@@ -42,8 +42,8 @@ class Dictionary(base.Dictionary):
 
     def _process(self, outdir):
         copy(self.submission.dir / 'cldf-md.json', outdir / 'cldf-md.json')
-        for p in self.submission.dir.glob('*.csv'):
-            copy(p, outdir / p.name)
+        for table in self.cldf.tables:
+            copy(self.submission.dir / table.local_name, outdir / table.local_name)
 
 
 DEFAULT_METADATA = """\
