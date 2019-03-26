@@ -16,7 +16,7 @@ DEFAULT_EXAMPLE_ID = 'ref'
 
 DEFAULT_ENTRY_MAP = {
     'lx': 'Headword',
-    'ps': 'Part_of_Speech',
+    'ps': 'Part_Of_Speech',
     'al': 'Alternative_Form',
     'et': 'Etymology',
     'hm': 'Homonym',
