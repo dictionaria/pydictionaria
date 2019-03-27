@@ -220,7 +220,7 @@ class Files(object):
         # as lookup!
         #
         for checksum, spec in submission.cdstar.items.items():
-            if spec['sid'] == submission.md.properties.get('media_lookup', submission.id):
+            if spec['sid'] in submission.media_sids:
                 self.files[spec['type']][spec['fname']] = checksum
                 self.files[spec['type']][as_unicode(Path(spec['fname']).stem)] = checksum
 

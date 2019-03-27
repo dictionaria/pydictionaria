@@ -171,7 +171,7 @@ class Dictionary(base.Dictionary):
         media_id_index = {
             entry['fname']: checksum
             for checksum, entry in self.submission.cdstar.items.items()
-            if entry['sid'] == self.submission.md.properties.get('media_lookup', self.submission.id)}
+            if entry['sid'] in self.submission.media_sids}
         for fname in list(media_id_index.keys()):
             media_id_index[fname.split('.')[0]] = media_id_index[fname]
         media_extr = sfm2cldf.MediaExtractor(

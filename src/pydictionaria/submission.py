@@ -48,6 +48,13 @@ class Submission(object):
     def cdstar(self):
         return MediaCatalog(self.repos)
 
+    @property
+    def media_sids(self):
+        res = self.md.properties.get('media_lookup', self.id)
+        if not isinstance(res, list):
+            res = [res]
+        return res
+
     @lazyproperty
     def module(self):
         try:
