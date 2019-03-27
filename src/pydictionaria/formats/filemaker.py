@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, print_function, division
 from collections import defaultdict, OrderedDict
 
-from clldutils.misc import cached_property
+from clldutils.misc import lazyproperty
 from clldutils.dsv import reader, UnicodeWriter
 from clldutils.markup import Table
 
@@ -36,7 +36,7 @@ class Dictionary(base.Dictionary):  # pragma: no cover
     def match(cls, submission):
         return submission.dir.joinpath('FIELDS.txt').exists()
 
-    @cached_property()
+    @lazyproperty
     def headers(self):
         return [(fname, cols) for fname, cols in self._iter_headers() if fname]
 

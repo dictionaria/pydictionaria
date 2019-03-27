@@ -5,7 +5,7 @@ import re
 import xlrd
 
 from clldutils.dsv import UnicodeWriter
-from clldutils.misc import cached_property
+from clldutils.misc import lazyproperty
 from clldutils.markup import Table
 from clldutils.path import md5, path_component
 
@@ -85,7 +85,7 @@ class Dictionary(base.Dictionary):
             if sheet.name != 'examples':
                 sheet.write_csv(outdir, self._example_map, self.process_row)
 
-    @cached_property()
+    @lazyproperty
     def sheets(self):
         workbook = xlrd.open_workbook(self.xlsx.as_posix())
         _sheets = {s.name: s for s in [Sheet(sheet) for sheet in workbook.sheets()]}
