@@ -286,6 +286,12 @@ def test_gloss():
     assert cldf_row['Gloss'] == ['abc', 'def']
 
 
+def test_cf():
+    sfm_entry = sfm.Entry([('cf', 'val1'), ('cf', 'val2;val3')])
+    cldf_row = s.sfm_entry_to_cldf_row('EntryTable', {'cf': 'Entry_IDs'}, sfm_entry)
+    assert cldf_row['Entry_IDs'] == ['val1', 'val2', 'val3']
+
+
 def test_multimarkers():
     sfm_entry = sfm.Entry([('cf', 'val1'), ('cf', 'val2')])
     cldf_row = s.sfm_entry_to_cldf_row(None, {'cf': 'See_Also'}, sfm_entry)

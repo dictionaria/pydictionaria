@@ -19,6 +19,7 @@ DEFAULT_ENTRY_MAP = {
     'hm': 'Homonym',
     'lc': 'Citation_Form',
     'mn': 'Main_Entry',
+    'cf': 'Entry_IDs',
     'va': 'Variant_Form'}
 
 DEFAULT_SENSE_MAP = {
@@ -37,9 +38,11 @@ DEFAULT_EXAMPLE_MAP = {
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
+LINKS_WITH_NO_LABEL = ['cf']
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
+    'Entry_IDs': DEFAULT_SEPARATOR,
     'Media_IDs': DEFAULT_SEPARATOR,
     'Sense_IDs': DEFAULT_SEPARATOR}
 
@@ -284,6 +287,8 @@ class LinkIndex(object):
         for match in re.finditer(self.id_regex, value):
             match_str = match.group().strip()
             replacement = self._index.get(match_str)
+            if replacement and (tag in LINKS_WITH_NO_LABEL):
+                replacement = replacement.split('(')[1].split(')')[0]
             if replacement is None:
                 continue
             value = value.replace(match_str, replacement)
@@ -361,15 +366,22 @@ def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
             row['Gloss'] = row['Gloss'].split()
         if 'Analyzed_Word' in row:
             row['Analyzed_Word'] = row['Analyzed_Word'].split()
-
+    elif table_name == 'EntryTable':
+        if 'Entry_IDs' in row:
+            row['Entry_IDs'] = [eid.strip() for eid in row['Entry_IDs'].split(';') if eid.strip()]
     return row
 
 
 def _add_columns(dataset, table_name, columns):
     for column in sorted(columns):
+        if table_name == 'EntryTable' and column == 'Entry_IDs':
+            dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
+                columnReference=column,
+                reference=dict(columnReference='ID', resource='entries.csv')
+            )))
         if column == 'Media_IDs':
             dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
-                columnReference='Media_IDs',
+                columnReference=column,
                 reference=dict(columnReference='ID', resource='media.csv')
             )))
         if column in SEPARATORS:
