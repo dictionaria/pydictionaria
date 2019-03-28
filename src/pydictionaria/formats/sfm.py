@@ -1,6 +1,7 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import re
+from collections import ChainMap
 from itertools import chain
 
 from clldutils.markup import Table
@@ -16,6 +17,14 @@ from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
 
+DEFAULT_MARKER_MAP = {
+    'd_Eng': 'de',
+    'g_Eng': 'ge',
+    'ps_Eng': 'ps',
+    'sc_Eng': 'sc',
+    'sd_Eng': 'sd',
+    'x_Eng': 'xe'}
+
 
 class Dictionary(base.Dictionary):
     _fname = 'db.sfm'
@@ -24,11 +33,13 @@ class Dictionary(base.Dictionary):
         base.Dictionary.__init__(self, submission)
         kw = {}
         for key, default in [
-            ('marker_map', {}),
             ('encoding', 'utf8'),
             ('entry_sep', '\\lx '),
         ]:
             kw[key] = submission.md.properties.get(key, default)
+        kw['marker_map'] = ChainMap(
+            submission.md.properties.get('marker_map', {}),
+            DEFAULT_MARKER_MAP)
         self.sfm = Database(submission.dir.joinpath(self._fname), **kw)
 
     @classmethod
