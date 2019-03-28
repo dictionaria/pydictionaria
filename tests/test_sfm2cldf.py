@@ -257,7 +257,7 @@ class MapSfmToCldf(unittest.TestCase):
         cldf_row = s.sfm_entry_to_cldf_row(self.mapping, sfm_entry)
         self.assertEqual(
             cldf_row,
-            {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': 'sense1 ; sense2'})
+            {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': ['sense1', 'sense2']})
 
     def test_map_language_id(self):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
@@ -266,7 +266,7 @@ class MapSfmToCldf(unittest.TestCase):
         cldf_row = s.sfm_entry_to_cldf_row(self.mapping, sfm_entry, 'lang1')
         self.assertEqual(
             cldf_row,
-            {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': 'sense1 ; sense2', 'Language_ID': 'lang1'})
+            {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': ['sense1', 'sense2'], 'Language_ID': 'lang1'})
 
     def test_map_media_ids(self):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
@@ -275,4 +275,4 @@ class MapSfmToCldf(unittest.TestCase):
         cldf_row = s.sfm_entry_to_cldf_row(self.mapping, sfm_entry)
         self.assertEqual(
             cldf_row,
-            {'ID': 'id1', 'Column1': 'value1', 'Media_IDs': 'file1 ; file2'})
+            {'ID': 'id1', 'Column1': 'value1', 'Media_IDs': ['file1', 'file2']})
