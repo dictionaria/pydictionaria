@@ -220,23 +220,46 @@ class Dictionary(base.Dictionary):
             spec['sense_columns'],
             spec['example_columns'])
 
-        if log_messages:
+        entry_rows = (
+            sfm2cldf.sfm_entry_to_cldf_row(spec['entry_map'], entry, lang_id)
+            for entry in entries)
+        sense_rows = (
+            sfm2cldf.sfm_entry_to_cldf_row(spec['sense_map'], sense)
+            for sense in senses)
+        example_rows = (
+            sfm2cldf.sfm_entry_to_cldf_row(spec['example_map'], example, lang_id)
+            for example in examples)
+        media_rows = (
+            {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
+            for filename, fileid in sorted(media_extr.files))
+
+        row_filter = sfm2cldf.RowFilter()
+        entry_rows = row_filter.filter(
+            sfm2cldf.RequiredColumns(dataset['EntryTable'].tableSchema),
+            entry_rows)
+        sense_rows = row_filter.filter(
+            sfm2cldf.RequiredColumns(dataset['SenseTable'].tableSchema),
+            sense_rows)
+        example_rows = row_filter.filter(
+            sfm2cldf.RequiredColumns(dataset['ExampleTable'].tableSchema),
+            example_rows)
+        media_rows = row_filter.filter(
+            sfm2cldf.RequiredColumns(dataset['media.csv'].tableSchema),
+            media_rows)
+
+        if log_messages or row_filter.filtered:
             logpath = self.submission.dir.joinpath('cldf.log')
             with logpath.open('w', encoding='utf8') as logfile:
                 for msg in log_messages:
                     print(msg, file=logfile)
+                for row in row_filter.filtered.values():
+                    print('\nRequired field missing in CLDF row:', file=logfile)
+                    msg ='\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in row.items())
+                    print(msg, file=logfile)
 
         kwargs = {
-            'EntryTable': (
-                sfm2cldf.sfm_entry_to_cldf_row(spec['entry_map'], entry, lang_id)
-                for entry in entries),
-            'SenseTable': (
-                sfm2cldf.sfm_entry_to_cldf_row(spec['sense_map'], sense)
-                for sense in senses),
-            'ExampleTable': (
-                sfm2cldf.sfm_entry_to_cldf_row(spec['example_map'], example, lang_id)
-                for example in examples),
-            'media.csv': (
-                {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
-                for filename, fileid in sorted(media_extr.files))}
+            'EntryTable': entry_rows,
+            'SenseTable': sense_rows,
+            'ExampleTable': example_rows,
+            'media.csv': media_rows}
         dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)

@@ -389,3 +389,28 @@ def make_cldf_dataset(folder, entry_columns, sense_columns, example_columns):
         _add_columns(dataset, 'ExampleTable', example_columns)
 
     return dataset
+
+
+class RequiredColumns:
+
+    def __init__(self, table_schema):
+        self._required_cols = [
+            col.name
+            for col in table_schema.columns
+            if col.required]
+
+    def __call__(self, row):
+        return all(row.get(col) for col in self._required_cols)
+
+
+class RowFilter:
+
+    def __init__(self):
+        self.filtered = OrderedDict()
+
+    def filter(self, pred, iterable):
+        for row in iterable:
+            if pred(row):
+                yield row
+            else:
+                self.filtered[row['ID']] = row
