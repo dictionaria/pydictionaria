@@ -1,13 +1,10 @@
-# coding: utf8
-from __future__ import unicode_literals
-
 from collections import OrderedDict, ChainMap
-from clldutils import sfm
-import pycldf
-
 import re
 import copy
 
+from clldutils import sfm
+import pycldf
+import csvw
 
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
@@ -366,6 +363,11 @@ def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
 
 def _add_columns(dataset, table_name, columns):
     for column in sorted(columns):
+        if column == 'Media_IDs':
+            dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
+                columnReference='Media_IDs',
+                reference=dict(columnReference='ID', resource='media.csv')
+            )))
         if column in SEPARATORS:
             column = {
                 'name': column,
