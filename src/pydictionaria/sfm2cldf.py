@@ -41,6 +41,10 @@ DEFAULT_EXAMPLE_MAP = {
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
 
+SEPARATORS = {
+    'Media_IDs': ' ; ',
+    'Sense_IDs': ' ; '}
+
 
 def _local_mapping(json_mapping, default_mapping, marker_set):
     global_map = ChainMap(json_mapping, default_mapping)
@@ -342,9 +346,9 @@ def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
     if hasattr(entry, 'entry_id'):
         row['Entry_ID'] = entry.entry_id
     if hasattr(entry, 'sense_ids'):
-        row['Sense_IDs'] = ' ; '.join(entry.sense_ids)
+        row['Sense_IDs'] = entry.sense_ids
     if hasattr(entry, 'media_ids'):
-        row['Media_IDs'] = ' ; '.join(entry.media_ids)
+        row['Media_IDs'] = entry.media_ids
     if language_id:
         row['Language_ID'] = language_id
 
@@ -362,6 +366,11 @@ def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
 
 def _add_columns(dataset, table_name, columns):
     for column in sorted(columns):
+        if column in SEPARATORS:
+            column = {
+                'name': column,
+                'datatype': 'string',
+                'separator': SEPARATORS[column]}
         try:
             dataset.add_columns(table_name, column)
         except ValueError:
