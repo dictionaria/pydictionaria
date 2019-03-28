@@ -278,9 +278,12 @@ class LinkIndex(object):
         self._index = {}
 
     def add_entry(self, entry):
-        self._index[entry.original_id] = '[{}]({})'.format(
-            entry.get(self.link_display_label, ''),
-            entry.id)
+        v = '[{}]({})'.format(entry.get(self.link_display_label, ''), entry.id)
+        self._index[entry.original_id] = v
+        lx = entry.get('lx')
+        if entry.get('hm'):
+            lx += ' {0}'.format(entry.get('hm'))
+        self._index[lx] = v
 
     def _process_tag(self, tag, value):
         if tag not in self.process_links_in_labels:
