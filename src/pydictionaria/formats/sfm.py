@@ -247,6 +247,13 @@ class Dictionary(base.Dictionary):
             sfm2cldf.RequiredColumns(dataset['media.csv'].tableSchema),
             media_rows)
 
+        kwargs = {
+            'EntryTable': entry_rows,
+            'SenseTable': sense_rows,
+            'ExampleTable': example_rows,
+            'media.csv': media_rows}
+        dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
+
         if log_messages or row_filter.filtered:
             logpath = self.submission.dir.joinpath('cldf.log')
             with logpath.open('w', encoding='utf8') as logfile:
@@ -254,12 +261,5 @@ class Dictionary(base.Dictionary):
                     print(msg, file=logfile)
                 for row in row_filter.filtered:
                     print('\nRequired field missing in CLDF row:', file=logfile)
-                    msg ='\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in row.items())
+                    msg = '\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in row.items())
                     print(msg, file=logfile)
-
-        kwargs = {
-            'EntryTable': entry_rows,
-            'SenseTable': sense_rows,
-            'ExampleTable': example_rows,
-            'media.csv': media_rows}
-        dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
