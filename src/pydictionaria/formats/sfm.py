@@ -221,13 +221,13 @@ class Dictionary(base.Dictionary):
             spec['example_columns'])
 
         entry_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row(spec['entry_map'], entry, lang_id)
+            sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], entry, lang_id)
             for entry in entries)
         sense_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row(spec['sense_map'], sense)
+            sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], sense)
             for sense in senses)
         example_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row(spec['example_map'], example, lang_id)
+            sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], example, lang_id)
             for example in examples)
         media_rows = (
             {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}

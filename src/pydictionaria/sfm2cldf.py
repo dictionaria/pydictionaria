@@ -330,7 +330,7 @@ def _single_spaces(s):
     return s
 
 
-def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
+def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
     # XXX What if the same tag appears multiple times?
     #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
@@ -356,10 +356,11 @@ def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
     # the property `separator="\t"`.  For these columns the `csvw` package
     # assumes that the value comes as a *list* not a string.
     # TODO Check the spec for other columns with separators
-    if 'Gloss' in row:
-        row['Gloss'] = row['Gloss'].split()
-    if 'Analyzed_Word' in row:
-        row['Analyzed_Word'] = row['Analyzed_Word'].split()
+    if table_name == 'ExampleTable':
+        if 'Gloss' in row:
+            row['Gloss'] = row['Gloss'].split()
+        if 'Analyzed_Word' in row:
+            row['Analyzed_Word'] = row['Analyzed_Word'].split()
 
     return row
 
