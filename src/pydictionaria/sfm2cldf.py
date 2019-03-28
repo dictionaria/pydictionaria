@@ -387,6 +387,10 @@ def make_cldf_dataset(folder, entry_columns, sense_columns, example_columns):
     _add_columns(dataset, 'SenseTable', sense_columns)
     if example_columns:
         _add_columns(dataset, 'ExampleTable', example_columns)
+        # Manually mark Translated_Text as required
+        ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
+        if ft:
+            ft.required = True
 
     return dataset
 
