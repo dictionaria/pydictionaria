@@ -1,4 +1,4 @@
-from collections import OrderedDict, ChainMap
+from collections import OrderedDict, ChainMap, defaultdict
 import re
 import copy
 
@@ -38,9 +38,10 @@ DEFAULT_EXAMPLE_MAP = {
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
 
+DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
-    'Media_IDs': ' ; ',
-    'Sense_IDs': ' ; '}
+    'Media_IDs': DEFAULT_SEPARATOR,
+    'Sense_IDs': DEFAULT_SEPARATOR}
 
 
 def _local_mapping(json_mapping, default_mapping, marker_set):
@@ -331,13 +332,15 @@ def _single_spaces(s):
 
 def sfm_entry_to_cldf_row(mapping, entry, language_id=None):
     # XXX What if the same tag appears multiple times?
-    #  * Option 1: Overwrite old value for tag (happening now)
+    #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
-    #  * Option 3: Collect values into semicolon-separated list
-    row = dict(
-        (mapping[tag], _single_spaces(value))
-        for tag, value in entry
-        if tag in mapping)
+    #  * Option 3: Collect values into semicolon-separated list (happening now)
+    row = defaultdict(list)
+    for tag, value in entry:
+        key = mapping.get(tag)
+        if key and value:
+            row[key].append(value)
+    row = {k: DEFAULT_SEPARATOR.join(v) for k, v in row.items()}
     if hasattr(entry, 'id'):
         row['ID'] = entry.id
     if hasattr(entry, 'entry_id'):

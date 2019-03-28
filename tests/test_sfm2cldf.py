@@ -276,3 +276,9 @@ class MapSfmToCldf(unittest.TestCase):
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Media_IDs': ['file1', 'file2']})
+
+
+def test_multimarkers():
+    sfm_entry = sfm.Entry([('cf', 'val1'), ('cf', 'val2')])
+    cldf_row = s.sfm_entry_to_cldf_row({'cf': 'See_Also'}, sfm_entry)
+    assert cldf_row['See_Also'] == 'val1 ; val2'
