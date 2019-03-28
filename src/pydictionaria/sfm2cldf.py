@@ -411,11 +411,11 @@ class RowFilter:
     """Filter which keeps a record of filtered elements."""
 
     def __init__(self):
-        self.filtered = OrderedDict()
+        self.filtered = []
 
     def filter(self, pred, iterable):
         for row in iterable:
             if pred(row):
                 yield row
             else:
-                self.filtered[row['ID']] = row
+                self.filtered.append(row)

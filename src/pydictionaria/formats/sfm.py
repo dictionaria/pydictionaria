@@ -252,7 +252,7 @@ class Dictionary(base.Dictionary):
             with logpath.open('w', encoding='utf8') as logfile:
                 for msg in log_messages:
                     print(msg, file=logfile)
-                for row in row_filter.filtered.values():
+                for row in row_filter.filtered:
                     print('\nRequired field missing in CLDF row:', file=logfile)
                     msg ='\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in row.items())
                     print(msg, file=logfile)
