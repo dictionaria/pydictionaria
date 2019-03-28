@@ -20,6 +20,7 @@ DEFAULT_ENTRY_MAP = {
     'lc': 'Citation_Form',
     'mn': 'Main_Entry',
     'cf': 'Entry_IDs',
+    'cont': 'Contains',
     'va': 'Variant_Form'}
 
 DEFAULT_SENSE_MAP = {
@@ -38,10 +39,11 @@ DEFAULT_EXAMPLE_MAP = {
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = ['cf']
+LINKS_WITH_NO_LABEL = ['cf', 'cont']
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
+    'Contains': DEFAULT_SEPARATOR,
     'Entry_IDs': DEFAULT_SEPARATOR,
     'Media_IDs': DEFAULT_SEPARATOR,
     'Sense_IDs': DEFAULT_SEPARATOR}
@@ -367,14 +369,15 @@ def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
         if 'Analyzed_Word' in row:
             row['Analyzed_Word'] = row['Analyzed_Word'].split()
     elif table_name == 'EntryTable':
-        if 'Entry_IDs' in row:
-            row['Entry_IDs'] = [eid.strip() for eid in row['Entry_IDs'].split(';') if eid.strip()]
+        for col in ['Entry_IDs', 'Contains']:
+            if col in row:
+                row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
     return row
 
 
 def _add_columns(dataset, table_name, columns):
     for column in sorted(columns):
-        if table_name == 'EntryTable' and column == 'Entry_IDs':
+        if table_name == 'EntryTable' and column in ['Entry_IDs', 'Contains']:
             dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
                 columnReference=column,
                 reference=dict(columnReference='ID', resource='entries.csv')
