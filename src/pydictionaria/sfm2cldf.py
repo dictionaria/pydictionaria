@@ -400,10 +400,15 @@ class RequiredColumns:
             if col.required]
 
     def __call__(self, row):
+        """Return True iff. all required fields of a row is set.
+
+        Return False otherwise.
+        """
         return all(row.get(col) for col in self._required_cols)
 
 
 class RowFilter:
+    """Filter which keeps a record of filtered elements."""
 
     def __init__(self):
         self.filtered = OrderedDict()
