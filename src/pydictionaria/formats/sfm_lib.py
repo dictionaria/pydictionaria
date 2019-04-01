@@ -54,7 +54,7 @@ class Database(SFM):
             if res is False:
                 remove.append(i)
             else:
-                self[i] = visitor(entry) or entry
+                self[i] = res or entry
         for i in reversed(remove):
             del self[i]
 
