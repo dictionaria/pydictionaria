@@ -261,5 +261,7 @@ class Dictionary(base.Dictionary):
                     print(msg, file=logfile)
                 for row in row_filter.filtered:
                     print('\nRequired field missing in CLDF row:', file=logfile)
-                    msg = '\n'.join('{}: {}'.format(repr(k), repr(v)) for k, v in row.items())
+                    msg = '\n'.join(
+                        '{}: {}'.format(repr(k), repr(v))
+                        for k, v in sorted(row.items()))
                     print(msg, file=logfile)
