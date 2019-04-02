@@ -1,6 +1,9 @@
 from collections import OrderedDict, ChainMap, defaultdict
 import re
+import logging
 import copy
+import os.path
+import sys
 
 from clldutils import sfm
 import pycldf
@@ -447,3 +450,27 @@ class RowFilter:
                 yield row
             else:
                 self.filtered.append(row)
+
+
+class OnlyBaseNames(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        msg = re.sub(
+            r'^.*?\.csv(?=:)',
+            lambda m: os.path.basename(m.group()),
+            msg)
+        return msg, kwargs
+
+
+def cldf_logger(name, stream=None):
+    formatter = logging.Formatter('%(levelname)s %(message)s')
+    to_stdout = logging.StreamHandler(sys.stdout)
+    to_stdout.setFormatter(formatter)
+    if stream is not None:
+        to_stream = logging.StreamHandler(stream)
+        to_stream.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.propagate = False
+    logger.setLevel(logging.INFO)
+    logger.addHandler(to_stdout)
+    logger.addHandler(to_stream)
+    return OnlyBaseNames(logger, {})

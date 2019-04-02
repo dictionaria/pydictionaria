@@ -254,14 +254,18 @@ class Dictionary(base.Dictionary):
             'media.csv': media_rows}
         dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
 
-        if log_messages or row_filter.filtered:
-            logpath = self.submission.dir.joinpath('cldf.log')
-            with logpath.open('w', encoding='utf8') as logfile:
-                for msg in log_messages:
-                    print(msg, file=logfile)
-                for row in row_filter.filtered:
-                    print('\nRequired field missing in CLDF row:', file=logfile)
-                    msg = '\n'.join(
-                        '{}: {}'.format(repr(k), repr(v))
-                        for k, v in sorted(row.items()))
-                    print(msg, file=logfile)
+        logpath = self.submission.dir.joinpath('cldf.log')
+        with logpath.open('w', encoding='utf8') as logfile:
+            for msg in log_messages:
+                print(msg, file=logfile)
+
+            for row in row_filter.filtered:
+                print('\nRequired field missing in CLDF row:', file=logfile)
+                msg = '\n'.join(
+                    '{}: {}'.format(repr(k), repr(v))
+                    for k, v in sorted(row.items()))
+                print(msg, file=logfile)
+
+            print(file=logfile)
+            log_name = '%s.cldf' % self.submission.id
+            dataset.validate(log=sfm2cldf.cldf_logger(log_name, logfile))
