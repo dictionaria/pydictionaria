@@ -112,11 +112,13 @@ class Examples(SFM):
     def concat_multilines(self):
         def _fix(entry):
             new = Example()
-            for marker in new.markers:
-                if marker in ['tx', 'mb', 'gl']:
+            multiline_markers = {'tx', 'mb', 'gl'}
+            for marker, value in entry:
+                if marker in multiline_markers:
                     new.append((marker, '\t'.join(entry.getall(marker))))
+                    multiline_markers.remove(marker)
                 else:
-                    new.append((marker, entry.get(marker)))
+                    new.append((marker, value))
             return new
         self.visit(_fix)
 
