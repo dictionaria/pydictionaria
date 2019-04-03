@@ -221,8 +221,11 @@ class Files(object):
         #
         for checksum, spec in submission.cdstar.items.items():
             if spec['sid'] in submission.media_sids:
+                fname = Path(spec['fname'])
                 self.files[spec['type']][spec['fname']] = checksum
-                self.files[spec['type']][as_unicode(Path(spec['fname']).stem)] = checksum
+                self.files[spec['type']][as_unicode(fname.stem)] = checksum
+                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.upper()] = checksum
+                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.lower()] = checksum
 
     def __call__(self, entry):
         e = Entry()
