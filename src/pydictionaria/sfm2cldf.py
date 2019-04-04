@@ -295,14 +295,14 @@ class LinkIndex(object):
         if tag not in self.process_links_in_labels:
             return tag, value
 
-        for match in re.finditer(self.id_regex, value):
+        def replace_ref(match):
             match_str = match.group().strip()
             replacement = self._index.get(match_str)
             if replacement and (tag in LINKS_WITH_NO_LABEL):
                 replacement = replacement.split('(')[1].split(')')[0]
-            if replacement is None:
-                continue
-            value = value.replace(match_str, replacement)
+            return replacement or match.group()
+
+        value = re.sub(self.id_regex, replace_ref, value)
 
         return tag, value
 
