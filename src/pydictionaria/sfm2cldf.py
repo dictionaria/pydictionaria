@@ -53,7 +53,10 @@ SEPARATORS = {
 
 
 def _local_mapping(json_mapping, default_mapping, marker_set):
-    global_map = ChainMap(json_mapping, default_mapping)
+    mapped_values = set(json_mapping.values())
+    global_map = ChainMap(
+        json_mapping,
+        {k: v for k, v in default_mapping.items() if v not in mapped_values})
     markers = set(global_map.keys()) & marker_set
     mapping = {
         marker: value
