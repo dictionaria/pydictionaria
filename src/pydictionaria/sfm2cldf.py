@@ -352,7 +352,7 @@ def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
     for tag, value in entry:
         key = mapping.get(tag)
         if key and value:
-            row[key].append(re.sub(r'\s+', ' ', value))
+            row[key].append(_single_spaces(value))
     row = {k: DEFAULT_SEPARATOR.join(v) for k, v in row.items()}
     if hasattr(entry, 'id'):
         row['ID'] = entry.id
