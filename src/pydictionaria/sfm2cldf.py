@@ -286,7 +286,10 @@ class LinkIndex(object):
     def add_entry(self, entry):
         v = '[{}]({})'.format(entry.get(self.link_display_label, ''), entry.id)
         self._index[entry.original_id] = v
-        lx = entry.get('lx', '')
+        lx = entry.get('lx')
+        if not lx:
+            # Don't fill the index with empty strings or integers
+            return
         if entry.get('hm'):
             lx += ' {0}'.format(entry.get('hm'))
         self._index[lx] = v
