@@ -85,8 +85,8 @@ class ExampleSeparation(unittest.TestCase):
         lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
-
         phrases = ET.SubElement(par, 'phrases')
+
         phrase1 = ET.SubElement(phrases, 'phrase')
         segnum1 = ET.SubElement(phrase1, 'item', type='segnum')
         segnum1.text = '1.1'
