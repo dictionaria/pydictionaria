@@ -70,4 +70,4 @@ def separate_examples(document, log=None):
                     'segnum': segnum,
                     'vernacular': vernacular,
                     'other_langs': other_langs,
-                    'phrase': phrase}
+                    'example': phrase}
