@@ -32,10 +32,12 @@ def separate_examples(document, log=None):
         paragraphs = text.find('paragraphs') or ()
         if not paragraphs:
             log_or_raise("No paragraphs in interlinear text '{}'".format(text.attrib.get('guid', '???')), log)
+
         for paragraph in text.find('paragraphs') or ():
             phrases = paragraph.find('phrases') or ()
             if not phrases:
                 log_or_raise("No phrases in paragraph '{}'".format(paragraph.attrib.get('guid', '???')), log)
+
             for phrase in phrases:
                 segnum = get_item(phrase, 'segnum')
                 yield {
