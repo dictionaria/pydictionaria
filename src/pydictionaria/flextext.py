@@ -25,17 +25,17 @@ def get_languages(node):
     return vernacular, other
 
 
-def separate_examples(document):
+def separate_examples(document, log=None):
     for text in document:
         title = get_item(text, 'title')
         vernacular, other_langs = get_languages(text)
         paragraphs = text.find('paragraphs') or ()
         if not paragraphs:
-            log_or_raise("No paragraphs in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+            log_or_raise("No paragraphs in interlinear text '{}'".format(text.attrib.get('guid', '???')), log)
         for paragraph in text.find('paragraphs') or ():
             phrases = paragraph.find('phrases') or ()
             if not phrases:
-                log_or_raise("No phrases in paragraph '{}'".format(paragraph.attrib.get('guid', '???')))
+                log_or_raise("No phrases in paragraph '{}'".format(paragraph.attrib.get('guid', '???')), log)
             for phrase in phrases:
                 segnum = get_item(phrase, 'segnum')
                 yield {
