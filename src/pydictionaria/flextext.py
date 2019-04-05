@@ -6,20 +6,20 @@ def get_item(node, key, default=None):
 
 
 def get_languages(node):
-    languages = node.find('languages')
-    if not languages:
-        raise ValueError('Missing <languages> tag')
-
+    languages = set()
     vernacular = None
-    other = []
-    for lang in languages:
-        if not vernacular and lang.attrib.get('vernacular') == 'true':
-            vernacular = lang.attrib.get('lang')
-        elif 'lang' in lang.attrib:
-            other.append(lang.attrib['lang'])
 
-    other.sort()
-    return vernacular, other
+    for language in node.iter('language'):
+        lang_name = language.attrib.get('lang')
+        if not lang_name:
+            continue
+
+        if not vernacular and language.attrib.get('vernacular') == 'true':
+            vernacular = language.attrib.get('lang')
+
+        languages.add(lang_name)
+
+    return languages, vernacular
 
 
 def separate_examples(document, log=None):
@@ -35,14 +35,14 @@ def separate_examples(document, log=None):
                 log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
 
-        vernacular, other_langs = get_languages(text)
+        languages, vernacular = get_languages(text)
+        if not languages:
+            if log:
+                log.warn("Missing languages in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+            continue
         if not vernacular:
             if log:
                 log.warn("Missing vernacular in interlinear text '{}'".format(text.attrib.get('guid', '???')))
-            continue
-        if not other_langs:
-            if log:
-                log.warn("Missing languages in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
 
         paragraphs = text.find('paragraphs')
@@ -68,6 +68,6 @@ def separate_examples(document, log=None):
                 yield {
                     'title': title,
                     'segnum': segnum,
+                    'languages': languages,
                     'vernacular': vernacular,
-                    'other_langs': other_langs,
                     'example': phrase}

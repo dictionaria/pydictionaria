@@ -72,7 +72,7 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[0]['title'], 'ID_1')
         self.assertEqual(examples[0]['segnum'], '1')
         self.assertEqual(examples[0]['vernacular'], 'lang1')
-        self.assertEqual(examples[0]['other_langs'], ['lang2'])
+        self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
 
     def test_multiple_phrases(self):
@@ -100,12 +100,12 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[0]['title'], 'ID_1')
         self.assertEqual(examples[0]['segnum'], '1.1')
         self.assertEqual(examples[0]['vernacular'], 'lang1')
-        self.assertEqual(examples[0]['other_langs'], ['lang2'])
+        self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
         self.assertEqual(examples[1]['title'], 'ID_1')
         self.assertEqual(examples[1]['segnum'], '1.2')
         self.assertEqual(examples[1]['vernacular'], 'lang1')
-        self.assertEqual(examples[1]['other_langs'], ['lang2'])
+        self.assertEqual(examples[1]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[1]['example'])
 
     def test_multiple_paragrahs(self):
@@ -135,12 +135,12 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[0]['title'], 'ID_1')
         self.assertEqual(examples[0]['segnum'], '1')
         self.assertEqual(examples[0]['vernacular'], 'lang1')
-        self.assertEqual(examples[0]['other_langs'], ['lang2'])
+        self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
         self.assertEqual(examples[1]['title'], 'ID_1')
         self.assertEqual(examples[1]['segnum'], '2')
         self.assertEqual(examples[1]['vernacular'], 'lang1')
-        self.assertEqual(examples[1]['other_langs'], ['lang2'])
+        self.assertEqual(examples[1]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[1]['example'])
 
     def test_multiple_texts(self):
@@ -150,8 +150,8 @@ class ExampleSeparation(unittest.TestCase):
         title1 = ET.SubElement(text1, 'item', type='title')
         title1.text = 'ID_1'
         languages = ET.SubElement(text1, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        lang1_1 = ET.SubElement(languages, 'language', lang='lang1.1', vernacular='true')
+        lang1_2 = ET.SubElement(languages, 'language', lang='lang1.2')
         pars = ET.SubElement(text1, 'paragraphs')
         par1 = ET.SubElement(pars, 'paragraph')
         phrases1 = ET.SubElement(par1, 'phrases')
@@ -176,13 +176,13 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(len(examples), 2)
         self.assertEqual(examples[0]['title'], 'ID_1')
         self.assertEqual(examples[0]['segnum'], '1')
-        self.assertEqual(examples[0]['vernacular'], 'lang1')
-        self.assertEqual(examples[0]['other_langs'], ['lang2'])
+        self.assertEqual(examples[0]['vernacular'], 'lang1.1')
+        self.assertEqual(examples[0]['languages'], {'lang1.1', 'lang1.2'})
         self.assertTrue(examples[0]['example'])
         self.assertEqual(examples[1]['title'], 'ID_2')
         self.assertEqual(examples[1]['segnum'], '1')
         self.assertEqual(examples[1]['vernacular'], 'lang2.1')
-        self.assertEqual(examples[1]['other_langs'], ['lang2.2'])
+        self.assertEqual(examples[1]['languages'], {'lang2.1', 'lang2.2'})
         self.assertTrue(examples[1]['example'])
 
     def test_missing_phrases(self):
@@ -257,8 +257,6 @@ class ExampleSeparation(unittest.TestCase):
         text = ET.SubElement(doc, 'interlinear-text')
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
-        languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
