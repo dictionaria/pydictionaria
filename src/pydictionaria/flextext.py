@@ -26,6 +26,9 @@ def get_languages(node):
 
 
 def separate_examples(document, log=None):
+    if not document.find('interlinear-text'):
+        log_or_raise('XML data does not contain any interlinear texts.', log)
+
     for text in document.iter('interlinear-text'):
         title = get_item(text, 'title')
         vernacular, other_langs = get_languages(text)

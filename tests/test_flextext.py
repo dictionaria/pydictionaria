@@ -201,12 +201,7 @@ class ExampleSeparation(unittest.TestCase):
 
     def test_missing_phrases(self):
         doc = ET.Element('document')
-        text = ET.SubElement(doc, 'interlinear-text')
-        title = ET.SubElement(text, 'item', type='title')
-        title.text = 'ID_1'
-        languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        not_text = ET.SubElement(doc, 'not-an-interlinear-text')
 
         with self.assertRaises(ValueError):
             examples = list(f.separate_examples(doc))
