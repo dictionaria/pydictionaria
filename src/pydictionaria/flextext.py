@@ -1,6 +1,3 @@
-from clldutils.misc import log_or_raise
-
-
 def get_item(node, key, default=None):
     for item in node.iter('item'):
         if item.attrib.get('type') == key:
