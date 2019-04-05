@@ -30,7 +30,13 @@ def separate_examples(document, log=None):
 
     for text in document.iter('interlinear-text'):
         title = get_item(text, 'title')
+        if not title:
+            if log:
+                log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+                continue
+
         vernacular, other_langs = get_languages(text)
+
         paragraphs = text.find('paragraphs')
         if not paragraphs:
             if log:

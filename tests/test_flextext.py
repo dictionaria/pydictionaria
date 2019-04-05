@@ -217,3 +217,19 @@ class ExampleSeparation(unittest.TestCase):
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(len(examples), 0)
+
+    def test_missing_title(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        pars = ET.SubElement(text, 'paragraphs')
+        par = ET.SubElement(pars, 'paragraph')
+        phrases = ET.SubElement(par, 'phrases')
+        phrase = ET.SubElement(phrases, 'phrase')
+        segnum = ET.SubElement(phrase, 'item', type='segnum')
+        segnum.text = '1'
+
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(examples, [])
