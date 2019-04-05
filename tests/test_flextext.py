@@ -233,3 +233,38 @@ class ExampleSeparation(unittest.TestCase):
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
+
+    def test_missing_vernacular(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title = ET.SubElement(text, 'item', type='title')
+        title.text = 'ID_1'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        pars = ET.SubElement(text, 'paragraphs')
+        par = ET.SubElement(pars, 'paragraph')
+        phrases = ET.SubElement(par, 'phrases')
+        phrase = ET.SubElement(phrases, 'phrase')
+        segnum = ET.SubElement(phrase, 'item', type='segnum')
+        segnum.text = '1'
+
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(examples, [])
+
+    def test_missing_languages(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title = ET.SubElement(text, 'item', type='title')
+        title.text = 'ID_1'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        pars = ET.SubElement(text, 'paragraphs')
+        par = ET.SubElement(pars, 'paragraph')
+        phrases = ET.SubElement(par, 'phrases')
+        phrase = ET.SubElement(phrases, 'phrase')
+        segnum = ET.SubElement(phrase, 'item', type='segnum')
+        segnum.text = '1'
+
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(examples, [])
