@@ -199,7 +199,7 @@ class ExampleSeparation(unittest.TestCase):
         with self.assertRaises(ValueError):
             examples = list(f.separate_examples(doc))
 
-    def test_missing_phrases(self):
+    def test_missing_texts(self):
         doc = ET.Element('document')
         not_text = ET.SubElement(doc, 'not-an-interlinear-text')
 
