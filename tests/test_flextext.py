@@ -196,12 +196,24 @@ class ExampleSeparation(unittest.TestCase):
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
 
-        with self.assertRaises(ValueError):
-            examples = list(f.separate_examples(doc))
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(len(examples), 0)
+
+    def test_missing_paragraphs(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title = ET.SubElement(text, 'item', type='title')
+        title.text = 'ID_1'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(len(examples), 0)
 
     def test_missing_texts(self):
         doc = ET.Element('document')
         not_text = ET.SubElement(doc, 'not-an-interlinear-text')
 
-        with self.assertRaises(ValueError):
-            examples = list(f.separate_examples(doc))
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(len(examples), 0)
