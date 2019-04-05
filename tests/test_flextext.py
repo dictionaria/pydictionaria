@@ -184,3 +184,29 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[1]['vernacular'], 'lang2.1')
         self.assertEqual(examples[1]['other_langs'], ['lang2.2'])
         self.assertTrue(examples[1]['phrase'])
+
+    def test_missing_phrases(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title = ET.SubElement(text, 'item', type='title')
+        title.text = 'ID_1'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        pars = ET.SubElement(text, 'paragraphs')
+        par = ET.SubElement(pars, 'paragraph')
+
+        with self.assertRaises(ValueError):
+            examples = list(f.separate_examples(doc))
+
+    def test_missing_phrases(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title = ET.SubElement(text, 'item', type='title')
+        title.text = 'ID_1'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+
+        with self.assertRaises(ValueError):
+            examples = list(f.separate_examples(doc))
