@@ -60,6 +60,11 @@ def separate_examples(document, log=None):
 
             for phrase in phrases.iter('phrase'):
                 segnum = get_item(phrase, 'segnum')
+                if not segnum:
+                    if log:
+                        log.warn("Missing segnum in phrase '{}'".format(phrase.attrib.get('guid', '???')))
+                    continue
+
                 yield {
                     'title': title,
                     'segnum': segnum,
