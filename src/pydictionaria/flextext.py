@@ -86,8 +86,11 @@ def separate_examples(document, log=None):
 def extract_gloss(phrase):
     # TODO Handle invalid data
     analyzed_word = []
+    glosses = []
     for word in phrase.find('words').iter('word'):
         for morph in word.find('morphemes').iter('morph'):
             analyzed_word.append(get_item(morph, 'txt', ''))
+            glosses.append(get_item(morph, 'gls', ''))
     return {
-        'Analyzed_Word': analyzed_word}
+        'Analyzed_Word': analyzed_word,
+        'Gloss': glosses}
