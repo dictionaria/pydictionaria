@@ -88,12 +88,15 @@ def extract_gloss(phrase):
     analyzed_word = []
     glosses = []
     gloss_pos = []
+    lemmas = []
     for word in phrase.find('words').iter('word'):
         for morph in word.find('morphemes').iter('morph'):
             analyzed_word.append(get_item(morph, 'txt', ''))
             glosses.append(get_item(morph, 'gls', ''))
             gloss_pos.append(get_item(morph, 'msa', ''))
+            lemmas.append(get_item(morph, 'cf', ''))
     return {
         'Analyzed_Word': analyzed_word,
         'Gloss': glosses,
-        'Gloss_POS': gloss_pos}
+        'Gloss_POS': gloss_pos,
+        'Lexical_Entries': lemmas}
