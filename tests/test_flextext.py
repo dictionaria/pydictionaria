@@ -36,7 +36,6 @@ class ParseItemTag(unittest.TestCase):
         value = f.get_item(node, 'key')
         self.assertEqual(value, 'value3')
 
-
     def test_no_matches_yields_default(self):
         node = ET.Element('node')
         item1 = ET.SubElement(node, 'not-item', type='not-key')
