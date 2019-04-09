@@ -90,6 +90,7 @@ def extract_gloss(phrase):
     gloss_pos = []
     lemmas = []
     for word in phrase.find('words').iter('word'):
+        # TODO Fall back to word's txt etc. if there are no morphemes
         for morph in word.find('morphemes').iter('morph'):
             analyzed_word.append(get_item(morph, 'txt', ''))
             glosses.append(get_item(morph, 'gls', ''))
