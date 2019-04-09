@@ -424,3 +424,19 @@ class MergePhrases(unittest.TestCase):
         combo = f.merge_phrases([phrase1, phrase2])
         self.assertEqual(combo['Analyzed_Word'], ['mb1.1', 'mb1.2', 'mb1.3', 'mb2.1', 'mb2.2', 'mb2.3'])
         self.assertEqual(combo['Gloss'], ['gl1.1', 'gl1.2', 'gl1.3', 'gl2.1', 'gl2.2', 'gl2.3'])
+
+    def test_pad_missing_fields(self):
+        phrase1 = {
+            'Analyzed_Word': ['mb1.1', 'mb1.2'],
+            'Gloss': ['gl1.1', 'gl1.2']}
+        phrase2 = {
+            'Gloss': ['gl2.1', 'gl2.2'],
+            'Gloss_POS': ['pos2.1', 'pos2.2']}
+        phrase3 = {
+            'Analyzed_Word': ['mb3.1', 'mb3.2'],
+            'Gloss_POS': ['pos3.1', 'pos3.2']}
+
+        combo = f.merge_phrases([phrase1, phrase2, phrase3])
+        self.assertEqual(combo['Analyzed_Word'], ['mb1.1', 'mb1.2', '', '', 'mb3.1', 'mb3.2'])
+        self.assertEqual(combo['Gloss'], ['gl1.1', 'gl1.2', 'gl2.1', 'gl2.2', '', ''])
+        self.assertEqual(combo['Gloss_POS'], ['', '', 'pos2.1', 'pos2.2', 'pos3.1', 'pos3.2'])
