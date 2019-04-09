@@ -87,10 +87,13 @@ def extract_gloss(phrase):
     # TODO Handle invalid data
     analyzed_word = []
     glosses = []
+    gloss_pos = []
     for word in phrase.find('words').iter('word'):
         for morph in word.find('morphemes').iter('morph'):
             analyzed_word.append(get_item(morph, 'txt', ''))
             glosses.append(get_item(morph, 'gls', ''))
+            gloss_pos.append(get_item(morph, 'msa', ''))
     return {
         'Analyzed_Word': analyzed_word,
-        'Gloss': glosses}
+        'Gloss': glosses,
+        'Gloss_POS': gloss_pos}

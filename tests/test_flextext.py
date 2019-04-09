@@ -333,3 +333,30 @@ class GlossExtraction(unittest.TestCase):
         self.assertEqual(
             processed.get('Gloss'),
             ['gloss1.1', 'gloss1.2', 'gloss2.1', 'gloss2.2'])
+
+    def test_gloss_pos(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        morphemes1 = ET.SubElement(word1, 'morphemes')
+        morph1_1 = ET.SubElement(morphemes1, 'morph')
+        msa1_1 = ET.SubElement(morph1_1, 'item', type='msa')
+        msa1_1.text = 'pos1.1'
+        morph1_2 = ET.SubElement(morphemes1, 'morph')
+        msa1_2 = ET.SubElement(morph1_2, 'item', type='msa')
+        msa1_2.text = 'pos1.2'
+
+        word2 = ET.SubElement(words, 'word')
+        morphemes2 = ET.SubElement(word2, 'morphemes')
+        morph2_1 = ET.SubElement(morphemes2, 'morph')
+        msa2_1 = ET.SubElement(morph2_1, 'item', type='msa')
+        msa2_1.text = 'pos2.1'
+        morph2_2 = ET.SubElement(morphemes2, 'morph')
+        msa2_2 = ET.SubElement(morph2_2, 'item', type='msa')
+        msa2_2.text = 'pos2.2'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Gloss_POS'),
+            ['pos1.1', 'pos1.2', 'pos2.1', 'pos2.2'])
