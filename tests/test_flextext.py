@@ -409,3 +409,18 @@ class GlossExtraction(unittest.TestCase):
         self.assertEqual(
             processed.get('Lexical_Entries'),
             ['lemma1 1', 'lemma2 2'])
+
+
+class MergePhrases(unittest.TestCase):
+
+    def test_merge_lists(self):
+        phrase1 = {
+            'Analyzed_Word': ['mb1.1', 'mb1.2', 'mb1.3'],
+            'Gloss': ['gl1.1', 'gl1.2', 'gl1.3']}
+        phrase2 = {
+            'Analyzed_Word': ['mb2.1', 'mb2.2', 'mb2.3'],
+            'Gloss': ['gl2.1', 'gl2.2', 'gl2.3']}
+
+        combo = f.merge_phrases([phrase1, phrase2])
+        self.assertEqual(combo['Analyzed_Word'], ['mb1.1', 'mb1.2', 'mb1.3', 'mb2.1', 'mb2.2', 'mb2.3'])
+        self.assertEqual(combo['Gloss'], ['gl1.1', 'gl1.2', 'gl1.3', 'gl2.1', 'gl2.2', 'gl2.3'])
