@@ -103,7 +103,7 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
 
-    def test_multiple_paragrahs(self):
+    def test_multiple_paragraphs(self):
         doc = ET.Element('document')
         text = ET.SubElement(doc, 'interlinear-text')
         title = ET.SubElement(text, 'item', type='title')
