@@ -411,32 +411,32 @@ class GlossExtraction(unittest.TestCase):
             ['lemma1 1', 'lemma2 2'])
 
 
-class MergePhrases(unittest.TestCase):
+class MergeGlosses(unittest.TestCase):
 
     def test_merge_lists(self):
-        phrase1 = {
+        gloss1 = {
             'Analyzed_Word': ['mb1.1', 'mb1.2', 'mb1.3'],
             'Gloss': ['gl1.1', 'gl1.2', 'gl1.3']}
-        phrase2 = {
+        gloss2 = {
             'Analyzed_Word': ['mb2.1', 'mb2.2', 'mb2.3'],
             'Gloss': ['gl2.1', 'gl2.2', 'gl2.3']}
 
-        combo = f.merge_phrases([phrase1, phrase2])
+        combo = f.merge_glosses([gloss1, gloss2])
         self.assertEqual(combo['Analyzed_Word'], ['mb1.1', 'mb1.2', 'mb1.3', 'mb2.1', 'mb2.2', 'mb2.3'])
         self.assertEqual(combo['Gloss'], ['gl1.1', 'gl1.2', 'gl1.3', 'gl2.1', 'gl2.2', 'gl2.3'])
 
     def test_pad_missing_fields(self):
-        phrase1 = {
+        gloss1 = {
             'Analyzed_Word': ['mb1.1', 'mb1.2'],
             'Gloss': ['gl1.1', 'gl1.2']}
-        phrase2 = {
+        gloss2 = {
             'Gloss': ['gl2.1', 'gl2.2'],
             'Gloss_POS': ['pos2.1', 'pos2.2']}
-        phrase3 = {
+        gloss3 = {
             'Analyzed_Word': ['mb3.1', 'mb3.2'],
             'Gloss_POS': ['pos3.1', 'pos3.2']}
 
-        combo = f.merge_phrases([phrase1, phrase2, phrase3])
+        combo = f.merge_glosses([gloss1, gloss2, gloss3])
         self.assertEqual(combo['Analyzed_Word'], ['mb1.1', 'mb1.2', '', '', 'mb3.1', 'mb3.2'])
         self.assertEqual(combo['Gloss'], ['gl1.1', 'gl1.2', 'gl2.1', 'gl2.2', '', ''])
         self.assertEqual(combo['Gloss_POS'], ['', '', 'pos2.1', 'pos2.2', 'pos3.1', 'pos3.2'])

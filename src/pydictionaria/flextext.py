@@ -108,15 +108,15 @@ def extract_gloss(phrase):
         'Lexical_Entries': lemmas}
 
 
-def merge_phrases(phrases):
+def merge_glosses(glosses):
     all_keys = {
         key
-        for phrase in phrases
-        for key in phrase}
+        for gloss in glosses
+        for key in gloss}
 
     combo = {key: [] for key in all_keys}
-    for phrase in phrases:
-        max_len = max(map(len, phrase.values()))
+    for gloss in glosses:
+        max_len = max(map(len, gloss.values()))
         for key in all_keys:
-            combo[key].extend(phrase.get(key) or [''] * max_len)
+            combo[key].extend(gloss.get(key) or [''] * max_len)
     return combo
