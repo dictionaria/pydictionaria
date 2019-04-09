@@ -276,3 +276,33 @@ class ExampleSeparation(unittest.TestCase):
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
+
+
+class GlossExtraction(unittest.TestCase):
+
+    def test_analysed_word(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        morphemes1 = ET.SubElement(word1, 'morphemes')
+        morph1_1 = ET.SubElement(morphemes1, 'morph')
+        txt1_1 = ET.SubElement(morph1_1, 'item', type='txt')
+        txt1_1.text = 'morpheme1.1'
+        morph1_2 = ET.SubElement(morphemes1, 'morph')
+        txt1_2 = ET.SubElement(morph1_2, 'item', type='txt')
+        txt1_2.text = 'morpheme1.2'
+
+        word2 = ET.SubElement(words, 'word')
+        morphemes2 = ET.SubElement(word2, 'morphemes')
+        morph2_1 = ET.SubElement(morphemes2, 'morph')
+        txt2_1 = ET.SubElement(morph2_1, 'item', type='txt')
+        txt2_1.text = 'morpheme2.1'
+        morph2_2 = ET.SubElement(morphemes2, 'morph')
+        txt2_2 = ET.SubElement(morph2_2, 'item', type='txt')
+        txt2_2.text = 'morpheme2.2'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Analyzed_Word'),
+            ['morpheme1.1', 'morpheme1.2', 'morpheme2.1', 'morpheme2.2'])

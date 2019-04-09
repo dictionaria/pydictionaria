@@ -81,3 +81,13 @@ def separate_examples(document, log=None):
                     'languages': languages,
                     'vernacular': vernacular,
                     'example': phrases}
+
+
+def extract_gloss(phrase):
+    # TODO Handle invalid data
+    analyzed_word = []
+    for word in phrase.find('words').iter('word'):
+        for morph in word.find('morphemes').iter('morph'):
+            analyzed_word.append(get_item(morph, 'txt', ''))
+    return {
+        'Analyzed_Word': analyzed_word}
