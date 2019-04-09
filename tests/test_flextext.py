@@ -96,17 +96,12 @@ class ExampleSeparation(unittest.TestCase):
         segnum2.text = '1.2'
 
         examples = list(f.separate_examples(doc))
-        self.assertEqual(len(examples), 2)
+        self.assertEqual(len(examples), 1)
         self.assertEqual(examples[0]['title'], 'ID_1')
-        self.assertEqual(examples[0]['segnum'], '1.1')
+        self.assertEqual(examples[0]['segnum'], '1')
         self.assertEqual(examples[0]['vernacular'], 'lang1')
         self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
-        self.assertEqual(examples[1]['title'], 'ID_1')
-        self.assertEqual(examples[1]['segnum'], '1.2')
-        self.assertEqual(examples[1]['vernacular'], 'lang1')
-        self.assertEqual(examples[1]['languages'], {'lang1', 'lang2'})
-        self.assertTrue(examples[1]['example'])
 
     def test_multiple_paragrahs(self):
         doc = ET.Element('document')

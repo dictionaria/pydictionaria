@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 def get_item(node, key, default=None):
     for item in node.iter('item'):
         if item.attrib.get('type') == key:
@@ -58,6 +61,7 @@ def separate_examples(document, log=None):
                     log.warn("No phrases in paragraph '{}'".format(paragraph.attrib.get('guid', '???')))
                 continue
 
+            examples = OrderedDict()
             for phrase in phrases.iter('phrase'):
                 segnum = get_item(phrase, 'segnum')
                 if not segnum:
@@ -65,9 +69,15 @@ def separate_examples(document, log=None):
                         log.warn("Missing segnum in phrase '{}'".format(phrase.attrib.get('guid', '???')))
                     continue
 
+                prefix = segnum.split('.')[0] or segnum
+                if prefix not in examples:
+                    examples[prefix] = []
+                examples[prefix].append(phrase)
+
+            for segnum, phrases in examples.items():
                 yield {
                     'title': title,
                     'segnum': segnum,
                     'languages': languages,
                     'vernacular': vernacular,
-                    'example': phrase}
+                    'example': phrases}
