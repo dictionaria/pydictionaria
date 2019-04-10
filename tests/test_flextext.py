@@ -432,6 +432,35 @@ class GlossExtraction(unittest.TestCase):
             processed.get('Analyzed_Word'),
             ['word1', 'morpheme2.1', 'morpheme2.2'])
 
+    def test_punctuation(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        morphemes1 = ET.SubElement(word1, 'morphemes')
+        morph1_1 = ET.SubElement(morphemes1, 'morph')
+        txt1_1 = ET.SubElement(morph1_1, 'item', type='txt')
+        txt1_1.text = 'morpheme1.1'
+        pos1_1 = ET.SubElement(morph1_1, 'item', type='msa')
+        pos1_1.text = 'pos1.1'
+        morph1_2 = ET.SubElement(morphemes1, 'morph')
+        txt1_2 = ET.SubElement(morph1_2, 'item', type='txt')
+        txt1_2.text = 'morpheme1.2'
+        pos1_2 = ET.SubElement(morph1_2, 'item', type='msa')
+        pos1_2.text = 'pos1.2'
+
+        word2 = ET.SubElement(words, 'word')
+        punct1 = ET.SubElement(word2, 'item', type='punct')
+        punct1.text = '!'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Analyzed_Word'),
+            ['morpheme1.1', 'morpheme1.2', '!'])
+        self.assertEqual(
+            processed.get('Gloss_POS'),
+            ['pos1.1', 'pos1.2', 'punct'])
+
 
 class MergeGlosses(unittest.TestCase):
 

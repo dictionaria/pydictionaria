@@ -105,6 +105,13 @@ def extract_gloss(phrase):
         mb = get_item(morph, 'txt', '')
         gl = get_item(morph, 'gls', '')
         ps = get_item(morph, 'msa', '')
+
+        if not mb:
+            punct = get_item(morph, 'punct', '')
+            if punct:
+                mb = punct
+                ps = 'punct'
+
         lemma = get_item(morph, 'cf', '')
         homonym = get_item(morph, 'hn')
         if lemma and homonym:
