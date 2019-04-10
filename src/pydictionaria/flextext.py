@@ -131,27 +131,3 @@ def merge_glosses(glosses):
         for key in all_keys:
             combo[key].extend(gloss.get(key) or [''] * max_len)
     return combo
-
-
-class GlossDatabase:
-
-    def __init__(self, glosses):
-        self.gloss_index = OrderedDict(
-            ((gloss['title'], gloss['segnum']), gloss)
-            for gloss in glosses)
-
-    def by_title(self, title, segnum):
-        prefix = segnum.split('.')[0] or segnum
-        if (title, prefix) in self.gloss_index:
-            return self.gloss_index[(title, prefix)]
-
-        candidates = [
-            key
-            for key, num in self.gloss_index
-            if num == prefix and key.startswith(title)]
-        if len(candidates) == 1:
-            return self.gloss_index[candidates[0]]
-        elif len(candidates) > 1:
-            raise KeyError("Key '({}, {})' is not unique".format(title, segnum))
-        else:
-            raise KeyError(repr((title, segnum)))
