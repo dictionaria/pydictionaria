@@ -125,7 +125,6 @@ def _find_morphemes(phrase):
 
 
 def extract_gloss(phrase, log=None):
-    # TODO Handle invalid data
     analyzed_word = []
     glosses = []
     gloss_pos = []
@@ -137,6 +136,7 @@ def extract_gloss(phrase, log=None):
         return {}
 
     for morph in _find_morphemes(phrase):
+        # TODO Handle glosses in multiple languages
         item_index = ItemIndex(morph.iter('item'))
         mb = item_index.get_text('txt')
         gl = item_index.get_text('gls')
