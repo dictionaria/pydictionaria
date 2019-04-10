@@ -115,7 +115,7 @@ class ItemIndex:
 
 
 def _find_morphemes(phrase):
-    for word in phrase.find('words').iter('word'):
+    for word in words.iter('word'):
         morphemes = word.find('morphemes')
         if morphemes:
             for morph in morphemes.iter('morph'):
@@ -124,14 +124,19 @@ def _find_morphemes(phrase):
             yield word
 
 
-def extract_gloss(phrase):
+def extract_gloss(phrase, log=None):
     # TODO Handle invalid data
     analyzed_word = []
     glosses = []
     gloss_pos = []
     lemmas = []
 
-    for morph in _find_morphemes(phrase):
+    if not phrase.find('words'):
+        if log:
+            log.warn("No words in phrase '{}'.format(phrase.attrib.get('guid', '???')))
+        return {}
+
+    for morph in _find_morphemes(phrase, log):
         item_index = ItemIndex(morph.iter('item'))
         mb = item_index.get_text('txt')
         gl = item_index.get_text('gls')
@@ -161,6 +166,10 @@ def extract_gloss(phrase):
 
 
 def merge_glosses(glosses):
+    """Merge sequence of glosses into a single gloss.
+
+    Note: This loops over the glosses twice, so an iterator is not enough.
+    """
     all_keys = {
         key
         for gloss in glosses
