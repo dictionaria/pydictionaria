@@ -102,14 +102,17 @@ def extract_gloss(phrase):
     lemmas = []
 
     for morph in _find_morphemes(phrase):
-        analyzed_word.append(get_item(morph, 'txt', ''))
-        glosses.append(get_item(morph, 'gls', ''))
-        gloss_pos.append(get_item(morph, 'msa', ''))
-
+        mb = get_item(morph, 'txt', '')
+        gl = get_item(morph, 'gls', '')
+        ps = get_item(morph, 'msa', '')
         lemma = get_item(morph, 'cf', '')
         homonym = get_item(morph, 'hn')
         if lemma and homonym:
             lemma = '%s %s' % (lemma, homonym)
+
+        analyzed_word.append(mb)
+        glosses.append(gl)
+        gloss_pos.append(ps)
         lemmas.append(lemma)
 
     return {
