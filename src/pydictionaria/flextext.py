@@ -115,7 +115,7 @@ class ItemIndex:
 
 
 def _find_morphemes(phrase):
-    for word in words.iter('word'):
+    for word in phrase.find('words').iter('word'):
         morphemes = word.find('morphemes')
         if morphemes:
             for morph in morphemes.iter('morph'):
@@ -133,10 +133,10 @@ def extract_gloss(phrase, log=None):
 
     if not phrase.find('words'):
         if log:
-            log.warn("No words in phrase '{}'.format(phrase.attrib.get('guid', '???')))
+            log.warn("No words in phrase '{}'".format(phrase.attrib.get('guid', '???')))
         return {}
 
-    for morph in _find_morphemes(phrase, log):
+    for morph in _find_morphemes(phrase):
         item_index = ItemIndex(morph.iter('item'))
         mb = item_index.get_text('txt')
         gl = item_index.get_text('gls')
