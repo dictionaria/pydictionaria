@@ -83,6 +83,16 @@ def separate_examples(document, log=None):
                     'example': phrases}
 
 
+def _find_morphemes(phrase):
+    for word in phrase.find('words').iter('word'):
+        morphemes = word.find('morphemes')
+        if morphemes:
+            for morph in morphemes.iter('morph'):
+                yield morph
+        else:
+            yield word
+
+
 def extract_gloss(phrase):
     # TODO Handle invalid data
     # TODO Handle punctuation
@@ -90,29 +100,18 @@ def extract_gloss(phrase):
     glosses = []
     gloss_pos = []
     lemmas = []
-    for word in phrase.find('words').iter('word'):
-        morphemes = word.find('morphemes')
-        if morphemes:
-            for morph in morphemes.iter('morph'):
-                analyzed_word.append(get_item(morph, 'txt', ''))
-                glosses.append(get_item(morph, 'gls', ''))
-                gloss_pos.append(get_item(morph, 'msa', ''))
 
-                lemma = get_item(morph, 'cf', '')
-                homonym = get_item(morph, 'hn')
-                if lemma and homonym:
-                    lemma = '%s %s' % (lemma, homonym)
-                lemmas.append(lemma)
-        else:
-            analyzed_word.append(get_item(word, 'txt', ''))
-            glosses.append(get_item(word, 'gls', ''))
-            gloss_pos.append(get_item(word, 'msa', ''))
+    for morph in _find_morphemes(phrase):
+        analyzed_word.append(get_item(morph, 'txt', ''))
+        glosses.append(get_item(morph, 'gls', ''))
+        gloss_pos.append(get_item(morph, 'msa', ''))
 
-            lemma = get_item(word, 'cf', '')
-            homonym = get_item(word, 'hn')
-            if lemma and homonym:
-                lemma = '%s %s' % (lemma, homonym)
-            lemmas.append(lemma)
+        lemma = get_item(morph, 'cf', '')
+        homonym = get_item(morph, 'hn')
+        if lemma and homonym:
+            lemma = '%s %s' % (lemma, homonym)
+        lemmas.append(lemma)
+
     return {
         'Analyzed_Word': analyzed_word,
         'Gloss': glosses,
