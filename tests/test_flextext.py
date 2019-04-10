@@ -410,6 +410,28 @@ class GlossExtraction(unittest.TestCase):
             processed.get('Lexical_Entries'),
             ['lemma1 1', 'lemma2 2'])
 
+    def test_fallback_to_words(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        txt1 = ET.SubElement(word1, 'item', type='txt')
+        txt1.text = 'word1'
+
+        word2 = ET.SubElement(words, 'word')
+        morphemes2 = ET.SubElement(word2, 'morphemes')
+        morph2_1 = ET.SubElement(morphemes2, 'morph')
+        txt2_1 = ET.SubElement(morph2_1, 'item', type='txt')
+        txt2_1.text = 'morpheme2.1'
+        morph2_2 = ET.SubElement(morphemes2, 'morph')
+        txt2_2 = ET.SubElement(morph2_2, 'item', type='txt')
+        txt2_2.text = 'morpheme2.2'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Analyzed_Word'),
+            ['word1', 'morpheme2.1', 'morpheme2.2'])
+
 
 class MergeGlosses(unittest.TestCase):
 
