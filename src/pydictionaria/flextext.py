@@ -83,6 +83,37 @@ def separate_examples(document, log=None):
                     'example': phrases}
 
 
+class ItemIndex:
+
+    def __init__(self, items=None):
+        self._index = {}
+        if items:
+            self.add_items(items)
+
+    def add_item(self, item):
+        item_type = item.attrib.get('type')
+        if not item_type:
+            return
+        if item_type not in self._index:
+            self._index[item_type] = []
+        self._index[item_type].append(item)
+
+    def add_items(self, items):
+        for item in items:
+            self.add_item(item)
+
+    def get_items(self, item_type, default=()):
+        """Return all items with the attribute type=item_type."""
+        return self._index.get(item_type, default)
+
+    def get_text(self, item_type, default=''):
+        """Return text of the first item with the attribute type=item_type."""
+        try:
+            return self.get_items(item_type)[0].text
+        except (KeyError, IndexError):
+            return default
+
+
 def _find_morphemes(phrase):
     for word in phrase.find('words').iter('word'):
         morphemes = word.find('morphemes')
@@ -95,25 +126,25 @@ def _find_morphemes(phrase):
 
 def extract_gloss(phrase):
     # TODO Handle invalid data
-    # TODO Handle punctuation
     analyzed_word = []
     glosses = []
     gloss_pos = []
     lemmas = []
 
     for morph in _find_morphemes(phrase):
-        mb = get_item(morph, 'txt', '')
-        gl = get_item(morph, 'gls', '')
-        ps = get_item(morph, 'msa', '')
+        item_index = ItemIndex(morph.iter('item'))
+        mb = item_index.get_text('txt')
+        gl = item_index.get_text('gls')
+        ps = item_index.get_text('msa')
 
         if not mb:
-            punct = get_item(morph, 'punct', '')
-            if punct:
-                mb = punct
+            puncts = item_index.get_items('punct')
+            if puncts:
+                mb = puncts[0].text
                 ps = 'punct'
 
-        lemma = get_item(morph, 'cf', '')
-        homonym = get_item(morph, 'hn')
+        lemma = item_index.get_text('cf')
+        homonym = item_index.get_text('hn')
         if lemma and homonym:
             lemma = '%s %s' % (lemma, homonym)
 
