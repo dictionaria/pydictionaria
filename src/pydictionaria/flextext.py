@@ -141,12 +141,11 @@ def extract_gloss(phrase, log=None):
         mb = item_index.get_text('txt')
         gl = item_index.get_text('gls')
         ps = item_index.get_text('msa')
+        puncts = item_index.get_items('punct')
 
-        if not mb:
-            puncts = item_index.get_items('punct')
-            if puncts:
-                mb = puncts[0].text
-                ps = 'punct'
+        if puncts and not mb:
+            mb = puncts[0].text
+            ps = 'punct'
 
         lemma = item_index.get_text('cf')
         homonym = item_index.get_text('hn')
