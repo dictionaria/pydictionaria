@@ -153,11 +153,11 @@ def _parse_morph(morph):
 
     for gl_item in item_index.get_items('gls'):
         lang = gl_item.attrib.get('lang', 'en')
-        gloss[_column_name('Gloss', lang)] = gl_item.text
+        gloss[_column_name('Gloss', lang)] = gl_item.text or ''
 
     for ps_item in item_index.get_items('msa'):
         lang = ps_item.attrib.get('lang', 'en')
-        gloss[_column_name('Gloss_POS', lang)] = ps_item.text
+        gloss[_column_name('Gloss_POS', lang)] = ps_item.text or ''
 
     return gloss
 

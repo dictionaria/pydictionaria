@@ -499,6 +499,32 @@ class GlossExtraction(unittest.TestCase):
             processed.get('Gloss_Fr'),
             ['le gloss1.1', 'le gloss1.2', 'le gloss2.1', 'le gloss2.2'])
 
+    def test_missing_text(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        morphemes1 = ET.SubElement(word1, 'morphemes')
+        morph1_1 = ET.SubElement(morphemes1, 'morph')
+        gls1_1 = ET.SubElement(morph1_1, 'item', type='gls')
+        gls1_1.text = 'gloss1.1'
+        morph1_2 = ET.SubElement(morphemes1, 'morph')
+        gls1_2 = ET.SubElement(morph1_2, 'item', type='gls')
+
+        word2 = ET.SubElement(words, 'word')
+        morphemes2 = ET.SubElement(word2, 'morphemes')
+        morph2_1 = ET.SubElement(morphemes2, 'morph')
+        gls2_1 = ET.SubElement(morph2_1, 'item', type='gls')
+        gls2_1.text = 'gloss2.1'
+        morph2_2 = ET.SubElement(morphemes2, 'morph')
+        gls2_2 = ET.SubElement(morph2_2, 'item', type='gls')
+        gls2_2.text = 'gloss2.2'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Gloss'),
+            ['gloss1.1', '', 'gloss2.1', 'gloss2.2'])
+
 
 class MergeGlosses(unittest.TestCase):
 
