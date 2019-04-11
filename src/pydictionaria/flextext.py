@@ -124,6 +124,13 @@ def _find_morphemes(phrase):
             yield word
 
 
+def _column_name(name, lang):
+    lang_suffix = ''
+    if lang != 'en':
+        lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+    return '{}{}'.format(name, lang_suffix)
+
+
 def _parse_morph(morph):
     gloss = {}
 
@@ -138,26 +145,19 @@ def _parse_morph(morph):
         gloss['Analyzed_Word'] = mb
 
     lemma = item_index.get_text('cf')
-    homonym = item_index.get_text('hn')
-    if lemma and homonym:
-        lemma = '%s %s' % (lemma, homonym)
-
     if lemma:
+        homonym = item_index.get_text('hn')
+        if homonym:
+            lemma = '%s %s' % (lemma, homonym)
         gloss['Lexical_Entries'] = lemma
 
     for gl_item in item_index.get_items('gls'):
         lang = gl_item.attrib.get('lang', 'en')
-        lang_suffix = ''
-        if lang != 'en':
-            lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
-        gloss['Gloss{}'.format(lang_suffix)] = gl_item.text
+        gloss[_column_name('Gloss', lang)] = gl_item.text
 
     for ps_item in item_index.get_items('msa'):
         lang = ps_item.attrib.get('lang', 'en')
-        lang_suffix = ''
-        if lang != 'en':
-            lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
-        gloss['Gloss_POS{}'.format(lang_suffix)] = ps_item.text
+        gloss[_column_name('Gloss_POS', lang)] = ps_item.text
 
     return gloss
 
