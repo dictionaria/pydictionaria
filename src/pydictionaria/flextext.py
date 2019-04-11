@@ -25,7 +25,7 @@ def _extract_languages(node):
     return languages, vernacular
 
 
-def _extract_title(node, vernacular):
+def _extract_text_id(node, vernacular):
     title_items = [
         (item.attrib.get('lang', ''), item.text)
         for item in node.iter('item')
@@ -58,8 +58,8 @@ def separate_examples(document, log=None):
                 log.warn("Missing vernacular in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
 
-        title = _extract_title(text, vernacular)
-        if not title:
+        text_id = _extract_text_id(text, vernacular)
+        if not text_id:
             if log:
                 log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
@@ -92,7 +92,7 @@ def separate_examples(document, log=None):
 
             for segnum, phrases in examples.items():
                 yield {
-                    'title': title,
+                    'text_id': text_id,
                     'segnum': segnum,
                     'languages': languages,
                     'vernacular': vernacular,
