@@ -42,14 +42,15 @@ DEFAULT_EXAMPLE_MAP = {
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = ['cf', 'cont']
+LINKS_WITH_NO_LABEL = ['mn', 'cf', 'cont']
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
     'Contains': DEFAULT_SEPARATOR,
     'Entry_IDs': DEFAULT_SEPARATOR,
     'Media_IDs': DEFAULT_SEPARATOR,
-    'Sense_IDs': DEFAULT_SEPARATOR}
+    'Sense_IDs': DEFAULT_SEPARATOR,
+    'Main_Entry': DEFAULT_SEPARATOR}
 
 
 def _local_mapping(json_mapping, default_mapping, marker_set):
@@ -381,7 +382,7 @@ def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
         if 'Analyzed_Word' in row:
             row['Analyzed_Word'] = row['Analyzed_Word'].split()
     elif table_name == 'EntryTable':
-        for col in ['Entry_IDs', 'Contains']:
+        for col in ['Main_Entry', 'Entry_IDs', 'Contains']:
             if col in row:
                 row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
     return row
@@ -389,7 +390,7 @@ def sfm_entry_to_cldf_row(table_name, mapping, entry, language_id=None):
 
 def _add_columns(dataset, table_name, columns):
     for column in sorted(columns):
-        if table_name == 'EntryTable' and column in ['Entry_IDs', 'Contains']:
+        if table_name == 'EntryTable' and column in ['Main_Entry', 'Entry_IDs', 'Contains']:
             dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
                 columnReference=column,
                 reference=dict(columnReference='ID', resource='entries.csv')
