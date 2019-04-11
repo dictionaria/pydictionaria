@@ -26,10 +26,10 @@ def _extract_languages(node):
 
 
 def _extract_title(node, vernacular):
-    title_items = sorted(
+    title_items = [
         (item.attrib.get('lang', ''), item.text)
         for item in node.iter('item')
-        if item.text and item.attrib.get('type') == 'title')
+        if item.text and item.attrib.get('type') == 'title']
 
     if not title_items:
         return None

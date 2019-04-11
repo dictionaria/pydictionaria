@@ -302,6 +302,32 @@ class ExampleSeparation(unittest.TestCase):
         self.assertEqual(examples[0]['languages'], {'lang1', 'lang2'})
         self.assertTrue(examples[0]['example'])
 
+    def test_fall_back_to_first_title(self):
+        doc = ET.Element('document')
+        text = ET.SubElement(doc, 'interlinear-text')
+        title1 = ET.SubElement(text, 'item', type='title', lang='lang3')
+        title1.text = 'ID_1'
+        title2 = ET.SubElement(text, 'item', type='title', lang='lang2')
+        title2.text = 'ID_2'
+        languages = ET.SubElement(text, 'languages')
+        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        lang3 = ET.SubElement(languages, 'language', lang='lang3')
+        pars = ET.SubElement(text, 'paragraphs')
+        par = ET.SubElement(pars, 'paragraph')
+        phrases = ET.SubElement(par, 'phrases')
+        phrase = ET.SubElement(phrases, 'phrase')
+        segnum = ET.SubElement(phrase, 'item', type='segnum')
+        segnum.text = '1'
+
+        examples = list(f.separate_examples(doc))
+        self.assertEqual(len(examples), 1)
+        self.assertEqual(examples[0]['title'], 'ID_1')
+        self.assertEqual(examples[0]['segnum'], '1')
+        self.assertEqual(examples[0]['vernacular'], 'lang1')
+        self.assertEqual(examples[0]['languages'], {'lang1', 'lang2', 'lang3'})
+        self.assertTrue(examples[0]['example'])
+
 
 class GlossExtraction(unittest.TestCase):
 
