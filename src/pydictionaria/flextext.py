@@ -32,12 +32,6 @@ def separate_examples(document, log=None):
         return
 
     for text in document.iter('interlinear-text'):
-        title = get_item(text, 'title')
-        if not title:
-            if log:
-                log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
-            continue
-
         languages, vernacular = get_languages(text)
         if not languages:
             if log:
@@ -46,6 +40,23 @@ def separate_examples(document, log=None):
         if not vernacular:
             if log:
                 log.warn("Missing vernacular in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+            continue
+
+        title = ''
+        title_items = sorted(
+            (item.attrib.get('lang', ''), item.text)
+            for item in text.iter('item')
+            if item.text and item.attrib.get('type') == 'title')
+        if title_items:
+            for lang, item_text in title_items:
+                if lang == vernacular:
+                    title = item_text
+                    break
+            else:
+                title = title_items[0][1]
+        if not title:
+            if log:
+                log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
 
         paragraphs = text.find('paragraphs')
