@@ -125,43 +125,54 @@ def _find_morphemes(phrase):
 
 
 def extract_gloss(phrase, log=None):
-    analyzed_word = []
-    glosses = []
-    gloss_pos = []
-    lemmas = []
-
     if not phrase.find('words'):
         if log:
             log.warn("No words in phrase '{}'".format(phrase.attrib.get('guid', '???')))
         return {}
 
+    morph_glosses = []
     for morph in _find_morphemes(phrase):
-        # TODO Handle glosses in multiple languages
         item_index = ItemIndex(morph.iter('item'))
+
+        morph_gloss = {}
         mb = item_index.get_text('txt')
-        gl = item_index.get_text('gls')
-        ps = item_index.get_text('msa')
         puncts = item_index.get_items('punct')
 
         if puncts and not mb:
             mb = puncts[0].text
-            ps = 'punct'
+        if mb:
+            morph_gloss['Analyzed_Word'] = mb
 
         lemma = item_index.get_text('cf')
         homonym = item_index.get_text('hn')
         if lemma and homonym:
             lemma = '%s %s' % (lemma, homonym)
 
-        analyzed_word.append(mb)
-        glosses.append(gl)
-        gloss_pos.append(ps)
-        lemmas.append(lemma)
+        if lemma:
+            morph_gloss['Lexical_Entries'] = lemma
 
-    return {
-        'Analyzed_Word': analyzed_word,
-        'Gloss': glosses,
-        'Gloss_POS': gloss_pos,
-        'Lexical_Entries': lemmas}
+        for gl_item in item_index.get_items('gls'):
+            lang = gl_item.attrib.get('lang', 'en')
+            lang_suffix = ''
+            if lang != 'en':
+                lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+            morph_gloss['Gloss{}'.format(lang_suffix)] = gl_item.text
+
+        for ps_item in item_index.get_items('msa'):
+            lang = ps_item.attrib.get('lang', 'en')
+            lang_suffix = ''
+            if lang != 'en':
+                lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+            morph_gloss['Gloss_POS{}'.format(lang_suffix)] = ps_item.text
+
+        morph_glosses.append(morph_gloss)
+
+    gloss = {k: [] for g in morph_glosses for k in g}
+    for g in morph_glosses:
+        for k in gloss:
+            gloss[k].append(g.get(k, ''))
+
+    return gloss
 
 
 def merge_glosses(glosses):

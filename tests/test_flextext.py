@@ -459,7 +459,45 @@ class GlossExtraction(unittest.TestCase):
             ['morpheme1.1', 'morpheme1.2', '!'])
         self.assertEqual(
             processed.get('Gloss_POS'),
-            ['pos1.1', 'pos1.2', 'punct'])
+            ['pos1.1', 'pos1.2', ''])
+
+    def test_multilanguage_gloss(self):
+        phrase = ET.Element('phrase')
+        words = ET.SubElement(phrase, 'words')
+
+        word1 = ET.SubElement(words, 'word')
+        morphemes1 = ET.SubElement(word1, 'morphemes')
+        morph1_1 = ET.SubElement(morphemes1, 'morph')
+        gls1_1_en = ET.SubElement(morph1_1, 'item', type='gls', lang='en')
+        gls1_1_en.text = 'gloss1.1'
+        gls1_1_fr = ET.SubElement(morph1_1, 'item', type='gls', lang='fr')
+        gls1_1_fr.text = 'le gloss1.1'
+        morph1_2 = ET.SubElement(morphemes1, 'morph')
+        gls1_2_en = ET.SubElement(morph1_2, 'item', type='gls', lang='en')
+        gls1_2_en.text = 'gloss1.2'
+        gls1_2_fr = ET.SubElement(morph1_2, 'item', type='gls', lang='fr')
+        gls1_2_fr.text = 'le gloss1.2'
+
+        word2 = ET.SubElement(words, 'word')
+        morphemes2 = ET.SubElement(word2, 'morphemes')
+        morph2_1 = ET.SubElement(morphemes2, 'morph')
+        gls2_1_en = ET.SubElement(morph2_1, 'item', type='gls', lang='en')
+        gls2_1_en.text = 'gloss2.1'
+        gls2_1_fr = ET.SubElement(morph2_1, 'item', type='gls', lang='fr')
+        gls2_1_fr.text = 'le gloss2.1'
+        morph2_2 = ET.SubElement(morphemes2, 'morph')
+        gls2_2_en = ET.SubElement(morph2_2, 'item', type='gls', lang='en')
+        gls2_2_en.text = 'gloss2.2'
+        gls2_2_fr = ET.SubElement(morph2_2, 'item', type='gls', lang='fr')
+        gls2_2_fr.text = 'le gloss2.2'
+
+        processed = f.extract_gloss(phrase)
+        self.assertEqual(
+            processed.get('Gloss'),
+            ['gloss1.1', 'gloss1.2', 'gloss2.1', 'gloss2.2'])
+        self.assertEqual(
+            processed.get('Gloss_Fr'),
+            ['le gloss1.1', 'le gloss1.2', 'le gloss2.1', 'le gloss2.2'])
 
 
 class MergeGlosses(unittest.TestCase):
