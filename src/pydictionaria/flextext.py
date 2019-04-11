@@ -124,48 +124,51 @@ def _find_morphemes(phrase):
             yield word
 
 
+def _parse_morph(morph):
+    gloss = {}
+
+    item_index = ItemIndex(morph.iter('item'))
+
+    mb = item_index.get_text('txt')
+    puncts = item_index.get_items('punct')
+
+    if puncts and not mb:
+        mb = puncts[0].text
+    if mb:
+        gloss['Analyzed_Word'] = mb
+
+    lemma = item_index.get_text('cf')
+    homonym = item_index.get_text('hn')
+    if lemma and homonym:
+        lemma = '%s %s' % (lemma, homonym)
+
+    if lemma:
+        gloss['Lexical_Entries'] = lemma
+
+    for gl_item in item_index.get_items('gls'):
+        lang = gl_item.attrib.get('lang', 'en')
+        lang_suffix = ''
+        if lang != 'en':
+            lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+        gloss['Gloss{}'.format(lang_suffix)] = gl_item.text
+
+    for ps_item in item_index.get_items('msa'):
+        lang = ps_item.attrib.get('lang', 'en')
+        lang_suffix = ''
+        if lang != 'en':
+            lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+        gloss['Gloss_POS{}'.format(lang_suffix)] = ps_item.text
+
+    return gloss
+
+
 def extract_gloss(phrase, log=None):
     if not phrase.find('words'):
         if log:
             log.warn("No words in phrase '{}'".format(phrase.attrib.get('guid', '???')))
         return {}
 
-    morph_glosses = []
-    for morph in _find_morphemes(phrase):
-        item_index = ItemIndex(morph.iter('item'))
-
-        morph_gloss = {}
-        mb = item_index.get_text('txt')
-        puncts = item_index.get_items('punct')
-
-        if puncts and not mb:
-            mb = puncts[0].text
-        if mb:
-            morph_gloss['Analyzed_Word'] = mb
-
-        lemma = item_index.get_text('cf')
-        homonym = item_index.get_text('hn')
-        if lemma and homonym:
-            lemma = '%s %s' % (lemma, homonym)
-
-        if lemma:
-            morph_gloss['Lexical_Entries'] = lemma
-
-        for gl_item in item_index.get_items('gls'):
-            lang = gl_item.attrib.get('lang', 'en')
-            lang_suffix = ''
-            if lang != 'en':
-                lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
-            morph_gloss['Gloss{}'.format(lang_suffix)] = gl_item.text
-
-        for ps_item in item_index.get_items('msa'):
-            lang = ps_item.attrib.get('lang', 'en')
-            lang_suffix = ''
-            if lang != 'en':
-                lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
-            morph_gloss['Gloss_POS{}'.format(lang_suffix)] = ps_item.text
-
-        morph_glosses.append(morph_gloss)
+    morph_glosses = list(map(_parse_morph, _find_morphemes(phrase)))
 
     gloss = {k: [] for g in morph_glosses for k in g}
     for g in morph_glosses:
