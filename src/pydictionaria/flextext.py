@@ -8,7 +8,7 @@ def get_item(node, key, default=None):
     return default
 
 
-def get_languages(node):
+def _extract_languages(node):
     languages = set()
     vernacular = None
 
@@ -25,7 +25,7 @@ def get_languages(node):
     return languages, vernacular
 
 
-def get_title(node, vernacular):
+def _extract_title(node, vernacular):
     title_items = sorted(
         (item.attrib.get('lang', ''), item.text)
         for item in node.iter('item')
@@ -48,7 +48,7 @@ def separate_examples(document, log=None):
         return
 
     for text in document.iter('interlinear-text'):
-        languages, vernacular = get_languages(text)
+        languages, vernacular = _extract_languages(text)
         if not languages:
             if log:
                 log.warn("Missing languages in interlinear text '{}'".format(text.attrib.get('guid', '???')))
@@ -58,7 +58,7 @@ def separate_examples(document, log=None):
                 log.warn("Missing vernacular in interlinear text '{}'".format(text.attrib.get('guid', '???')))
             continue
 
-        title = get_title(text, vernacular)
+        title = _extract_title(text, vernacular)
         if not title:
             if log:
                 log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
