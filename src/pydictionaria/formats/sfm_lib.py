@@ -309,93 +309,125 @@ class Rearrange(object):
         move_marker(entry, 'xr', 'xe')
 
 
+class ExampleExtractionStateMachine:
+
+    marker_map = {
+        'rf': 'rf',
+        'xv': 'tx',
+        'xvm': 'mb',
+        'xeg': 'gl',
+        'xo': 'ot',
+        'xn': 'ot',
+        'xr': 'ota',
+        'xe': 'ft',
+        'sfx': 'sf',
+    }
+
+    start_markers = {'lemma', 'ref', 'rf', 'tx'}
+    merge_markers = {'tx', 'mb', 'gl'}
+    end_markers = {'ft'}
+
+    def __init__(self, example_markers, id_generator, log, entry_cls=Entry):
+        self.entry = entry_cls()
+        self.id_gen = id_generator
+        self.log = log
+        self.example_markers = set(self.marker_map)
+        self.example_markers.update(example_markers)
+        self.example = Example()
+        self._entry_buffer = []
+        self._state = self._beginning
+
+    def _beginning(self, marker, content):
+        if marker == 'tx' and self.example.get('tx'):
+            self.log_error('missing xe')
+            self.drop_example()
+        self.example.append((marker, content))
+        if marker in self.end_markers:
+            self._state = self._end
+        elif marker not in self.start_markers:
+            self._state = self._middle
+
+    def _middle(self, marker, content):
+        if marker in self.merge_markers:
+            old_value = self.example.get(marker)
+            new_value = '%s %s' % (old_value, content) if old_value else content
+            self.example.set(marker, new_value)
+        else:
+            self.example.append((marker, content))
+        if marker in self.end_markers:
+            self._state = self._end
+
+    def _end(self, marker, content):
+        if marker in self.start_markers:
+            self.finish_example()
+            self.example.append((marker, content))
+
+        elif marker == 'ft' and self.example.get('ft'):
+            self.finish_example()
+            self.example.append((marker, content))
+            self.log_error('missing xv')
+            self.drop_example()
+
+        else:
+            self.example.append((marker, content))
+
+    def process_marker(self, marker, content):
+        if marker in self.example_markers:
+            self._state(self.marker_map.get(marker, marker), content)
+        elif self.example:
+            # Hold off on adding entry markers until the example is done -- to
+            # make sure the \xref marker ends up in the right place.
+            self._entry_buffer.append((marker, content))
+        else:
+            self.entry.append((marker, content))
+
+    def log_error(self, message):
+        self.log.write(
+            '# incomplete example in lx: %s - %s:\n%s\n\n'
+            % (self.entry.get('lx'), message, self.example))
+
+    def drop_example(self):
+        self.example = Example()
+        self._state = self._beginning
+
+    def finish_example(self):
+        if self.example:
+            if not self.example.get('tx'):
+                self.log_error('missing xv')
+            elif not self.example.get('ft'):
+                self.log_error('missing xe')
+            else:
+                lx = self.entry.get('lx')
+                if lx:
+                    self.example.set('lemma', lx)
+                self.entry.append(('xref', self.id_gen(self.example)))
+        self.drop_example()
+        self.entry.extend(self._entry_buffer)
+        self._entry_buffer.clear()
+
+
 class ExampleExtractor(object):
     """
     SFM visitor to extract examples
     """
-    def __init__(self, corpus, log):
+    def __init__(self, example_markers, corpus, log):
         """
         :param corpus: A pydictionaria.example.Corpus instance to lookup morphems and \
         glosses in an ELAN corpus.
         :param log:
         """
-        self.example_props = {
-            'rf': 'rf',
-            'xv': 'tx',
-            'xvm': 'mb',
-            'xeg': 'gl',
-            'xo': 'ot',
-            'xn': 'ot',
-            'xr': 'ota',
-            'xe': 'ft',
-            'sfx': 'sf',
-        }
+        self.example_markers = example_markers
         self.examples = OrderedDict()
         self.corpus = corpus
         self.log = log
 
     def __call__(self, entry):
-        example = None
-        lx = entry.get('lx')
-        rf = None
-        xvm = None
-        xeg = None
-        new_entry = entry.__class__()
-
+        state_machine = ExampleExtractionStateMachine(
+            self.example_markers, self.xref, self.log, entry.__class__)
         for marker, content in entry:
-            if marker not in self.example_props:
-                new_entry.append((marker, content))
-                continue
-
-            if marker == 'rf':
-                rf = content
-            elif marker == 'xvm':
-                xvm = '%s %s' % (xvm, content) if xvm else content
-            elif marker == 'xeg':
-                xeg = '%s %s' % (xeg, content) if xeg else content
-
-            elif marker == 'xv':
-                if xvm is None and xeg is None:
-                    # new example starts
-                    if example:
-                        # but last one is unfinished
-                        self.log.write(
-                            '# incomplete example in lx: %s - missing xe:\n%s\n\n'
-                            % (lx, example))
-                    example = Example([('tx', content)])
-                else:
-                    example.set(
-                        'tx',
-                        '%s %s' % (example.get('tx', ''), content))
-                assert example
-
-            elif marker == 'xe':
-                # example ends
-                if example:
-                    if rf:
-                        example.insert(0, ('rf', rf))
-                    if xvm:
-                        example.set('mb', xvm)
-                    if xeg:
-                        example.set('gl', xeg)
-                    example.append(('ft', content))
-                    example.set('lemma', lx)
-                    new_entry.append(('xref', self.xref(example)))
-                    rf = None
-                    xvm = None
-                    xeg = None
-                    example = None
-                else:
-                    self.log.write(
-                        '# incomplete example in lx: %s - missing xv\n' % lx)
-
-            else:
-                if not example:
-                    self.log.write('incomplete example in lx: %s - missing xv\n' % lx)
-                else:
-                    example.append((self.example_props[marker], content))
-
-        return new_entry
+            state_machine.process_marker(marker, content)
+        state_machine.finish_example()
+        return state_machine.entry
 
     def merge(self, ex1, ex2):
         merged_ex = copy.copy(ex1)

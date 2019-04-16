@@ -127,7 +127,11 @@ class Dictionary(base.Dictionary):
         else:
             with self.submission.dir.joinpath(
                     'examples.log').open('w', encoding='utf8') as log:
-                extractor = ExampleExtractor(Corpus.from_dir(self.submission.dir), log)
+                # FIXME This should go into sfm2cldf.make_spec
+                example_markers = set(self.submission.md.properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
+                if 'gloss_ref' in self.submission.md.properties:
+                    example_markers.add(self.submission.md.properties['gloss_ref'])
+                extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
 
