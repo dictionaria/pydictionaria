@@ -310,7 +310,9 @@ class ExampleExtraction(unittest.TestCase):
             ('ft', 'translation 3'),
             ('lemma', 'headword')])
 
-        log.write.assert_called()
+        with self.assertRaises(AssertionError):
+            log.write.assert_not_called()
+
 
     def test_two_xv_markers_at_the_beginning(self):
         example_markers = {'rf', 'xv', 'xe'}
@@ -345,7 +347,8 @@ class ExampleExtraction(unittest.TestCase):
             ('ft', 'translation 3'),
             ('lemma', 'headword')])
 
-        log.write.assert_called()
+        with self.assertRaises(AssertionError):
+            log.write.assert_not_called()
 
     def test_missing_beginning(self):
         example_markers = {'rf', 'xv', 'xe', 'other_marker'}
@@ -383,4 +386,5 @@ class ExampleExtraction(unittest.TestCase):
             ('ft', 'translation 3'),
             ('lemma', 'headword')])
 
-        log.write.assert_called()
+        with self.assertRaises(AssertionError):
+            log.write.assert_not_called()
