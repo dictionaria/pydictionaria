@@ -94,6 +94,10 @@ def make_spec(properties, marker_set):
     example_markers.update((example_id, 'sfx'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
 
+    gloss_ref = properties.get('gloss_ref')
+    if gloss_ref:
+        example_markers.add(gloss_ref)
+
     return {
         'entry_map': entry_map,
         'entry_markers': entry_markers,
@@ -109,7 +113,8 @@ def make_spec(properties, marker_set):
         'example_map': example_map,
         'example_markers': example_markers,
         'example_columns': example_columns,
-        'example_id': example_id}
+        'example_id': example_id,
+        'gloss_ref': gloss_ref}
 
 
 def group_by_separator(sep, sfm_pairs):

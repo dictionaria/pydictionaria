@@ -1,7 +1,7 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import re
-from collections import ChainMap
+from collections import ChainMap, defaultdict
 from itertools import chain
 
 from clldutils.markup import Table
@@ -16,6 +16,7 @@ from pydictionaria.example import Corpus, Examples
 from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
+from pydictionaria import flextext
 
 DEFAULT_MARKER_MAP = {
     'd_Eng': 'de',
@@ -150,6 +151,34 @@ class Dictionary(base.Dictionary):
             examples)
         examples = Examples(example_index.values())
 
+        glosses = {}
+        glosses_path = self.submission.dir.joinpath('glosses.flextext')
+        if glosses_path.exists():
+            logpath = self.submission.dir.joinpath('glosses.log')
+            log_name = '%s.glosses' % self.submission.id
+            with logpath.open('w', encoding='utf-8') as logfile:
+                log = sfm2cldf.cldf_logger(log_name, logfile)
+                gloss_ref_marker = props.get('gloss_ref')
+                if not gloss_ref_marker:
+                    log.error("'gloss_ref' marker not specified in md.json!")
+                else:
+                    # TODO Factor out
+                    gloss_to_ex = defaultdict(dict)
+                    for example in examples:
+                        gloss_ref = example.get(gloss_ref_marker, '')
+                        match = re.fullmatch(r'(.*) (\d+)', gloss_ref.strip())
+                        text_id = match.group(1) if match else gloss_ref
+                        segnum = match.group(2) if match else '1'
+                        if not text_id:
+                            continue
+                        gloss_to_ex[text_id][segnum] = example.id
+
+                    for gloss in flextext.parse_flextext(str(glosses_path), log):
+                        text = gloss_to_ex.get(gloss['text_id']) or {}
+                        example_id = text.get(gloss['segnum'])
+                        if example_id:
+                            glosses[example_id] = gloss
+
         entry_extr = sfm2cldf.EntryExtractor(
             spec['entry_id'],
             spec['entry_markers'])
@@ -224,6 +253,20 @@ class Dictionary(base.Dictionary):
             spec['sense_columns'],
             spec['example_columns'])
 
+        # TODO Factor out
+        gloss_columns = {
+            column
+            for gloss in glosses.values()
+            for column in gloss['example']}
+        for column in gloss_columns:
+            try:
+                dataset.add_columns(
+                    'ExampleTable',
+                    {'name': column, 'datatype': 'string', 'separator': r'\t'})
+            except ValueError:
+                # ValueError means the column is already there
+                pass
+
         entry_rows = (
             sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], entry, lang_id)
             for entry in entries)
@@ -250,6 +293,14 @@ class Dictionary(base.Dictionary):
         media_rows = row_filter.filter(
             sfm2cldf.RequiredColumns(dataset['media.csv'].tableSchema),
             media_rows)
+
+        # TODO Factor out
+        if glosses:
+            def merge_gloss_into_example(example):
+                if example['ID'] in glosses:
+                    return ChainMap(glosses[example['ID']]['example'], example)
+                return example
+            example_rows = map(merge_gloss_into_example, example_rows)
 
         kwargs = {
             'EntryTable': entry_rows,

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import xml.etree.ElementTree as ET
 
 
 def get_item(node, key, default=None):
@@ -210,3 +211,11 @@ def merge_glosses(glosses):
         for key in all_keys:
             combo[key].extend(gloss.get(key) or [''] * max_len)
     return combo
+
+
+def parse_flextext(file_name, log=None):
+    gloss_db = ET.parse(file_name)
+    for example in separate_examples(gloss_db.getroot(), log):
+        example['example'] = merge_glosses(
+            [extract_gloss(e, log) for e in example['example']])
+        yield example
