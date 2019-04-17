@@ -382,7 +382,9 @@ def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
     sources = []
     for tag, value in entry:
         if tag in refs:
-            sources.append('{}[{}]'.format(value, refs[tag]))
+            sources.extend(
+                '{}[{}]'.format(s.strip(), refs[tag])
+                for s in value.split(';'))
         key = mapping.get(tag)
         if key and value:
             row[key].append(_single_spaces(value))
