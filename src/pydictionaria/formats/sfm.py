@@ -192,7 +192,7 @@ class Dictionary(base.Dictionary):
             marker
             for entry in rest
             for marker, _ in entry)
-
+        # if marker not in spec['ref_markers']
         if unexpected_markers:
             marker_list = ', '.join(sorted(unexpected_markers))
             msg = 'Unexpected markers: {}'.format(marker_list)
@@ -251,7 +251,10 @@ class Dictionary(base.Dictionary):
             outdir,
             spec['entry_columns'],
             spec['sense_columns'],
-            spec['example_columns'])
+            spec['example_columns'],
+            spec['entry_refs'],
+            spec['sense_refs'],
+            spec['example_refs'])
 
         # TODO Factor out
         gloss_columns = {
@@ -268,13 +271,13 @@ class Dictionary(base.Dictionary):
                 pass
 
         entry_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], entry, lang_id)
+            sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
             for entry in entries)
         sense_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], sense)
+            sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_refs'], sense)
             for sense in senses)
         example_rows = (
-            sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], example, lang_id)
+            sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_refs'], example, lang_id)
             for example in examples)
         media_rows = (
             {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
