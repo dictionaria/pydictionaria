@@ -256,12 +256,13 @@ class Dictionary(base.Dictionary):
             spec['sense_refs'],
             spec['example_refs'])
 
-        sfm2cldf.attach_column_titles(
-            dataset['EntryTable'], spec['entry_map'], props['labels'])
-        sfm2cldf.attach_column_titles(
-            dataset['SenseTable'], spec['sense_map'], props['labels'])
-        sfm2cldf.attach_column_titles(
-            dataset['ExampleTable'], spec['example_map'], props['labels'])
+        if props.get('labels'):
+            sfm2cldf.attach_column_titles(
+                dataset['EntryTable'], spec['entry_map'], props['labels'])
+            sfm2cldf.attach_column_titles(
+                dataset['SenseTable'], spec['sense_map'], props['labels'])
+            sfm2cldf.attach_column_titles(
+                dataset['ExampleTable'], spec['example_map'], props['labels'])
 
         # TODO Factor out
         gloss_columns = {
