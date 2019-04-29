@@ -472,6 +472,16 @@ def make_cldf_dataset(
     return dataset
 
 
+def attach_column_titles(table, mapping, labels):
+    label_map = {
+        mapping[marker]: label
+        for marker, label in labels.items()
+        if marker in mapping}
+    for col in table.tableSchema.columns:
+        if str(col) in label_map:
+            col.titles = label_map[str(col)]
+
+
 class RequiredColumns:
 
     def __init__(self, table_schema):
