@@ -446,7 +446,7 @@ def _add_columns(dataset, table_name, columns, refs):
         try:
             dataset.add_columns(
                 table_name,
-                {'name': 'Source', 'datatype': 'string', 'separator': ';'})
+                'http://cldf.clld.org/v1.0/terms.rdf#source')
         except ValueError:
             # ValueError means the column is already there
             pass
