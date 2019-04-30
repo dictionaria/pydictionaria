@@ -482,34 +482,36 @@ def attach_column_titles(table, mapping, labels):
             col.titles = label_map[str(col)]
 
 
-class RequiredColumns:
+class RequiredColumnsFilter:
+    """Filter which keeps a record of filtered elements."""
 
     def __init__(self, table_schema):
         self._required_cols = [
             col.name
             for col in table_schema.columns
             if col.required]
+        self.warnings = []
 
-    def __call__(self, row):
-        """Return True iff. all required fields of a row is set.
+    def _missing_fields(self, elem):
+        return [
+            col
+            for col in self._required_cols
+            if not elem.get(col)]
 
-        Return False otherwise.
-        """
-        return all(row.get(col) for col in self._required_cols)
+    def _error_msg(self, row, missing_fields):
+        field_msg = ','.join(missing_fields)
+        row_repr = '\n'.join(
+            '{}: {}'.format(k, repr(v))
+            for k, v in sorted(row.items()))
+        return 'missing required columns ({}):\n{}'.format(field_msg, row_repr)
 
-
-class RowFilter:
-    """Filter which keeps a record of filtered elements."""
-
-    def __init__(self):
-        self.filtered = []
-
-    def filter(self, pred, iterable):
+    def filter(self, iterable):
         for row in iterable:
-            if pred(row):
-                yield row
+            missing_fields = self._missing_fields(row)
+            if missing_fields:
+                self.warnings.append(self._error_msg(row, missing_fields))
             else:
-                self.filtered.append(row)
+                yield row
 
 
 class OnlyBaseNames(logging.LoggerAdapter):

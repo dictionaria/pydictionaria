@@ -291,19 +291,14 @@ class Dictionary(base.Dictionary):
             {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
             for filename, fileid in sorted(media_extr.files))
 
-        row_filter = sfm2cldf.RowFilter()
-        entry_rows = row_filter.filter(
-            sfm2cldf.RequiredColumns(dataset['EntryTable'].tableSchema),
-            entry_rows)
-        sense_rows = row_filter.filter(
-            sfm2cldf.RequiredColumns(dataset['SenseTable'].tableSchema),
-            sense_rows)
-        example_rows = row_filter.filter(
-            sfm2cldf.RequiredColumns(dataset['ExampleTable'].tableSchema),
-            example_rows)
-        media_rows = row_filter.filter(
-            sfm2cldf.RequiredColumns(dataset['media.csv'].tableSchema),
-            media_rows)
+        entry_filter = sfm2cldf.RequiredColumnsFilter(dataset['EntryTable'].tableSchema)
+        entry_rows = entry_filter.filter(entry_rows)
+        sense_filter = sfm2cldf.RequiredColumnsFilter(dataset['SenseTable'].tableSchema)
+        sense_rows = sense_filter.filter(sense_rows)
+        example_filter = sfm2cldf.RequiredColumnsFilter(dataset['ExampleTable'].tableSchema)
+        example_rows = example_filter.filter(example_rows)
+        media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema)
+        media_rows = media_filter.filter(media_rows)
 
         # TODO Factor out
         if glosses:
@@ -325,12 +320,14 @@ class Dictionary(base.Dictionary):
             for msg in log_messages:
                 print(msg, file=logfile)
 
-            for row in row_filter.filtered:
-                print('\nRequired field missing in CLDF row:', file=logfile)
-                msg = '\n'.join(
-                    '{}: {}'.format(repr(k), repr(v))
-                    for k, v in sorted(row.items()))
-                print(msg, file=logfile)
+            for error in entry_filter.warnings:
+                print('\nERROR in entry: {}'.format(error), file=logfile)
+            for error in sense_filter.warnings:
+                print('\nERROR in sense: {}'.format(error), file=logfile)
+            for error in example_filter.warnings:
+                print('\nERROR in example: {}'.format(error), file=logfile)
+            for error in media_filter.warnings:
+                print('\nERROR in media entry: {}'.format(error), file=logfile)
 
             print(file=logfile)
             log_name = '%s.cldf' % self.submission.id
