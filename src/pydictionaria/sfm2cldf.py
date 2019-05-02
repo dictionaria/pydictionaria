@@ -202,6 +202,7 @@ class EntryExtractor(object):
         self.entry_id = entry_id
         self.entry_markers = entry_markers
         self._idgen = IDGenerator('LX')
+        self._idset = set()
 
         self.entries = sfm.SFM()
 
@@ -213,9 +214,20 @@ class EntryExtractor(object):
         if not new_entry:
             return False
 
+        original_id = entry.get(self.entry_id, '')
+        entry_id = re.sub(r'\s+', '_', original_id.strip())
+        if entry_id and self.entry_id == 'lx':
+            hm_nr = entry.get('hm')
+            if hm_nr:
+                entry_id = '{}_{}'.format(entry_id, hm_nr)
+
+        if entry_id in self._idset or not re.fullmatch(r'[a-zA-Z0-9_\-]+', entry_id):
+            entry_id = self._idgen.next_id()
+        self._idset.add(entry_id)
+
         # XXX Adding attributes to existing types feels very fragile...
-        new_entry.id = self._idgen.next_id()
-        new_entry.original_id = entry.get(self.entry_id)
+        new_entry.id = entry_id
+        new_entry.original_id = original_id
         new_entry.media_ids = []
         self.entries.append(new_entry)
 
