@@ -235,6 +235,39 @@ class EntryExtractor(object):
         return rest
 
 
+class PartOfSpeechFilter:
+    """Filters out all entries with multiple conflicting \ps markers."""
+
+    def __init__(self):
+        self.errors = []
+
+    def __call__(self, entry):
+        ps = entry.getall('ps')
+        if len(set(ps)) > 1:
+            msg = '\lx {}: Conflicting \ps markers: {}'.format(
+                entry.get('lx'),
+                ', '.join(map(repr, ps)))
+            self.errors.append(msg)
+            return False
+        return None
+
+
+def merge_pos(entry):
+    """Merge all unique \ps markers of an entry into one."""
+    ps = entry.getall('ps')
+    if len(ps) < 2:
+        return entry
+    new_entry = entry.__class__()
+    for marker, content in entry:
+        if marker == 'ps':
+            if ps:
+                new_entry.append(('ps', ' ; '.join(sorted(set(ps)))))
+                ps = None
+        else:
+            new_entry.append((marker, content))
+    return new_entry
+
+
 class SenseExtractor(object):
 
     def __init__(self, sense_sep, sense_markers):

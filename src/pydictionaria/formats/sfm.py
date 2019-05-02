@@ -179,6 +179,10 @@ class Dictionary(base.Dictionary):
                         if example_id:
                             glosses[example_id] = gloss
 
+        pos_filter = sfm2cldf.PartOfSpeechFilter()
+        self.sfm.visit(pos_filter)
+        self.sfm.visit(sfm2cldf.merge_pos)
+
         entry_extr = sfm2cldf.EntryExtractor(
             spec['entry_id'],
             spec['entry_markers'])
@@ -319,6 +323,10 @@ class Dictionary(base.Dictionary):
         with logpath.open('w', encoding='utf8') as logfile:
             for msg in log_messages:
                 print(msg, file=logfile)
+
+            print(file=logfile)
+            for error in pos_filter.errors:
+                print('ERROR:', error, file=logfile)
 
             for error in entry_filter.warnings:
                 print('\nERROR in entry: {}'.format(error), file=logfile)
