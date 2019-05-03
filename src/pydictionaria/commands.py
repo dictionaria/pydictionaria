@@ -149,7 +149,13 @@ def add_comparison_meanings(args):
 
 def with_submission(args, func):
     if args.args:
-        func(Submission(_submission_dir(args, args.args[0]), args.repos))
+        submission_dir = _submission_dir(args, args.args[0])
+        if submission_dir is None:
+            args.log.error("Could not find {}submission '{}'".format(
+                'internal ' if args.internal else '',
+                args.args[0]))
+        else:
+            func(Submission(submission_dir, args.repos))
     else:
         for d in sorted(_submission_dir(args).iterdir(), key=lambda d: d.name):
             if d.is_dir() and d.name != '_template' and d.joinpath('md.json').exists():
@@ -205,3 +211,5 @@ def _submission_dir(args, path_or_id=None):
     for fname in args.repos.joinpath(subdir).iterdir():
         if fname.name == path_or_id:
             return fname
+
+    return None
