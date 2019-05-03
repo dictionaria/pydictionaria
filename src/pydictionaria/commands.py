@@ -100,8 +100,11 @@ def stat(args):
     table.extend([(k, len(v), sum([1 if md5(vv) in mcat else 0 for vv in v]))
                   for k, v in s.media.items()])
     print(table.render(tablefmt='simple', sortkey=lambda r: -r[1], condensed=False))
-    print('\n## Dictionary [{0}]\n'.format(s.dictionary.format))
-    s.dictionary.stat()
+    if s.dictionary is None:
+        print('\n## Dictionary\n\n(no dictionary found)')
+    else:
+        print('\n## Dictionary [{0}]\n'.format(s.dictionary.format))
+        s.dictionary.stat()
 
 
 @command()
@@ -111,6 +114,10 @@ def search(args):
     dictionaria search SUBMISSION [KEY=VALUE]+
     """
     s = Submission(_submission_dir(args, args.args[0]), args.repos)
+    if s.dictionary is None:
+        args.log.error("No dictionary found in submission '{}'".format(s.id))
+        return
+
     query = {}
     for arg in args.args[1:]:
         key, value = arg.split('=', 1)
@@ -170,7 +177,10 @@ def check(args):
     dictionaria check [SUBMISSION]
     """
     def _check(s):
-        s.dictionary.check()
+        if s.dictionary is None:
+            args.log.error("No dictionary found in submission '{}'".format(s.id))
+        else:
+            s.dictionary.check()
     with_submission(args, _check)
 
 
@@ -181,7 +191,10 @@ def process(args):
     dictionaria process [SUBMISSION]
     """
     def _process(s):
-        s.dictionary.process()
+        if s.dictionary is None:
+            args.log.error("No dictionary found in submission '{}'".format(s.id))
+        else:
+            s.dictionary.process()
     with_submission(args, _process)
 
 
