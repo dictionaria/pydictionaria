@@ -36,13 +36,13 @@ DEFAULT_SENSE_MAP = {
     'zcom1': 'Concepticon_ID'}
 
 DEFAULT_EXAMPLE_MAP = {
+    'rf': 'Corpus_Reference',
     'tx': 'Primary_Text',
     'mb': 'Analyzed_Word',
     'gl': 'Gloss',
     'ft': 'Translated_Text'}
 
-DEFAULT_REFERENCES = {
-    'rf': 'tx'}
+DEFAULT_REFERENCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
