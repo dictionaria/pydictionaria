@@ -277,6 +277,19 @@ def prepare_glosses(glosses_path, gloss_ref_marker, examples, log):
     return glosses
 
 
+def check_for_missing_glosses(gloss_ref_marker, glosses, examples, log):
+    """Log an error message when an example references an unknown gloss."""
+    for example in examples:
+        gloss_ref = example.get(gloss_ref_marker)
+        if not gloss_ref:
+            continue
+        if example.id not in glosses:
+            log.error("Gloss '\\{} {}' not found (ex. {})".format(
+                gloss_ref_marker,
+                gloss_ref,
+                example.id))
+
+
 class PartOfSpeechFilter:
     """Filters out all entries with multiple conflicting \ps markers."""
 

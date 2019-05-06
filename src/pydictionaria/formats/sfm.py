@@ -163,6 +163,8 @@ class Dictionary(base.Dictionary):
                         glosses_path, gloss_ref_marker, examples, log)
                 else:
                     log.error("'gloss_ref' marker not specified in md.json!")
+                sfm2cldf.check_for_missing_glosses(
+                    gloss_ref_marker, glosses, examples, log)
 
         pos_filter = sfm2cldf.PartOfSpeechFilter()
         self.sfm.visit(pos_filter)
