@@ -616,6 +616,12 @@ class RequiredColumnsFilter:
                 yield row
 
 
+def merge_gloss_into_example(glosses, example_row):
+    if example_row['ID'] in glosses:
+        return ChainMap(glosses[example_row['ID']]['example'], example_row)
+    return example_row
+
+
 class OnlyBaseNames(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         msg = re.sub(

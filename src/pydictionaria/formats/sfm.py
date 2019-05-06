@@ -277,13 +277,10 @@ class Dictionary(base.Dictionary):
         media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema)
         media_rows = media_filter.filter(media_rows)
 
-        # TODO Factor out
         if glosses:
-            def merge_gloss_into_example(example):
-                if example['ID'] in glosses:
-                    return ChainMap(glosses[example['ID']]['example'], example)
-                return example
-            example_rows = map(merge_gloss_into_example, example_rows)
+            example_rows = (
+                sfm2cldf.merge_gloss_into_example(glosses, row)
+                for row in example_rows)
 
         kwargs = {
             'EntryTable': entry_rows,
