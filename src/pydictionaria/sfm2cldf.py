@@ -10,6 +10,8 @@ from clldutils import sfm
 import pycldf
 import csvw
 
+from pydictionaria import flextext
+
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
 DEFAULT_SENSE_SEP = 'sn'
@@ -233,6 +235,46 @@ class EntryExtractor(object):
 
         rest.entry_id = new_entry.id
         return rest
+
+
+class GlossToExMapping:
+
+    def __init__(self, gloss_ref_marker):
+        self.gloss_ref_marker = gloss_ref_marker
+        self._gloss_to_example_id = defaultdict(dict)
+
+    def add_example(self, example):
+        gloss_ref = example.get(self.gloss_ref_marker, '')
+        match = re.fullmatch(r'(.*) (\d+)', gloss_ref.strip())
+        text_id = match.group(1) if match else gloss_ref
+        segnum = match.group(2) if match else '1'
+        if not text_id:
+            return
+        self._gloss_to_example_id[text_id][segnum] = example.id
+
+    def add_examples(self, examples):
+        for example in examples:
+            self.add_example(example)
+
+    def get_example_id(self, text_id, segnum, default=None):
+        text = self._gloss_to_example_id.get(text_id)
+        if text is None:
+            return default
+        example_id = text.get(segnum)
+        if example_id is None:
+            return default
+        return example_id
+
+
+def prepare_glosses(glosses_path, gloss_ref_marker, examples, log):
+    glosses = {}
+    mapping = GlossToExMapping(gloss_ref_marker)
+    mapping.add_examples(examples)
+    for gloss in flextext.parse_flextext(str(glosses_path), log):
+        example_id = mapping.get_example_id(gloss['text_id'], gloss['segnum'])
+        if example_id:
+            glosses[example_id] = gloss
+    return glosses
 
 
 class PartOfSpeechFilter:

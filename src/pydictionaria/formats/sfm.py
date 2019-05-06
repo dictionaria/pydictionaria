@@ -16,7 +16,6 @@ from pydictionaria.example import Corpus, Examples
 from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
-from pydictionaria import flextext
 
 DEFAULT_MARKER_MAP = {
     'd_Eng': 'de',
@@ -159,25 +158,11 @@ class Dictionary(base.Dictionary):
             with logpath.open('w', encoding='utf-8') as logfile:
                 log = sfm2cldf.cldf_logger(log_name, logfile)
                 gloss_ref_marker = props.get('gloss_ref')
-                if not gloss_ref_marker:
-                    log.error("'gloss_ref' marker not specified in md.json!")
+                if gloss_ref_marker:
+                    glosses = sfm2cldf.prepare_glosses(
+                        glosses_path, gloss_ref_marker, examples, log)
                 else:
-                    # TODO Factor out
-                    gloss_to_ex = defaultdict(dict)
-                    for example in examples:
-                        gloss_ref = example.get(gloss_ref_marker, '')
-                        match = re.fullmatch(r'(.*) (\d+)', gloss_ref.strip())
-                        text_id = match.group(1) if match else gloss_ref
-                        segnum = match.group(2) if match else '1'
-                        if not text_id:
-                            continue
-                        gloss_to_ex[text_id][segnum] = example.id
-
-                    for gloss in flextext.parse_flextext(str(glosses_path), log):
-                        text = gloss_to_ex.get(gloss['text_id']) or {}
-                        example_id = text.get(gloss['segnum'])
-                        if example_id:
-                            glosses[example_id] = gloss
+                    log.error("'gloss_ref' marker not specified in md.json!")
 
         pos_filter = sfm2cldf.PartOfSpeechFilter()
         self.sfm.visit(pos_filter)
