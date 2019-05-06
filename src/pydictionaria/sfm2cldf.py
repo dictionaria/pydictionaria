@@ -644,7 +644,7 @@ class OnlyBaseNames(logging.LoggerAdapter):
         return msg, kwargs
 
 
-def cldf_logger(name, stream=None):
+def logger(name, stream=None):
     formatter = logging.Formatter('%(levelname)s %(message)s')
     to_stdout = logging.StreamHandler(sys.stdout)
     to_stdout.setFormatter(formatter)

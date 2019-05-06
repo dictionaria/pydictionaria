@@ -156,7 +156,7 @@ class Dictionary(base.Dictionary):
             logpath = self.submission.dir.joinpath('glosses.log')
             log_name = '%s.glosses' % self.submission.id
             with logpath.open('w', encoding='utf-8') as logfile:
-                log = sfm2cldf.cldf_logger(log_name, logfile)
+                log = sfm2cldf.logger(log_name, logfile)
                 gloss_ref_marker = props.get('gloss_ref')
                 if gloss_ref_marker:
                     glosses = sfm2cldf.prepare_glosses(
@@ -311,4 +311,4 @@ class Dictionary(base.Dictionary):
 
             print(file=logfile)
             log_name = '%s.cldf' % self.submission.id
-            dataset.validate(log=sfm2cldf.cldf_logger(log_name, logfile))
+            dataset.validate(log=sfm2cldf.logger(log_name, logfile))
