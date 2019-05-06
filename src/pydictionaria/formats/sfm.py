@@ -253,19 +253,7 @@ class Dictionary(base.Dictionary):
             sfm2cldf.attach_column_titles(
                 dataset['ExampleTable'], spec['example_map'], props['labels'])
 
-        # TODO Factor out
-        gloss_columns = {
-            column
-            for gloss in glosses.values()
-            for column in gloss['example']}
-        for column in sorted(gloss_columns):
-            try:
-                dataset.add_columns(
-                    'ExampleTable',
-                    {'name': column, 'datatype': 'string', 'separator': r'\t'})
-            except ValueError:
-                # ValueError means the column is already there
-                pass
+        sfm2cldf.add_gloss_columns(dataset, glosses)
 
         entry_rows = (
             sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)

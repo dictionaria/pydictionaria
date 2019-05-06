@@ -559,6 +559,21 @@ def make_cldf_dataset(
     return dataset
 
 
+def add_gloss_columns(dataset, glosses):
+    gloss_columns = {
+        column
+        for gloss in glosses.values()
+        for column in gloss['example']}
+    for column in sorted(gloss_columns):
+        try:
+            dataset.add_columns(
+                'ExampleTable',
+                {'name': column, 'datatype': 'string', 'separator': r'\t'})
+        except ValueError:
+            # ValueError means the column is already there
+            pass
+
+
 def attach_column_titles(table, mapping, labels):
     label_map = {
         mapping[marker]: label
