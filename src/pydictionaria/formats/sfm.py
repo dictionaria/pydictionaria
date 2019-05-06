@@ -273,7 +273,7 @@ class Dictionary(base.Dictionary):
             column
             for gloss in glosses.values()
             for column in gloss['example']}
-        for column in gloss_columns:
+        for column in sorted(gloss_columns):
             try:
                 dataset.add_columns(
                     'ExampleTable',
