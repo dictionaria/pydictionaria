@@ -640,13 +640,13 @@ class SenselessEntryFilter:
     def __init__(self, sense_rows, log):
         self.log = log
         self._entry_ids = {
-            e
-            for s in sense_rows
-            for e in s.get('Entry_IDs', '').split(SEPARATORS['Entry_IDs'])}
+            row['Entry_ID']
+            for row in sense_rows
+            if 'Entry_ID' in row}
 
     def filter(self, iterable):
         for entry in iterable:
-            entry_id = entry['ID']
+            entry_id = entry.get('ID', '').strip()
             if entry_id in self._entry_ids:
                 yield entry
             else:

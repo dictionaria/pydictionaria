@@ -251,40 +251,38 @@ class Dictionary(base.Dictionary):
 
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
-            entry_rows = (
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
-                for entry in entries)
-            sense_rows = (
+            entry_rows = [
+                    sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
+                    for entry in entries]
+            sense_rows = [
                 sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_refs'], sense)
-                for sense in senses)
-            example_rows = (
+                for sense in senses]
+            example_rows = [
                 sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_refs'], example, lang_id)
-                for example in examples)
-            media_rows = (
+                for example in examples]
+            media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
-                for filename, fileid in sorted(media_extr.files))
+                for filename, fileid in sorted(media_extr.files)]
 
             # Separator in log file
             print(file=logfile)
 
             entry_filter = sfm2cldf.RequiredColumnsFilter(dataset['EntryTable'].tableSchema, log)
-            entry_rows = entry_filter.filter(entry_rows)
+            entry_rows = list(entry_filter.filter(entry_rows))
             sense_filter = sfm2cldf.RequiredColumnsFilter(dataset['SenseTable'].tableSchema, log)
-            sense_rows = sense_filter.filter(sense_rows)
+            sense_rows = list(sense_filter.filter(sense_rows))
             example_filter = sfm2cldf.RequiredColumnsFilter(dataset['ExampleTable'].tableSchema, log)
-            example_rows = example_filter.filter(example_rows)
+            example_rows = list(example_filter.filter(example_rows))
             media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema, log)
-            media_rows = media_filter.filter(media_rows)
+            media_rows = list(media_filter.filter(media_rows))
 
-            # Don't let the filter eat up the sense iterator
-            sense_rows = list(sense_rows)
             senseless_entry_filter = sfm2cldf.SenselessEntryFilter(sense_rows, log)
-            entry_rows = entry_filter.filter(entry_rows)
+            entry_rows = list(senseless_entry_filter.filter(entry_rows))
 
             if glosses:
-                example_rows = (
+                example_rows = [
                     sfm2cldf.merge_gloss_into_example(glosses, row)
-                    for row in example_rows)
+                    for row in example_rows]
 
             kwargs = {
                 'EntryTable': entry_rows,
