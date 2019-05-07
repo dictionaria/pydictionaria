@@ -663,7 +663,7 @@ def merge_gloss_into_example(glosses, example_row):
     return example_row
 
 
-class OnlyBaseNames(logging.LoggerAdapter):
+class LogOnlyBaseNames(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         msg = re.sub(
             r'^.*?\.csv(?=:)',
@@ -684,4 +684,4 @@ def logger(name, stream=None):
     logger.setLevel(logging.INFO)
     logger.addHandler(to_stdout)
     logger.addHandler(to_stream)
-    return OnlyBaseNames(logger, {})
+    return logger
