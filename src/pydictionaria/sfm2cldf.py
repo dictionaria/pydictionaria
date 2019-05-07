@@ -627,7 +627,7 @@ class RequiredColumnsFilter:
         row_repr = '\n'.join(
             '{}: {}'.format(k, repr(v))
             for k, v in sorted(row.items()))
-        return 'missing required columns ({}):\n{}'.format(field_msg, row_repr)
+        return 'missing required columns ({}):\n{}\n'.format(field_msg, row_repr)
 
     def filter(self, iterable):
         for row in iterable:

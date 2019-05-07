@@ -296,18 +296,17 @@ class Dictionary(base.Dictionary):
 
             print(file=logfile)
             for error in pos_filter.errors:
-                print('ERROR:', error, file=logfile)
-
+                log.error(error)
             for error in entry_filter.warnings:
-                print('\nERROR in entry: {}'.format(error), file=logfile)
+                log.error('in entry: %s', error)
             for error in sense_filter.warnings:
-                print('\nERROR in sense: {}'.format(error), file=logfile)
+                log.error('in sense: %s', error)
             for error in senseless_entry_filter.warnings:
-                print('\nERROR in entry: {}'.format(error), file=logfile)
+                log.error('in entry: %s', error)
             for error in example_filter.warnings:
-                print('\nERROR in example: {}'.format(error), file=logfile)
+                log.error('in example: %s', error)
             for error in media_filter.warnings:
-                print('\nERROR in media entry: {}'.format(error), file=logfile)
+                log.error('in media entry: %s', error)
 
             print(file=logfile)
             dataset.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))
