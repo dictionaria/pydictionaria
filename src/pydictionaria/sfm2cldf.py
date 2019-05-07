@@ -284,34 +284,31 @@ def check_for_missing_glosses(gloss_ref_marker, glosses, examples, log):
         if not gloss_ref:
             continue
         if example.id not in glosses:
-            log.error("Gloss '\\{} {}' not found (ex. {})".format(
-                gloss_ref_marker,
-                gloss_ref,
-                example.id))
+            log.error(
+                "Gloss '\\%s %s' not found (ex. %s)",
+                gloss_ref_marker, gloss_ref, example.id)
 
 
 class PartOfSpeechFilter:
     """Filters out all entries with multiple conflicting \ps markers."""
 
-    def __init__(self):
-        self.errors = []
+    def __init__(self, log):
+        self.log = log
 
     def __call__(self, entry):
         ps = entry.getall('ps')
         if not ps:
-            msg = '\lx {}: \ps marker missing'.format(entry.get('lx'))
-            self.errors.append(msg)
+            self.log.error('\lx %s: \ps marker missing', entry.get('lx'))
             return False
         ps = [s for s in ps if s.strip()]
         if not ps:
-            msg = '\lx {}: \ps marker empty'.format(entry.get('lx'))
-            self.errors.append(msg)
+            self.log.error('\lx %s: \ps marker empty', entry.get('lx'))
             return False
         if len(set(ps)) > 1:
-            msg = '\lx {}: Conflicting \ps markers: {}'.format(
+            self.log.error(
+                '\lx %s: conflicting \ps markers: %s',
                 entry.get('lx'),
                 ', '.join(map(repr, ps)))
-            self.errors.append(msg)
             return False
         return None
 
@@ -609,12 +606,12 @@ def attach_column_titles(table, mapping, labels):
 class RequiredColumnsFilter:
     """Filter which keeps a record of filtered elements."""
 
-    def __init__(self, table_schema):
+    def __init__(self, table_schema, log):
         self._required_cols = [
             col.name
             for col in table_schema.columns
             if col.required]
-        self.warnings = []
+        self.log = log
 
     def _missing_fields(self, elem):
         return [
@@ -633,15 +630,15 @@ class RequiredColumnsFilter:
         for row in iterable:
             missing_fields = self._missing_fields(row)
             if missing_fields:
-                self.warnings.append(self._error_msg(row, missing_fields))
+                self.log.error(self._error_msg(row, missing_fields))
             else:
                 yield row
 
 
 class SenselessEntryFilter:
 
-    def __init__(self, sense_rows):
-        self.warnings = []
+    def __init__(self, sense_rows, log):
+        self.log = log
         self._entry_ids = {
             e
             for s in sense_rows
@@ -653,8 +650,7 @@ class SenselessEntryFilter:
             if entry_id in self._entry_ids:
                 yield entry
             else:
-                msg = 'entry {} not referred to by any senses'.format(entry_id)
-                self.warnings.append(msg)
+                self.log.error('no senses found for entry %s', entry_id)
 
 
 def merge_gloss_into_example(glosses, example_row):
@@ -667,8 +663,8 @@ class LogOnlyBaseNames(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         msg = re.sub(
             r'^.*?\.csv(?=:)',
-            lambda m: os.path.basename(m.group()),
-            msg)
+        lambda m: os.path.basename(m.group()),
+        msg)
         return msg, kwargs
 
 

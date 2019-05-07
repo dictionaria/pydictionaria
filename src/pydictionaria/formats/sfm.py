@@ -165,11 +165,11 @@ class Dictionary(base.Dictionary):
                         glosses = sfm2cldf.prepare_glosses(
                             glosses_path, gloss_ref_marker, examples, gloss_log)
                     else:
-                        gloss_log.error("'gloss_ref' marker not specified in md.json!")
+                        gloss_log.error("md.json does not specifiy 'gloss_ref' marker")
                     sfm2cldf.check_for_missing_glosses(
                         gloss_ref_marker, glosses, examples, gloss_log)
 
-            pos_filter = sfm2cldf.PartOfSpeechFilter()
+            pos_filter = sfm2cldf.PartOfSpeechFilter(log)
             self.sfm.visit(pos_filter)
             self.sfm.visit(sfm2cldf.merge_pos)
 
@@ -188,8 +188,7 @@ class Dictionary(base.Dictionary):
                 for marker, _ in entry)
             if unexpected_markers:
                 marker_list = ', '.join(sorted(unexpected_markers))
-                msg = 'Unexpected markers: {}'.format(marker_list)
-                log.warning('unexpected markers: {}'.format(marker_list))
+                log.warning('unexpected markers: %s', marker_list)
 
             entries = entry_extr.entries
             senses = sense_extr.senses
@@ -200,8 +199,7 @@ class Dictionary(base.Dictionary):
             if ex_ref.invalid_example_ids:
                 example_list = ', '.join(
                     sorted(map(repr, ex_ref.invalid_example_ids)))
-                msg = 'Unknown examples references by senses: {}'.format(example_list)
-                log.warning(msg)
+                log.warning('senses refer to non-existent examples: %s', example_list)
 
             media_id_index = {
                 entry['fname']: checksum
@@ -222,14 +220,12 @@ class Dictionary(base.Dictionary):
 
             if media_extr.orphans:
                 file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
-                msg = 'Unknown media files: {}'.format(file_list)
-                log.warning(msg)
+                log.warning('unknown media files: %s', file_list)
 
             try:
                 sfm2cldf.process_links(props, entries, senses, examples)
             except ValueError as e:
-                msg = 'Could not process links: {}'.format(e)
-                log.warning(msg)
+                log.warning('could not process links: %s', str(e))
 
             lang_id = (
                 self.submission.md.language.isocode
@@ -268,18 +264,21 @@ class Dictionary(base.Dictionary):
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
                 for filename, fileid in sorted(media_extr.files))
 
-            entry_filter = sfm2cldf.RequiredColumnsFilter(dataset['EntryTable'].tableSchema)
+            # Separator in log file
+            print(file=logfile)
+
+            entry_filter = sfm2cldf.RequiredColumnsFilter(dataset['EntryTable'].tableSchema, log)
             entry_rows = entry_filter.filter(entry_rows)
-            sense_filter = sfm2cldf.RequiredColumnsFilter(dataset['SenseTable'].tableSchema)
+            sense_filter = sfm2cldf.RequiredColumnsFilter(dataset['SenseTable'].tableSchema, log)
             sense_rows = sense_filter.filter(sense_rows)
-            example_filter = sfm2cldf.RequiredColumnsFilter(dataset['ExampleTable'].tableSchema)
+            example_filter = sfm2cldf.RequiredColumnsFilter(dataset['ExampleTable'].tableSchema, log)
             example_rows = example_filter.filter(example_rows)
-            media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema)
+            media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema, log)
             media_rows = media_filter.filter(media_rows)
 
             # Don't let the filter eat up the sense iterator
             sense_rows = list(sense_rows)
-            senseless_entry_filter = sfm2cldf.SenselessEntryFilter(sense_rows)
+            senseless_entry_filter = sfm2cldf.SenselessEntryFilter(sense_rows, log)
             entry_rows = entry_filter.filter(entry_rows)
 
             if glosses:
@@ -293,20 +292,4 @@ class Dictionary(base.Dictionary):
                 'ExampleTable': example_rows,
                 'media.csv': media_rows}
             dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
-
-            print(file=logfile)
-            for error in pos_filter.errors:
-                log.error(error)
-            for error in entry_filter.warnings:
-                log.error('in entry: %s', error)
-            for error in sense_filter.warnings:
-                log.error('in sense: %s', error)
-            for error in senseless_entry_filter.warnings:
-                log.error('in entry: %s', error)
-            for error in example_filter.warnings:
-                log.error('in example: %s', error)
-            for error in media_filter.warnings:
-                log.error('in media entry: %s', error)
-
-            print(file=logfile)
             dataset.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))
