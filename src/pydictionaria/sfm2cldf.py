@@ -298,6 +298,15 @@ class PartOfSpeechFilter:
 
     def __call__(self, entry):
         ps = entry.getall('ps')
+        if not ps:
+            msg = '\lx {}: \ps marker missing'.format(entry.get('lx'))
+            self.errors.append(msg)
+            return False
+        ps = [s for s in ps if s.strip()]
+        if not ps:
+            msg = '\lx {}: \ps marker empty'.format(entry.get('lx'))
+            self.errors.append(msg)
+            return False
         if len(set(ps)) > 1:
             msg = '\lx {}: Conflicting \ps markers: {}'.format(
                 entry.get('lx'),
@@ -309,7 +318,7 @@ class PartOfSpeechFilter:
 
 def merge_pos(entry):
     """Merge all unique \ps markers of an entry into one."""
-    ps = entry.getall('ps')
+    ps = [s for s in entry.getall('ps') if s.strip()]
     if len(ps) < 2:
         return entry
     new_entry = entry.__class__()
