@@ -638,6 +638,25 @@ class RequiredColumnsFilter:
                 yield row
 
 
+class SenselessEntryFilter:
+
+    def __init__(self, sense_rows):
+        self.warnings = []
+        self._entry_ids = {
+            e
+            for s in sense_rows
+            for e in s.get('Entry_IDs', '').split(SEPARATORS['Entry_IDs'])}
+
+    def filter(self, iterable):
+        for entry in iterable:
+            entry_id = entry['ID']
+            if entry_id in self._entry_ids:
+                yield entry
+            else:
+                msg = 'entry {} not referred to by any senses'.format(entry_id)
+                self.warnings.append(msg)
+
+
 def merge_gloss_into_example(glosses, example_row):
     if example_row['ID'] in glosses:
         return ChainMap(glosses[example_row['ID']]['example'], example_row)

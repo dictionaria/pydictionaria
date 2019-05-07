@@ -279,6 +279,11 @@ class Dictionary(base.Dictionary):
         media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema)
         media_rows = media_filter.filter(media_rows)
 
+        # Don't let the filter eat up the sense iterator
+        sense_rows = list(sense_rows)
+        senseless_entry_filter = sfm2cldf.SenselessEntryFilter(sense_rows)
+        entry_rows = entry_filter.filter(entry_rows)
+
         if glosses:
             example_rows = (
                 sfm2cldf.merge_gloss_into_example(glosses, row)
@@ -304,6 +309,8 @@ class Dictionary(base.Dictionary):
                 print('\nERROR in entry: {}'.format(error), file=logfile)
             for error in sense_filter.warnings:
                 print('\nERROR in sense: {}'.format(error), file=logfile)
+            for error in senseless_entry_filter.warnings:
+                print('\nERROR in entry: {}'.format(error), file=logfile)
             for error in example_filter.warnings:
                 print('\nERROR in example: {}'.format(error), file=logfile)
             for error in media_filter.warnings:
