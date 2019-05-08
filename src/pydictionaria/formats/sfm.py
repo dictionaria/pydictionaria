@@ -134,6 +134,7 @@ class Dictionary(base.Dictionary):
                 extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
+                examples.concat_multilines()
 
         props = self.submission.md.properties
         logpath = self.submission.dir.joinpath('cldf.log')

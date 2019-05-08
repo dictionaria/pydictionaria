@@ -240,48 +240,6 @@ class ExampleExtraction(unittest.TestCase):
             ('z0', 'gloss ref 3'),
             ('lemma', 'headword')])
 
-    def test_merge_glosses(self):
-        example_markers = {'xv', 'xvm', 'xeg', 'xe'}
-        extractor = sfm_lib.ExampleExtractor(example_markers, {}, Mock())
-        entry = Entry([
-            ('lx', 'headword'),
-            ('xv', 'primary text 1'),
-            ('xe', 'translation 1'),
-            ('xv', 'primary text 2a'),
-            ('xvm', 'analyzed word 2a'),
-            ('xeg', 'glossed word 2a'),
-            ('xv', 'primary text 2b'),
-            ('xvm', 'analyzed word 2b'),
-            ('xeg', 'glossed word 2b'),
-            ('xv', 'primary text 2c'),
-            ('xvm', 'analyzed word 2c'),
-            ('xeg', 'glossed word 2c'),
-            ('xe', 'translation 2'),
-            ('xv', 'primary text 3'),
-            ('xe', 'translation 3')])
-        extractor(entry)
-        examples = list(extractor.examples.values())
-        example1 = examples[0]
-        self.assertEqual(example1, [
-            ('ref', example1.id),
-            ('tx', 'primary text 1'),
-            ('ft', 'translation 1'),
-            ('lemma', 'headword')])
-        example2 = examples[1]
-        self.assertEqual(example2, [
-            ('ref', example2.id),
-            ('tx', 'primary text 2a primary text 2b primary text 2c'),
-            ('mb', 'analyzed word 2a analyzed word 2b analyzed word 2c'),
-            ('gl', 'glossed word 2a glossed word 2b glossed word 2c'),
-            ('ft', 'translation 2'),
-            ('lemma', 'headword')])
-        example3 = examples[2]
-        self.assertEqual(example3, [
-            ('ref', example3.id),
-            ('tx', 'primary text 3'),
-            ('ft', 'translation 3'),
-            ('lemma', 'headword')])
-
     def test_missing_xe(self):
         example_markers = {'xv', 'xe'}
         log = Mock()
@@ -308,6 +266,60 @@ class ExampleExtraction(unittest.TestCase):
             ('ref', example3.id),
             ('tx', 'primary text 3'),
             ('ft', 'translation 3'),
+            ('lemma', 'headword')])
+
+        with self.assertRaises(AssertionError):
+            log.write.assert_not_called()
+
+    def test_xv_in_the_middle(self):
+        example_markers = {'xv', 'mid1', 'mid2', 'xe'}
+        log = Mock()
+        extractor = sfm_lib.ExampleExtractor(example_markers, {}, log)
+        entry = Entry([
+            ('lx', 'headword'),
+            ('xv', 'primary text 1'),
+            ('mid1', 'mid1 1'),
+            ('xv', 'primary text 1b'),
+            ('mid2', 'mid2 1'),
+            ('xe', 'translation 1')])
+
+        extractor(entry)
+
+        examples = list(extractor.examples.values())
+        example1 = examples[0]
+        self.assertEqual(example1, [
+            ('ref', example1.id),
+            ('tx', 'primary text 1'),
+            ('mid1', 'mid1 1'),
+            ('tx', 'primary text 1b'),
+            ('mid2', 'mid2 1'),
+            ('ft', 'translation 1'),
+            ('lemma', 'headword')])
+
+    def test_rf_in_the_middle(self):
+        example_markers = {'rf', 'xv', 'mid1', 'mid2', 'xe'}
+        log = Mock()
+        extractor = sfm_lib.ExampleExtractor(example_markers, {}, log)
+        entry = Entry([
+            ('lx', 'headword'),
+            ('rf', 'source 1'),
+            ('xv', 'primary text 1'),
+            ('mid1', 'mid1 1'),
+            ('rf', 'source 2'),
+            ('xv', 'primary text 2'),
+            ('mid2', 'mid2 2'),
+            ('xe', 'translation 2')])
+
+        extractor(entry)
+
+        examples = list(extractor.examples.values())
+        example1 = examples[0]
+        self.assertEqual(example1, [
+            ('ref', example1.id),
+            ('rf', 'source 2'),
+            ('tx', 'primary text 2'),
+            ('mid2', 'mid2 2'),
+            ('ft', 'translation 2'),
             ('lemma', 'headword')])
 
         with self.assertRaises(AssertionError):

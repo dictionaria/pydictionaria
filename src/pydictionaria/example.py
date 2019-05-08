@@ -106,17 +106,21 @@ class Example(Entry, UnicodeMixin):
 
 
 class Examples(SFM):
+
     def read(self, filename, **kw):
         return SFM.read(self, filename, entry_impl=Example, **kw)
 
     def concat_multilines(self):
+        multiline_markers = {'tx', 'mb', 'gl'}
         def _fix(entry):
             new = Example()
-            multiline_markers = {'tx', 'mb', 'gl'}
+            merged_markers = set()
             for marker, value in entry:
+                if marker in merged_markers:
+                    continue
                 if marker in multiline_markers:
-                    new.append((marker, '\t'.join(entry.getall(marker))))
-                    multiline_markers.remove(marker)
+                    new.append((marker, ' '.join(entry.getall(marker))))
+                    merged_markers.add(marker)
                 else:
                     new.append((marker, value))
             return new

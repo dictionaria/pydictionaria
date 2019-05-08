@@ -324,7 +324,6 @@ class ExampleExtractionStateMachine:
     }
 
     start_markers = {'lemma', 'ref', 'rf', 'tx'}
-    merge_markers = {'tx', 'mb', 'gl'}
     end_markers = {'ft'}
 
     def __init__(self, example_markers, id_generator, log, entry_cls=Entry):
@@ -348,12 +347,10 @@ class ExampleExtractionStateMachine:
             self._state = self._middle
 
     def _middle(self, marker, content):
-        if marker in self.merge_markers:
-            old_value = self.example.get(marker)
-            new_value = '%s %s' % (old_value, content) if old_value else content
-            self.example.set(marker, new_value)
-        else:
-            self.example.append((marker, content))
+        if marker != 'tx' and marker in self.start_markers:
+            self.finish_example()
+            self._state = self._beginning
+        self.example.append((marker, content))
         if marker in self.end_markers:
             self._state = self._end
 
