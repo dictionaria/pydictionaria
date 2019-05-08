@@ -338,7 +338,7 @@ class ExampleExtractionStateMachine:
         self._state = self._beginning
 
     def _beginning(self, marker, content):
-        if marker == 'tx' and self.example.get('tx'):
+        if marker == 'tx' and self.example.get('tx') is not None:
             self.log_error('missing xe')
             self.drop_example()
         self.example.append((marker, content))

@@ -313,6 +313,36 @@ class ExampleExtraction(unittest.TestCase):
         with self.assertRaises(AssertionError):
             log.write.assert_not_called()
 
+    def test_missing_xe_and_empty_xv(self):
+        example_markers = {'xv', 'xe'}
+        log = Mock()
+        extractor = sfm_lib.ExampleExtractor(example_markers, {}, log)
+        entry = Entry([
+            ('lx', 'headword'),
+            ('xv', 'primary text 1'),
+            ('xe', 'translation 1'),
+            ('xv', ''),
+            ('xv', 'primary text 3'),
+            ('xe', 'translation 3')])
+
+        extractor(entry)
+
+        examples = list(extractor.examples.values())
+        example1 = examples[0]
+        self.assertEqual(example1, [
+            ('ref', example1.id),
+            ('tx', 'primary text 1'),
+            ('ft', 'translation 1'),
+            ('lemma', 'headword')])
+        example3 = examples[1]
+        self.assertEqual(example3, [
+            ('ref', example3.id),
+            ('tx', 'primary text 3'),
+            ('ft', 'translation 3'),
+            ('lemma', 'headword')])
+
+        with self.assertRaises(AssertionError):
+            log.write.assert_not_called()
 
     def test_two_xv_markers_at_the_beginning(self):
         example_markers = {'rf', 'xv', 'xe'}
