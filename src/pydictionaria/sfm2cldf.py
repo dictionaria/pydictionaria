@@ -635,22 +635,17 @@ class RequiredColumnsFilter:
                 yield row
 
 
-class SenselessEntryFilter:
-
-    def __init__(self, sense_rows, log):
-        self.log = log
-        self._entry_ids = {
-            row['Entry_ID']
-            for row in sense_rows
-            if 'Entry_ID' in row}
-
-    def filter(self, iterable):
-        for entry in iterable:
-            entry_id = entry.get('ID', '').strip()
-            if entry_id in self._entry_ids:
-                yield entry
-            else:
-                self.log.error('no senses found for entry %s', entry_id)
+def remove_senseless_entries(sense_rows, entry_rows, log):
+    entry_ids = {
+        row['Entry_ID']
+        for row in sense_rows
+        if 'Entry_ID' in row}
+    for entry in entry_rows:
+        entry_id = entry.get('ID', '').strip()
+        if entry_id in entry_ids:
+            yield entry
+        else:
+            log.error('no senses found for entry %s', entry_id)
 
 
 def merge_gloss_into_example(glosses, example_row):
