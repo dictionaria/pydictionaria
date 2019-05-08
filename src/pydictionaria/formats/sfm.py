@@ -276,7 +276,7 @@ class Dictionary(base.Dictionary):
             media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema, log)
             media_rows = list(media_filter.filter(media_rows))
 
-            entry_row = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
+            entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
 
             if glosses:
                 example_rows = [
