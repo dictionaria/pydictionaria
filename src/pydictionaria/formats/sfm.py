@@ -111,19 +111,18 @@ class Dictionary(base.Dictionary):
 
         examples_path = self.submission.dir.joinpath('examples.sfm')
         if examples_path.exists():
-            unchecked_examples = Examples()
-            unchecked_examples.read(examples_path)
-            unchecked_examples.concat_multilines()
-            eids = {e.id for e in unchecked_examples}
+            examples = Examples()
+            examples.read(examples_path)
+            original_amount = len(examples)
             cited = {
                 xref
-                for e in self.sfm
-                for xref in e.getall('xref')}
-            print('pruning {0} uncited examples from {1}'.format(
-                len(eids.difference(cited)), len(eids)))
+                for example in self.sfm
+                for xref in example.getall('xref')}
             examples = Examples(
-                e for e in unchecked_examples
-                if e.id in cited)
+                example
+                for example in examples
+                if example.id in cited)
+            print('pruning', original_amount - len(examples), 'examples from', original_amount)
         else:
             with self.submission.dir.joinpath(
                     'examples.log').open('w', encoding='utf8') as log:
@@ -134,7 +133,7 @@ class Dictionary(base.Dictionary):
                 extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
-                examples.concat_multilines()
+        examples.concat_multilines()
 
         props = self.submission.md.properties
         logpath = self.submission.dir.joinpath('cldf.log')
