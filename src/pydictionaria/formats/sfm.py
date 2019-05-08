@@ -169,8 +169,7 @@ class Dictionary(base.Dictionary):
                     sfm2cldf.check_for_missing_glosses(
                         gloss_ref_marker, glosses, examples, gloss_log)
 
-            pos_filter = sfm2cldf.PartOfSpeechFilter(log)
-            self.sfm.visit(pos_filter)
+            self.sfm.visit(lambda e: sfm2cldf.validate_ps(e, log))
             self.sfm.visit(sfm2cldf.merge_pos)
 
             entry_extr = sfm2cldf.EntryExtractor(

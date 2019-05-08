@@ -289,28 +289,29 @@ def check_for_missing_glosses(gloss_ref_marker, glosses, examples, log):
                 gloss_ref_marker, gloss_ref, example.id)
 
 
-class PartOfSpeechFilter:
-    """Filters out all entries with multiple conflicting \ps markers."""
+def validate_ps(entry, log):
+    """Visitor filtering out entries with invalid \ps markers.
 
-    def __init__(self, log):
-        self.log = log
+    Enforces the following rules:
+     1. There must be at least one non-empty \ps marker
+     2. Multiple non-empty \ps markers must not contradict each other
 
-    def __call__(self, entry):
-        ps = entry.getall('ps')
-        if not ps:
-            self.log.error('\lx %s: \ps marker missing', entry.get('lx'))
-            return False
-        ps = [s for s in ps if s.strip()]
-        if not ps:
-            self.log.error('\lx %s: \ps marker empty', entry.get('lx'))
-            return False
-        if len(set(ps)) > 1:
-            self.log.error(
-                '\lx %s: conflicting \ps markers: %s',
-                entry.get('lx'),
-                ', '.join(map(repr, ps)))
-            return False
-        return None
+    """
+    ps = entry.getall('ps')
+    if not ps:
+        log.error('\lx %s: entry dropped due to missing \ps marker', entry.get('lx'))
+        return False
+    ps = [s for s in ps if s.strip()]
+    if not ps:
+        log.error('\lx %s: entry dropped due to empty \ps marker', entry.get('lx'))
+        return False
+    if len(set(ps)) > 1:
+        log.error(
+            '\lx %s: entry dropped due to conflicting \ps markers: %s',
+            entry.get('lx'),
+            ', '.join(map(repr, ps)))
+        return False
+    return None
 
 
 def merge_pos(entry):
