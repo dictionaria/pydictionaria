@@ -114,11 +114,11 @@ class Dictionary(base.Dictionary):
             unchecked_examples = Examples()
             unchecked_examples.read(examples_path)
             unchecked_examples.concat_multilines()
-            eids = set(e.id for e in unchecked_examples)
-            cited = []
-            for e in self.sfm:
-                cited.extend(e.getall('xref'))
-            cited = set(cited)
+            eids = {e.id for e in unchecked_examples}
+            cited = {
+                xref
+                for e in self.sfm
+                for xref in e.getall('xref')}
             print('pruning {0} uncited examples from {1}'.format(
                 len(eids.difference(cited)), len(eids)))
             examples = Examples(
