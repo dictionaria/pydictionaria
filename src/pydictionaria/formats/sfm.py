@@ -252,8 +252,8 @@ class Dictionary(base.Dictionary):
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                    sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
-                    for entry in entries]
+                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
+                for entry in entries]
             sense_rows = [
                 sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_refs'], sense)
                 for sense in senses]
