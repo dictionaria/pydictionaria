@@ -636,13 +636,13 @@ class RequiredColumnsFilter:
 
 
 def remove_senseless_entries(sense_rows, entry_rows, log):
-    entry_ids = {
+    referenced_entries = {
         row['Entry_ID']
         for row in sense_rows
         if 'Entry_ID' in row}
     for entry in entry_rows:
         entry_id = entry.get('ID', '').strip()
-        if entry_id in entry_ids:
+        if entry_id in referenced_entries:
             yield entry
         else:
             log.error('no senses found for entry %s', entry_id)
