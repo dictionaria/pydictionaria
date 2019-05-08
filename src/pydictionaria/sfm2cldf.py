@@ -603,36 +603,26 @@ def attach_column_titles(table, mapping, labels):
             col.titles = label_map[str(col)]
 
 
-class RequiredColumnsFilter:
-    """Filter which keeps a record of filtered elements."""
-
-    def __init__(self, table_schema, log):
-        self._required_cols = [
-            col.name
-            for col in table_schema.columns
-            if col.required]
-        self.log = log
-
-    def _missing_fields(self, elem):
-        return [
+def ensure_required_columns(dataset, table_name, rows, log):
+    required_cols = [
+        col.name
+        for col in dataset[table_name].tableSchema.columns
+        if col.required]
+    for row in rows:
+        missing_fields = [
             col
-            for col in self._required_cols
-            if not elem.get(col)]
-
-    def _error_msg(self, row, missing_fields):
-        field_msg = ','.join(missing_fields)
-        row_repr = '\n'.join(
-            '{}: {}'.format(k, repr(v))
-            for k, v in sorted(row.items()))
-        return 'missing required columns ({}):\n{}\n'.format(field_msg, row_repr)
-
-    def filter(self, iterable):
-        for row in iterable:
-            missing_fields = self._missing_fields(row)
-            if missing_fields:
-                self.log.error(self._error_msg(row, missing_fields))
-            else:
-                yield row
+            for col in required_cols
+            if not row.get(col)]
+        if missing_fields:
+            field_list = ','.join(missing_fields)
+            row_repr = '\n'.join(
+                '{}: {}'.format(k, repr(v))
+                for k, v in sorted(row.items()))
+            log.error(
+                '%s: row dropped due to missing required fields (%s):\n%s\n',
+                table_name, field_list, row_repr)
+        else:
+            yield row
 
 
 def remove_senseless_entries(sense_rows, entry_rows, log):

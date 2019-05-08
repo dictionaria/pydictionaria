@@ -267,14 +267,10 @@ class Dictionary(base.Dictionary):
             # Separator in log file
             print(file=logfile)
 
-            entry_filter = sfm2cldf.RequiredColumnsFilter(dataset['EntryTable'].tableSchema, log)
-            entry_rows = list(entry_filter.filter(entry_rows))
-            sense_filter = sfm2cldf.RequiredColumnsFilter(dataset['SenseTable'].tableSchema, log)
-            sense_rows = list(sense_filter.filter(sense_rows))
-            example_filter = sfm2cldf.RequiredColumnsFilter(dataset['ExampleTable'].tableSchema, log)
-            example_rows = list(example_filter.filter(example_rows))
-            media_filter = sfm2cldf.RequiredColumnsFilter(dataset['media.csv'].tableSchema, log)
-            media_rows = list(media_filter.filter(media_rows))
+            entry_rows = list(sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
+            sense_rows = list(sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
+            example_rows = list(sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
+            media_rows = list(sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
 
             entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
 
