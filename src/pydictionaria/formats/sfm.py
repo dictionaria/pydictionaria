@@ -179,8 +179,8 @@ class Dictionary(base.Dictionary):
                 spec['sense_sep'],
                 spec['sense_markers'])
 
-            rest = map(entry_extr, self.sfm)
-            rest = (sense_extr(entry) for entry in rest if entry)
+            rest = [entry_extr(entry) for entry in self.sfm]
+            rest = [sense_extr(entry) for entry in rest if entry]
             unexpected_markers.update(
                 marker
                 for entry in rest
