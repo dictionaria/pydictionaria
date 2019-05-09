@@ -289,9 +289,8 @@ class ExampleExtraction(unittest.TestCase):
         example1 = examples[0]
         self.assertEqual(example1, [
             ('ref', example1.id),
-            ('tx', 'primary text 1'),
+            ('tx', 'primary text 1 primary text 1b'),
             ('mid1', 'mid1 1'),
-            ('tx', 'primary text 1b'),
             ('mid2', 'mid2 1'),
             ('ft', 'translation 1'),
             ('lemma', 'headword')])

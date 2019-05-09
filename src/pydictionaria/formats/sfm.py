@@ -12,7 +12,7 @@ from pydictionaria.formats.sfm_lib import (
     Stats, Rearrange, Files, ExampleExtractor, normalize, ComparisonMeanings,
     Check, repair, Database, CheckBibrefs,
 )
-from pydictionaria.example import Corpus, Examples
+from pydictionaria.example import Corpus, Examples, concat_multilines
 from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
@@ -113,6 +113,7 @@ class Dictionary(base.Dictionary):
         if examples_path.exists():
             examples = Examples()
             examples.read(examples_path)
+            examples.visit(concat_multilines)
             original_amount = len(examples)
             cited = {
                 xref
@@ -133,7 +134,6 @@ class Dictionary(base.Dictionary):
                 extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
-        examples.concat_multilines()
 
         props = self.submission.md.properties
         logpath = self.submission.dir.joinpath('cldf.log')

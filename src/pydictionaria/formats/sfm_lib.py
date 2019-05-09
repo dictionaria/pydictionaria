@@ -12,7 +12,7 @@ from clldutils.misc import slug
 from clldutils.text import split_text
 
 from pydictionaria.util import split_ids
-from pydictionaria.example import Example
+from pydictionaria.example import Example, concat_multilines
 from pydictionaria.log import warn, error
 
 
@@ -397,6 +397,7 @@ class ExampleExtractionStateMachine:
                 lx = self.entry.get('lx')
                 if lx:
                     self.example.set('lemma', lx)
+                self.example = concat_multilines(self.example)
                 self.entry.append(('xref', self.id_gen(self.example)))
         self.drop_example()
         self.entry.extend(self._entry_buffer)

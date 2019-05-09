@@ -7,6 +7,9 @@ from clldutils.sfm import Entry, SFM
 from clldutils.misc import slug, UnicodeMixin, lazyproperty
 
 
+MULTILINE_MARKERS = {'tx', 'mb', 'gl'}
+
+
 class Example(Entry, UnicodeMixin):
     markers = OrderedDict([
         ('ref', 'id'),
@@ -105,26 +108,24 @@ class Example(Entry, UnicodeMixin):
         return '\n'.join('\\' + l for l in lines)
 
 
+def concat_multilines(example):
+    new = Example()
+    merged_markers = set()
+    for marker, value in example:
+        if marker in merged_markers:
+            continue
+        if marker in MULTILINE_MARKERS:
+            new.append((marker, ' '.join(example.getall(marker))))
+            merged_markers.add(marker)
+        else:
+            new.append((marker, value))
+    return new
+
+
 class Examples(SFM):
 
     def read(self, filename, **kw):
         return SFM.read(self, filename, entry_impl=Example, **kw)
-
-    def concat_multilines(self):
-        multiline_markers = {'tx', 'mb', 'gl'}
-        def _fix(entry):
-            new = Example()
-            merged_markers = set()
-            for marker, value in entry:
-                if marker in merged_markers:
-                    continue
-                if marker in multiline_markers:
-                    new.append((marker, ' '.join(entry.getall(marker))))
-                    merged_markers.add(marker)
-                else:
-                    new.append((marker, value))
-            return new
-        self.visit(_fix)
 
     @lazyproperty
     def _map(self):

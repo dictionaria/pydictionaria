@@ -46,10 +46,10 @@ def test_Example():
 
 
 def test_Examples():
-    from pydictionaria.example import Examples, Example
+    from pydictionaria.example import Examples, Example, concat_multilines
 
     ex = Examples([Example.from_string(NORM_EXAMPLE + '\n\\mb more morphemes')])
-    ex.concat_multilines()
+    ex.visit(concat_multilines)
     assert ex[0].morphemes.split('\t') == \
         ['Enaa', 'a', 'hena', '-naa', 'e', 'Ruth', 'Iarabee', 'more', 'morphemes']
 
