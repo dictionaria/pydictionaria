@@ -636,7 +636,7 @@ def remove_senseless_entries(sense_rows, entry_rows, log):
         if entry_id in referenced_entries:
             yield entry
         else:
-            log.error('no senses found for entry %s', entry_id)
+            log.error("%s: entry dropped since there aren't any senses referring to it", entry_id)
 
 
 def merge_gloss_into_example(glosses, example_row):
