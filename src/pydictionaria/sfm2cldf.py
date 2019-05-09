@@ -649,8 +649,8 @@ class LogOnlyBaseNames(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         msg = re.sub(
             r'^.*?\.csv(?=:)',
-        lambda m: os.path.basename(m.group()),
-        msg)
+            lambda m: os.path.basename(m.group()),
+            msg)
         return msg, kwargs
 
 
