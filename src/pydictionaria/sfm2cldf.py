@@ -654,20 +654,20 @@ class LogOnlyBaseNames(logging.LoggerAdapter):
         return msg, kwargs
 
 
-def logger(name, stream=None):
-    logger = logging.getLogger(name)
-    logger.propagate = False
-    logger.setLevel(logging.INFO)
+def make_log(name, stream=None):
+    log = logging.getLogger(name)
+    log.propagate = False
+    log.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(levelname)s %(message)s')
 
     to_stdout = logging.StreamHandler(sys.stdout)
     to_stdout.setFormatter(formatter)
-    logger.addHandler(to_stdout)
+    log.addHandler(to_stdout)
 
     if stream is not None:
         to_stream = logging.StreamHandler(stream)
         to_stream.setFormatter(formatter)
-        logger.addHandler(to_stream)
+        log.addHandler(to_stream)
 
-    return logger
+    return log

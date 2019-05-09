@@ -139,7 +139,7 @@ class Dictionary(base.Dictionary):
         logpath = self.submission.dir.joinpath('cldf.log')
         with logpath.open('w', encoding='utf8') as logfile:
             log_name = '%s.cldf' % self.submission.id
-            log = sfm2cldf.logger(log_name, logfile)
+            log = sfm2cldf.make_log(log_name, logfile)
 
             all_markers = {
                 marker
@@ -159,7 +159,7 @@ class Dictionary(base.Dictionary):
                 gloss_logpath = self.submission.dir.joinpath('glosses.log')
                 gloss_logname = '%s.glosses' % self.submission.id
                 with gloss_logpath.open('w', encoding='utf-8') as gloss_logfile:
-                    gloss_log = sfm2cldf.logger(gloss_logname, gloss_logfile)
+                    gloss_log = sfm2cldf.make_log(gloss_logname, gloss_logfile)
                     gloss_ref_marker = props.get('gloss_ref')
                     if gloss_ref_marker:
                         glosses = sfm2cldf.prepare_glosses(
