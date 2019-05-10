@@ -108,7 +108,7 @@ def make_spec(properties, marker_set):
         marker_set,
         ref_mapping)
     example_id = properties.get('example_id', DEFAULT_EXAMPLE_ID)
-    example_markers.update((example_id, 'sfx'))
+    example_markers.update((example_id, 'sf'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
 
     gloss_ref = properties.get('gloss_ref')

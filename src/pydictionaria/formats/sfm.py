@@ -129,6 +129,7 @@ class Dictionary(base.Dictionary):
                     'examples.log').open('w', encoding='utf8') as log:
                 # FIXME This should go into sfm2cldf.make_spec
                 example_markers = set(self.submission.md.properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
+                example_markers.add('sfx')
                 if 'gloss_ref' in self.submission.md.properties:
                     example_markers.add(self.submission.md.properties['gloss_ref'])
                 extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
@@ -214,7 +215,7 @@ class Dictionary(base.Dictionary):
             entries.visit(media_extr)
             media_extr.tag = 'pc'
             senses.visit(media_extr)
-            media_extr.tag = 'sfx'
+            media_extr.tag = 'sf'
             examples.visit(media_extr)
 
             if media_extr.orphans:
