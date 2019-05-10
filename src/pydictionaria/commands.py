@@ -11,6 +11,7 @@ from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
 import html2markdown
+from pycldf import Dictionary
 
 from pydictionaria.util import MediaCatalog
 from pydictionaria.submission import Submission, Metadata, Language
@@ -231,20 +232,35 @@ def _submission_dir(args, path_or_id=None):
     return None
 
 
-README_TEMPLATE = """
+README_TEMPLATE = """\
 # {title}
 
 > by {authors}
 
 This repository contains the data underlying the published version of the dictionary
-at [Dictionaria]({url}) as 
-[CLDF](https://cldf.clld.org) [Dictionary](cldf).
+at [Dictionaria]({url}) as [CLDF](https://cldf.clld.org) 
+[Dictionary](cldf) 
+[![Build Status](https://travis-ci.org/dictionaria/{id}.svg?branch=master)](https://travis-ci.org/dictionaria/{id})
 
 Releases of this repository are archived with and accessible through 
 [ZENODO](https://zenodo.org/communities/dictionaria) and the latest release
 is published on the [Dictionaria website](https://dictionaria.clld.org).
 
 {intro}
+"""
+
+TRAVIS_YML = """\
+language: python
+python: "3.6"
+cache: pip
+before_cache: rm -f $HOME/.cache/pip/log/debug.log
+install: pip install pytest-cldf
+script: pytest --cldf-metadata=cldf/Dictionary-metadata.json test.py
+"""
+
+TEST_PY = """\
+def test_valid(cldf_dataset, cldf_logger):
+    assert cldf_dataset.validate(log=cldf_logger)
 """
 
 
@@ -259,7 +275,7 @@ def release(args):
     cldf_md_path = processed / 'cldf-md.json'
     if not cldf_md_path.exists():
         raise ParserError('submission has not been processed yet')
-    cldf_md = jsonlib.load(cldf_md_path, object_pairs_hook=collections.OrderedDict)
+    cldf_md = Dictionary.from_metadata(cldf_md_path)
     outdir = Path(args.args[1])
     if not outdir.exists():
         raise ParserError('publication repos does not exist')
@@ -283,6 +299,7 @@ def release(args):
 
     md = jsonlib.load(d / 'md.json')
     md_readme = {
+        'id': d.name,
         'url': 'https://dictionaria.clld.org/contributions/' + d.name,
         'intro': html2markdown.convert(read_text(d / 'md.html')),
         'title': md['properties'].get('title') or md['language']['name'] + ' dictionary',
@@ -297,25 +314,35 @@ def release(args):
     sources = d / 'sources.bib'
     if sources.exists():
         copy(sources, cldf / sources.name)
-        cldf_md['dc:source'] = sources.name
+        cldf_md.properties['dc:source'] = sources.name
 
-    cldf_md['dc:creator'] = md_readme['authors']
-    cldf_md['dc:title'] = md_readme['title']
-    cldf_md['dc:identifier'] = md_readme['url']
-    jsonlib.dump(cldf_md, cldf / 'Dictionary-metadata.json', indent=4)
+    cldf_md.properties['dc:creator'] = md_readme['authors']
+    cldf_md.properties['dc:title'] = md_readme['title']
+    cldf_md.properties['dc:identifier'] = md_readme['url']
 
     media_table = processed / 'media.csv'
-    for table in cldf_md['tables']:
-        if table['url'] != media_table.name:
-            copy(processed / table['url'], cldf / table['url'])
+    for table in cldf_md.tables:
+        if table.local_name != media_table.name:
+            copy(processed / table.local_name, cldf / table.local_name)
     if media_table.exists():
         with UnicodeWriter(cldf / media_table.name) as w:
             for i, row in enumerate(reader(media_table, dicts=True)):
                 if i == 0:
                     w.writerow(list(row.keys()) + ['URL', 'mimetype', 'size'])
+                    cldf_md.add_columns(
+                        media_table.name,
+                        {'name': 'URL', 'datatype': 'anyURI'},
+                        {'name': 'mimetype'},
+                        {'name': 'size', 'datatype': 'integer'},
+                    )
                 assert row['ID'] in media
                 row['URL'] = 'https://cdstar.shh.mpg.de/bitstreams/{0[objid]}/{0[original]}'.format(
                     media[row['ID']])
                 row['mimetype'] = media[row['ID']]['mimetype']
                 row['size'] = media[row['ID']]['size']
                 w.writerow(row.values())
+    new_md = cldf / 'Dictionary-metadata.json'
+    cldf_md.write_metadata(new_md)
+    Dictionary.from_metadata(new_md).validate()
+    write_text(outdir / '.travis.yml', TRAVIS_YML)
+    write_text(outdir / 'test.py', TEST_PY)
