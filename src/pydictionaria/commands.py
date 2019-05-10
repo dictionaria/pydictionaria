@@ -1,13 +1,16 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import os
+import collections
 
+from csvw.dsv import reader, UnicodeWriter
 from clldutils.clilib import ParserError, command
 from clldutils import jsonlib
-from clldutils.path import Path, md5
+from clldutils.path import Path, md5, copy, read_text, write_text
 from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
+import html2markdown
 
 from pydictionaria.util import MediaCatalog
 from pydictionaria.submission import Submission, Metadata, Language
@@ -226,3 +229,93 @@ def _submission_dir(args, path_or_id=None):
             return fname
 
     return None
+
+
+README_TEMPLATE = """
+# {title}
+
+> by {authors}
+
+This repository contains the data underlying the published version of the dictionary
+at [Dictionaria]({url}) as 
+[CLDF](https://cldf.clld.org) [Dictionary](cldf).
+
+Releases of this repository are archived with and accessible through 
+[ZENODO](https://zenodo.org/communities/dictionaria) and the latest release
+is published on the [Dictionaria website](https://dictionaria.clld.org).
+
+{intro}
+"""
+
+
+@command()
+def release(args):
+    """Release a dictionary by copying it to its own public github repository.
+
+    dictionaria release SUBMISSION REPOS
+    """
+    d = _submission_dir(args).joinpath(args.args[0])
+    processed = d / 'processed'
+    cldf_md_path = processed / 'cldf-md.json'
+    if not cldf_md_path.exists():
+        raise ParserError('submission has not been processed yet')
+    cldf_md = jsonlib.load(cldf_md_path, object_pairs_hook=collections.OrderedDict)
+    outdir = Path(args.args[1])
+    if not outdir.exists():
+        raise ParserError('publication repos does not exist')
+    media = jsonlib.load(args.repos / 'cdstar.json')
+    copy(d / 'md.json', outdir / 'md.json')
+
+    def format_authors(authors):
+        res, in_with = [], False
+        for i, a in enumerate(authors):
+            name = a['name'] if isinstance(a, dict) else a
+            primary = a['primary'] if isinstance(a, dict) else True
+            assert (in_with and not primary) or (not in_with)
+            if i > 0:
+                sep = 'and'
+                if (not primary) and (not in_with):
+                    in_with = True
+                    sep = 'with'
+                res.append(sep)
+            res.append(name)
+        return ' '.join(res)
+
+    md = jsonlib.load(d / 'md.json')
+    md_readme = {
+        'url': 'https://dictionaria.clld.org/contributions/' + d.name,
+        'intro': html2markdown.convert(read_text(d / 'md.html')),
+        'title': md['properties'].get('title') or md['language']['name'] + ' dictionary',
+        'authors': format_authors(md['authors']),
+    }
+    write_text(outdir / 'README.md', README_TEMPLATE.format(**md_readme))
+    cldf = outdir / 'cldf'
+
+    if not cldf.exists():
+        cldf.mkdir()
+
+    sources = d / 'sources.bib'
+    if sources.exists():
+        copy(sources, cldf / sources.name)
+        cldf_md['dc:source'] = sources.name
+
+    cldf_md['dc:creator'] = md_readme['authors']
+    cldf_md['dc:title'] = md_readme['title']
+    cldf_md['dc:identifier'] = md_readme['url']
+    jsonlib.dump(cldf_md, cldf / 'Dictionary-metadata.json', indent=4)
+
+    media_table = processed / 'media.csv'
+    for table in cldf_md['tables']:
+        if table['url'] != media_table.name:
+            copy(processed / table['url'], cldf / table['url'])
+    if media_table.exists():
+        with UnicodeWriter(cldf / media_table.name) as w:
+            for i, row in enumerate(reader(media_table, dicts=True)):
+                if i == 0:
+                    w.writerow(list(row.keys()) + ['URL', 'mimetype', 'size'])
+                assert row['ID'] in media
+                row['URL'] = 'https://cdstar.shh.mpg.de/bitstreams/{0[objid]}/{0[original]}'.format(
+                    media[row['ID']])
+                row['mimetype'] = media[row['ID']]['mimetype']
+                row['size'] = media[row['ID']]['size']
+                w.writerow(row.values())
