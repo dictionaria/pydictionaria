@@ -35,6 +35,7 @@ DEFAULT_SENSE_MAP = {
     'sc': 'Scientific_Name',
     'sd': 'Semantic_Domain',
     'sy': 'Synonym',
+    'an': 'Antonym',
     'zcom1': 'Concepticon_ID'}
 
 DEFAULT_EXAMPLE_MAP = {
@@ -48,11 +49,13 @@ DEFAULT_REFERENCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = ['mn', 'cf', 'cont']
+LINKS_WITH_NO_LABEL = ['mn', 'cf', 'cont', 'sy', 'an']
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
     'Contains': DEFAULT_SEPARATOR,
+    'Synonym': DEFAULT_SEPARATOR,
+    'Antonym': DEFAULT_SEPARATOR,
     'Entry_IDs': DEFAULT_SEPARATOR,
     'Media_IDs': DEFAULT_SEPARATOR,
     'Sense_IDs': DEFAULT_SEPARATOR,
@@ -523,32 +526,33 @@ def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
         for col in ['Main_Entry', 'Entry_IDs', 'Contains']:
             if col in row:
                 row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
+    elif table_name == 'SenseTable':
+        for col in ['Synonym', 'Antonym']:
+            if col in row:
+                row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
     return row
 
 
 def _add_columns(dataset, table_name, columns, refs):
     for column in sorted(columns):
-        if table_name == 'EntryTable' and column in ['Main_Entry', 'Entry_IDs', 'Contains']:
-            dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
-                columnReference=column,
-                reference=dict(columnReference='ID', resource='entries.csv')
-            )))
-        if column == 'Media_IDs':
-            dataset[table_name].tableSchema.foreignKeys.append(csvw.ForeignKey.fromdict(dict(
-                columnReference=column,
-                reference=dict(columnReference='ID', resource='media.csv')
-            )))
+        col = column
         if column in SEPARATORS:
-            column = {
+            col = {
                 'name': column,
                 'datatype': 'string',
                 'separator': SEPARATORS[column]}
         try:
-            dataset.add_columns(table_name, column)
+            dataset.add_columns(table_name, col)
         except ValueError:
             # ValueError means the column is already there
             pass
 
+        if table_name == 'EntryTable' and column in ['Main_Entry', 'Entry_IDs', 'Contains']:
+            dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
+        if table_name == 'SenseTable' and column in ['Synonym', 'Antonym']:
+            dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
+        if column == 'Media_IDs':
+            dataset[table_name].add_foreign_key(column, 'media.csv', 'ID')
     if refs:
         try:
             dataset.add_columns(
@@ -572,9 +576,10 @@ def make_cldf_dataset(
     if example_columns:
         _add_columns(dataset, 'ExampleTable', example_columns, example_refs)
         # Manually mark Translated_Text as required
-        ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
-        if ft:
-            ft.required = True
+        # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
+        #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
+        #if ft:
+        #    ft.required = True
 
     return dataset
 
