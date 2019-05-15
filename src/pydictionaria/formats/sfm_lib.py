@@ -200,6 +200,7 @@ class Files(object):
             'sfx': ['image', 'audio'],
         }
         for mtype, files in submission.media.items():
+            # Register files in known media sub-directories of the submission dir:
             for p in files:
                 self.files[mtype][as_unicode(p.name)] = p
                 # and just in case, add transliterated variants of file names:
@@ -212,14 +213,9 @@ class Files(object):
                 self.files[mtype][as_unicode(p.stem) + p.suffix.lower()] = p
                 self.files[mtype][as_unicode(p.stem) + p.suffix.upper()] = p
                 self.files[mtype][as_unicode(p.stem)] = p
-        #
-        # FIXME: must also take files from cdstar.json into account! use
-        # - submission id
-        # - mimetype
-        # - path name
-        # as lookup!
-        #
+
         for checksum, spec in submission.cdstar.items.items():
+            # Register files already uploaded to CDStar:
             if spec['sid'] in submission.media_sids:
                 fname = Path(spec['fname'])
                 self.files[spec['type']][spec['fname']] = checksum
@@ -228,6 +224,10 @@ class Files(object):
                 self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.lower()] = checksum
 
     def __call__(self, entry):
+        """
+        Look up media references in the dict of registered files, and if found, replace reference
+        with md5 sum of matched file.
+        """
         e = Entry()
         for marker, content in entry:
             mtypes = self.marker_to_mtypes.get(marker)

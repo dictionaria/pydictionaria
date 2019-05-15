@@ -103,14 +103,18 @@ class Dictionary(base.Dictionary):
 
     def _process(self, outdir):
         if self.submission.module and hasattr(self.submission.module, 'process'):
+            # Run submission-specific preprocessing/normalization of SFM:
             self.sfm.visit(self.submission.module.process)
+        # Run generic normalization of SFM:
         self.sfm.visit(normalize)
         self.sfm.visit(Rearrange())
+
+        # Replace media references with md5 sums of referenced files:
         files = Files(self.submission)
         self.sfm.visit(files)
 
         examples_path = self.submission.dir.joinpath('examples.sfm')
-        if examples_path.exists():
+        if examples_path.exists():  # Examples are submitted as separate SFM file.
             examples = Examples()
             examples.read(examples_path)
             examples.visit(concat_multilines)
@@ -128,11 +132,13 @@ class Dictionary(base.Dictionary):
             with self.submission.dir.joinpath(
                     'examples.log').open('w', encoding='utf8') as log:
                 # FIXME This should go into sfm2cldf.make_spec
-                example_markers = set(self.submission.md.properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
+                example_markers = set(
+                    self.submission.md.properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
                 example_markers.add('sfx')
                 if 'gloss_ref' in self.submission.md.properties:
                     example_markers.add(self.submission.md.properties['gloss_ref'])
-                extractor = ExampleExtractor(example_markers, Corpus.from_dir(self.submission.dir), log)
+                extractor = ExampleExtractor(
+                    example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
 
