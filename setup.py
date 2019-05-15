@@ -23,6 +23,7 @@ setup(
         'requests',
         'purl',
         'python-dateutil',
+        'csvw>=1.5.4',
         'BeautifulSoup4',
         'attrs>=19.1',
         'clldutils~=2.0',
