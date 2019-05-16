@@ -286,7 +286,7 @@ def release(args):
         res, in_with = [], False
         for i, a in enumerate(authors):
             name = a['name'] if isinstance(a, dict) else a
-            primary = a['primary'] if isinstance(a, dict) else True
+            primary = a.get('primary', True) if isinstance(a, dict) else True
             assert (in_with and not primary) or (not in_with)
             if i > 0:
                 sep = 'and'
@@ -343,6 +343,6 @@ def release(args):
                 w.writerow(row.values())
     new_md = cldf / 'Dictionary-metadata.json'
     cldf_md.write_metadata(new_md)
-    Dictionary.from_metadata(new_md).validate()
+    Dictionary.from_metadata(new_md).validate(log=args.log)
     write_text(outdir / '.travis.yml', TRAVIS_YML)
     write_text(outdir / 'test.py', TEST_PY)
