@@ -245,7 +245,8 @@ class Dictionary(base.Dictionary):
                 spec['example_columns'],
                 spec['entry_refs'],
                 spec['sense_refs'],
-                spec['example_refs'])
+                spec['example_refs'],
+                log)
 
             if props.get('labels'):
                 sfm2cldf.attach_column_titles(
