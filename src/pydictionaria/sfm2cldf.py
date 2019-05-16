@@ -184,22 +184,20 @@ class IDGenerator(object):
 
 
 def prepare_examples(example_id, example_markers, database):
-    unexpected_markers = set()
     id_gen = IDGenerator('XV')
     example_index = OrderedDict()
-    for markers in database:
-        extracted_markers, rest = split_by_pred(
-            lambda pair: pair[0] in example_markers,
-            markers)
-        unexpected_markers.update(tag for tag, _ in rest)
 
-        new_example = sfm.Entry(extracted_markers)
+    for old_example in database:
+        new_example = sfm.Entry(
+            (marker, content)
+            for marker, content in old_example
+            if marker in example_markers)
         new_example.id = id_gen.next_id()
         new_example.sense_ids = []
         new_example.media_ids = []
-        example_index[markers.id] = new_example
+        example_index[old_example.id] = new_example
 
-    return example_index, unexpected_markers
+    return example_index
 
 
 class EntryExtractor(object):
@@ -533,7 +531,7 @@ def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
     return row
 
 
-def _add_columns(dataset, table_name, columns, refs):
+def _add_columns(dataset, table_name, columns, refs, log):
     for column in sorted(columns):
         col = column
         if column in SEPARATORS:
@@ -543,9 +541,11 @@ def _add_columns(dataset, table_name, columns, refs):
                 'separator': SEPARATORS[column]}
         try:
             dataset.add_columns(table_name, col)
-        except ValueError:
-            # ValueError means the column is already there
-            pass
+        except ValueError as error:
+            msg = str(error)
+            # Ignore columns that are already there
+            if not msg.startswith('Duplicate column name:'):
+                log.error('%s: Could not add column: %s', table_name, msg)
 
         if table_name == 'EntryTable' and column in ['Main_Entry', 'Entry_IDs', 'Contains']:
             dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
@@ -566,15 +566,16 @@ def _add_columns(dataset, table_name, columns, refs):
 def make_cldf_dataset(
         folder,
         entry_columns, sense_columns, example_columns,
-        entry_refs, sense_refs, example_refs):
+        entry_refs, sense_refs, example_refs,
+        log):
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table('media.csv', 'ID', 'Language_ID', 'Filename')
 
-    _add_columns(dataset, 'EntryTable', entry_columns, entry_refs)
-    _add_columns(dataset, 'SenseTable', sense_columns, sense_refs)
+    _add_columns(dataset, 'EntryTable', entry_columns, entry_refs, log)
+    _add_columns(dataset, 'SenseTable', sense_columns, sense_refs, log)
     if example_columns:
-        _add_columns(dataset, 'ExampleTable', example_columns, example_refs)
+        _add_columns(dataset, 'ExampleTable', example_columns, example_refs, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
         #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')

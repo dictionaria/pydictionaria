@@ -309,28 +309,30 @@ class Rearrange(object):
         move_marker(entry, 'xr', 'xe')
 
 
+EXAMPLE_MARKER_MAP = {
+    'rf': 'rf',
+    'xv': 'tx',
+    'xvm': 'mb',
+    'xeg': 'gl',
+    'xo': 'ot',
+    'xn': 'ot',
+    'xr': 'ota',
+    'xe': 'ft',
+    'sfx': 'sf',
+}
+
+EXAMPLE_START_MARKERS = {'lemma', 'ref', 'rf', 'tx'}
+
+EXAMPLE_END_MARKERS = {'ft'}
+
+
 class ExampleExtractionStateMachine:
-
-    marker_map = {
-        'rf': 'rf',
-        'xv': 'tx',
-        'xvm': 'mb',
-        'xeg': 'gl',
-        'xo': 'ot',
-        'xn': 'ot',
-        'xr': 'ota',
-        'xe': 'ft',
-        'sfx': 'sf',
-    }
-
-    start_markers = {'lemma', 'ref', 'rf', 'tx'}
-    end_markers = {'ft'}
 
     def __init__(self, example_markers, id_generator, log, entry_cls=Entry):
         self.entry = entry_cls()
         self.id_gen = id_generator
         self.log = log
-        self.example_markers = set(self.marker_map)
+        self.example_markers = set(EXAMPLE_MARKER_MAP)
         self.example_markers.update(example_markers)
         self.example = Example()
         self._entry_buffer = []
@@ -341,21 +343,21 @@ class ExampleExtractionStateMachine:
             self.log_error('missing xe')
             self.drop_example()
         self.example.append((marker, content))
-        if marker in self.end_markers:
+        if marker in EXAMPLE_END_MARKERS:
             self._state = self._end
-        elif marker not in self.start_markers:
+        elif marker not in EXAMPLE_START_MARKERS:
             self._state = self._middle
 
     def _middle(self, marker, content):
-        if marker != 'tx' and marker in self.start_markers:
+        if marker != 'tx' and marker in EXAMPLE_START_MARKERS:
             self.finish_example()
             self._state = self._beginning
         self.example.append((marker, content))
-        if marker in self.end_markers:
+        if marker in EXAMPLE_END_MARKERS:
             self._state = self._end
 
     def _end(self, marker, content):
-        if marker in self.start_markers:
+        if marker in EXAMPLE_START_MARKERS:
             self.finish_example()
             self.example.append((marker, content))
 
@@ -370,7 +372,7 @@ class ExampleExtractionStateMachine:
 
     def process_marker(self, marker, content):
         if marker in self.example_markers:
-            self._state(self.marker_map.get(marker, marker), content)
+            self._state(EXAMPLE_MARKER_MAP.get(marker, marker), content)
         elif self.example:
             # Hold off on adding entry markers until the example is done -- to
             # make sure the \xref marker ends up in the right place.
