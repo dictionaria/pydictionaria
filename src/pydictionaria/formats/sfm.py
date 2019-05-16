@@ -160,7 +160,7 @@ class Dictionary(base.Dictionary):
             all_markers -= set(EXAMPLE_MARKER_MAP.values())
             if all_markers:
                 marker_list = ', '.join(sorted(all_markers))
-                log.warning('unexpected markers: %s', marker_list)
+                log.warning('No CLDF column defined for markers: %s', marker_list)
 
             example_index = sfm2cldf.prepare_examples(
                 spec['example_id'],
