@@ -162,8 +162,7 @@ class Dictionary(base.Dictionary):
                 marker_list = ', '.join(sorted(all_markers))
                 log.warning('unexpected markers: %s', marker_list)
 
-            # TODO Get rid of unexpected_markers
-            example_index, _ = sfm2cldf.prepare_examples(
+            example_index = sfm2cldf.prepare_examples(
                 spec['example_id'],
                 spec['example_markers'],
                 examples)

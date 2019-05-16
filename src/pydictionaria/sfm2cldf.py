@@ -184,22 +184,20 @@ class IDGenerator(object):
 
 
 def prepare_examples(example_id, example_markers, database):
-    unexpected_markers = set()
     id_gen = IDGenerator('XV')
     example_index = OrderedDict()
-    for markers in database:
-        extracted_markers, rest = split_by_pred(
-            lambda pair: pair[0] in example_markers,
-            markers)
-        unexpected_markers.update(tag for tag, _ in rest)
 
-        new_example = sfm.Entry(extracted_markers)
+    for old_example in database:
+        new_example = sfm.Entry(
+            (marker, content)
+            for marker, content in old_example
+            if marker in example_markers)
         new_example.id = id_gen.next_id()
         new_example.sense_ids = []
         new_example.media_ids = []
-        example_index[markers.id] = new_example
+        example_index[old_example.id] = new_example
 
-    return example_index, unexpected_markers
+    return example_index
 
 
 class EntryExtractor(object):
