@@ -301,7 +301,7 @@ def release(args):
     md_readme = {
         'id': d.name,
         'url': 'https://dictionaria.clld.org/contributions/' + d.name,
-        'intro': read_text(d / 'md.md'),
+        'intro': read_text(d / 'intro.md'),
         'title': md['properties'].get('title') or md['language']['name'] + ' dictionary',
         'authors': format_authors(md['authors']),
     }
