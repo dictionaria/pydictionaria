@@ -10,7 +10,7 @@ from clldutils import sfm
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
     Stats, Rearrange, Files, ExampleExtractor, normalize, ComparisonMeanings,
-    Check, repair, Database, CheckBibrefs,
+    Check, repair, Database, CheckBibrefs, EXAMPLE_MARKER_MAP
 )
 from pydictionaria.example import Corpus, Examples, concat_multilines
 from pydictionaria.log import pprint
@@ -154,7 +154,16 @@ class Dictionary(base.Dictionary):
                 for marker, _ in entry}
             spec = sfm2cldf.make_spec(props, all_markers)
 
-            example_index, unexpected_markers = sfm2cldf.prepare_examples(
+            all_markers -= spec['entry_markers']
+            all_markers -= spec['sense_markers']
+            all_markers -= spec['example_markers']
+            all_markers -= set(EXAMPLE_MARKER_MAP.values())
+            if all_markers:
+                marker_list = ', '.join(sorted(all_markers))
+                log.warning('unexpected markers: %s', marker_list)
+
+            # TODO Get rid of unexpected_markers
+            example_index, _ = sfm2cldf.prepare_examples(
                 spec['example_id'],
                 spec['example_markers'],
                 examples)
@@ -188,13 +197,6 @@ class Dictionary(base.Dictionary):
 
             rest = [entry_extr(entry) for entry in self.sfm]
             rest = [sense_extr(entry) for entry in rest if entry]
-            unexpected_markers.update(
-                marker
-                for entry in rest
-                for marker, _ in entry)
-            if unexpected_markers:
-                marker_list = ', '.join(sorted(unexpected_markers))
-                log.warning('unexpected markers: %s', marker_list)
 
             entries = entry_extr.entries
             senses = sense_extr.senses
