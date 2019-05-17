@@ -1,7 +1,6 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import os
-import collections
 
 from csvw.dsv import reader, UnicodeWriter
 from clldutils.clilib import ParserError, command
@@ -10,8 +9,8 @@ from clldutils.path import Path, md5, copy, read_text, write_text
 from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
-import html2markdown
 from pycldf import Dictionary
+from bs4 import BeautifulSoup
 
 from pydictionaria.util import MediaCatalog
 from pydictionaria.submission import Submission, Metadata, Language
@@ -264,6 +263,69 @@ def test_valid(cldf_dataset, cldf_logger):
 """
 
 
+def igt_to_table(soup, div):
+    """
+    """
+    morphemes, glosses = [], []
+    ot = div.find('div', class_='object-language')
+    tt = div.find('div', class_='translation')
+    sn = div.find('div', class_='sentence-number')
+
+    def coalesce(e):
+        return e or soup.new_tag('td')
+
+    for d in div.find_all('div', class_='gloss-unit'):
+        morphemes.append(coalesce(d.find('div', class_='morpheme')))
+        glosses.append(coalesce(d.find('div', class_='gloss')))
+
+    table = soup.new_tag('table')
+    tbody = soup.new_tag('tbody')
+    tbody.append('\n')
+
+    tr = soup.new_tag('tr')
+    if sn:
+        nr = soup.new_tag('td')
+        s = soup.new_tag('strong')
+        s.string = div.find('div', class_='sentence-number').string
+        nr.append(s)
+        tr.append(nr)
+    ot.name = 'td'
+    ot['colspan'] = len(morphemes)
+    tr.append(ot)
+    tbody.append(tr)
+    tbody.append('\n')
+
+    tr = soup.new_tag('tr')
+    if sn:
+        tr.append(soup.new_tag('td'))
+    for m in morphemes:
+        m.name = 'td'
+        tr.append(m)
+    tbody.append(tr)
+    tbody.append('\n')
+
+    tr = soup.new_tag('tr')
+    if sn:
+        tr.append(soup.new_tag('td'))
+    for m in glosses:
+        m.name = 'td'
+        tr.append(m)
+    tbody.append(tr)
+    tbody.append('\n')
+
+    tr = soup.new_tag('tr')
+    if sn:
+        tr.append(soup.new_tag('td'))
+    tt.name = 'td'
+    tt['colspan'] = len(morphemes)
+    tr.append(tt)
+    tbody.append(tr)
+    tbody.append('\n')
+
+    table.append(tbody)
+    div.replace_with(table)
+
+
 @command()
 def release(args):
     """Release a dictionary by copying it to its own public github repository.
@@ -297,11 +359,15 @@ def release(args):
             res.append(name)
         return ' '.join(res)
 
+    intro = BeautifulSoup(read_text(d / 'intro.md'), 'html.parser')
+    for div in intro.find_all('div', class_='sentence-wrapper'):
+        igt_to_table(intro, div)
+
     md = jsonlib.load(d / 'md.json')
     md_readme = {
         'id': d.name,
         'url': 'https://dictionaria.clld.org/contributions/' + d.name,
-        'intro': read_text(d / 'intro.md'),
+        'intro': '{0}'.format(intro),
         'title': md['properties'].get('title') or md['language']['name'] + ' dictionary',
         'authors': format_authors(md['authors']),
     }

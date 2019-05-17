@@ -36,7 +36,6 @@ setup(
         'termcolor',
         'pybtex',
         'xlrd',
-        'html2markdown',
     ],
     extras_require={
         'dev': ['flake8'],
