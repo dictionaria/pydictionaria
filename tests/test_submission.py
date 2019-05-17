@@ -26,3 +26,10 @@ def test_Submission(repos, tmpdir):
 
 def test_Excel(repos):
     Submission(repos.joinpath('submissions', 'sub_excel'), repos)
+
+
+def test_SFM(repos, capsys):
+    s = Submission(repos.joinpath('submissions', 'sub_sfm'), repos)
+    s.dictionary.search(zz='custom')
+    out, _ = capsys.readouterr()
+    assert "1" in out

@@ -1,6 +1,8 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 
+from clldutils.path import read_text
+
 from pydictionaria import commands
 
 
@@ -31,8 +33,21 @@ def test_add_comparison_meanings(mocker, repos):
 
 
 def test_process(mocker, repos):
-    commands.process(_args(mocker, repos))
+    commands.process(_args(mocker, repos, 'sub_excel'))
     assert repos.joinpath('submissions', 'sub_excel', 'processed').exists()
+
+
+def test_check_sfm(mocker, repos):
+    commands.check(_args(mocker, repos, 'sub_sfm'))
+
+
+def test_process_sfm(mocker, repos):
+    commands.process(_args(mocker, repos, 'sub_sfm'))
+    proc = repos.joinpath('submissions', 'sub_sfm', 'processed')
+    assert "Custom" in read_text(proc / 'senses.csv').split('\n')[0]
+    assert "Custom" in read_text(proc / 'entries.csv').split('\n')[0]
+
+    commands.process(_args(mocker, repos, 'sub_sfm_with_examples'))
 
 
 def test_new(mocker, repos):
