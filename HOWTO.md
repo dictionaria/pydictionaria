@@ -484,7 +484,38 @@ Example:  A dictionary uses the marker `\id` to store identifiers for entries.
 
 ### …provide examples in a separate SFM file
 
-TODO
+Situation:  Examples are stored in a separated SFM database.
+
+Solution:  Provide the examples as part of the submission using the file name
+`examples.sfm`.  The conv
+
+ * In `examples.sfm`: Each example should specify a unique identifier in the
+   `\ref` marker.
+ * In `db.sfm`: The senses should refer to their examples by specifying the
+   example ID in the `\xref` marker.
+
+Example for an `examples.sfm` file:
+
+    \ref ex.001
+    \tx Leute, Klaus hat Schnitten mitgebracht!
+    \ft Guys, Klaus brought sandwiches!
+
+    \ref ex.002
+    \tx Kann ich eine Schnitte mit Käse haben?
+    \ft Can I have a cheese sandwich?
+
+Example for the corresponding `db.sfm` file:
+
+    \lx Käse
+    \ps n
+    \de cheese
+    \xref ex.002
+
+    \lx Schnitte
+    \ps n
+    \de sandwich
+    \xref ex.001
+    \xref ex.002
 
 ### …add glosses in the flextext format
 
