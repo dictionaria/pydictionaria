@@ -1,18 +1,18 @@
 How to Write the md.json File
 =============================
 
-Table of Contents
-
- * Introduction
- * Common traps in JSON files
- * List of all properties
- * How do I…
-
-
 Introduction
 ------------
 
-TODO
+This file describes the format of the `md.json` file and how to use the various
+properties defined in it.  This description is structured as follows:
+
+ * *Common traps in JSON files* – Selection of mistakes, people often make, when
+   working with JSON.
+ * *List of all properties* – Documentation of every property supported in the
+   `md.json` file
+ * *How do I…* – Small tutorials on how to perform common tasks when submitting
+   a dictionary, such as the addition of custom fields
 
 
 Common traps in JSON files
@@ -519,7 +519,23 @@ Example for the corresponding `db.sfm` file:
 
 ### …add glosses in the flextext format
 
-TODO
+Situation:  In FLEx exports the `db.sfm` only contains unglossed examples, while
+the glosses are exported in a separate file, using the `flextext` format.
+
+Solution:  Dictionaria is able to extract glosses from the `flextext` file and
+merge them into the corresponding examples.
+
+TODO What needs to be done on the FLEx side to make this happen?
+
+FLEx will store a reference to the gloss in an SFM marker, which FLEx usually
+calls `\zXX`, where `XX` stands for a number (`\z1`, `\z2`, etc.).   Note that
+(a) the user has no control over the name of this marker and (b) the name might
+be different from database to database.  To tell Dictionaria about the exact
+marker, use the `gloss_ref` property in the `md.json`:
+
+    "properties": {
+        "gloss_ref": "z5"
+    }
 
 ### …specify the order, in which the fields are displayed in the web app
 
@@ -544,7 +560,7 @@ Example:  Consider a dictionary defining three custom fields in the Entry Table:
 In the web app, entries using these fields might look something like this:
 
     solnce `sun'
-    
+
     Cyrillic: солнце
     Inflection_Class: neuter
     Phonetic_Form: sónce
@@ -566,7 +582,7 @@ to each other, one can specify the order explicitly using the
 Now the entry renders as follows:
 
     solnce `sun'
-    
+
     Cyrillic: солнце
     Phonetic Form: sónce
     Inflection_Class: neuter
