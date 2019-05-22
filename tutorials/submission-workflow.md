@@ -2,24 +2,175 @@ How to Prepare a Submission
 ===========================
 
 
-Workflow TODO
+Workflow
 --------
 
-=> see dictionaria-intern readme
+The editorial workflow to process dictionaries from submission to publication is
+a series of automated or manual steps.  The automated steps are implemented as
+sub-commands of the `dictionaria` command line interface.
+
+### Initialising a new submission
+
+Command:
+
+    dictionaria new <submission-id>
+
+This command creates a directory `submissions/<submission-id>` populated with
+a skeletal `md.json`.
+
+### Adding submitted content to the new directory.
+
+Put the files for the submission directly into the `submissions/<submission-id>`
+folder.
+
+TODO what about CLDF input
+
+⇒ See the `submitting-sfm.md` tutorial file for the filename conventions for
+SFM input.
+
+### Editing the `md.json` metadata file
+
+TODO elaborate
+TODO refer to `submitting-sfm.md`
+
+The metadata file uses the [JSON format][json], which is a widely
+used plain-text format for exchanging data.
+
+[json]: https://json.org
+
+### Writing the `intro.md`
+
+The file `submissions/<submission-id>/intro.md` contains an introductory text to
+be displayed on Dictionaria.  The file is written in the [Markdown format][md].
+See section 'Writing the introduction' below for details.
+
+### Adding comparison meanings to the dictionary.
+
+TODO what and how?
+
+### Validate the input files
+
+Command:
+
+    dictionaria check <submission-id>
+
+This command outputs warnings about invalid data in the input files.
+
+### Processing a submission
+
+Command:
+
+    dictionaria process <submission-id>
+
+This command creates a directory `submissions/<submission-id>/processed`.  The
+files in this directory will be read when importing the dictionary into
+Dictionaria.
+
+The actions performed when processing are input format dependent, but in all
+cases
+
+ - the input will be converted into the [CLDF](https://cldf.clld.org) format
+ - references to media files are switched from local filesystem paths to md5
+   checksums of the file contents
+
+### Publishing a submission
+
+    dictionaria release <submission-id> <...>
+
+TODO
 
 
-Writing the JSON metadata file
-------------------------------
+Common traps when editing JSON files
+------------------------------------
 
-TODO quick run-down on JSON
-TODO move section on common traps here
+The JSON file format is very particular about how the data is written.  At times
+this makes editing a JSON file by hand a bit finicky.  This section attempts to
+shed light at some common traps, people fall into when working with JSON.
+
+### Use double quotes
+
+Always use "double quotes" to denote text data – 'single quotes' will *not*
+work.
+
+Do:
+
+    "property": "value"
+
+Don't:
+
+    'property': 'value'
+
+### Use the right kind of bracket
+
+Use square brackets `[…]` for lists of values.  Use curly braces `{…}` for
+mappings from values to values.
+
+Do:
+
+    {
+        "property 1": "value 1",
+        "property 2": ["value 2a", "value 2b", "value 3b"]
+    }
+
+Don't:
+
+    [
+        "property 1": "value 1",
+        "property 2": {"value 2a", "value 2b", "value 3b"}
+    ]
+
+### Beware of trailing commas
+
+Make sure that there is one comma between every element in a list or mapping and
+*no trailing or leading commas*.  Trailing commas tend to sneak in, when the
+elements are arranged vertically for readability.
+
+Do:
+
+    {
+        "property 1": "value 1",
+        "property 2": "value 2",
+        "property 3": "value 3"
+    }
+
+Don't:
+
+    {
+        "property 1": "value 1",
+        "property 2": "value 2",
+        "property 3": "value 3",
+    }
 
 
 Writing the introduction
 ------------------------
 
-TODO (maybe) quick run-down on Markdown
-TODO remind people to use HTML wherever it's more convenient
+Every submission contains an `intro.md` file, which contains an introduction to
+the dictionary and the language within it.
+
+The file uses the [Markdown format][md].  It is a plain text format, designed to
+achieve two properties:
+
+ 1. It is easy for a human being to read and write
+ 2. It is easy for a machine to convert into HTML
+
+For the most part, documents written in Markdown read like regular plain text.
+See [the official specification][md-syntax] for details on the syntax.
+
+Note that the feature set in Markdown is kept quite small.  The format is meant
+to make writing HTML less painful, but is was never intended as a full-fledged
+replacement.  In some cases, this means that core features might be missing
+– most notably tables.  However, any HTML included in a Markdown document is
+kept intact during the conversion, so people often write files that contain both
+Markdown and HTML.
+
+Rule of thumb:
+
+ - Use Markdown, wherever it is more convenient than HTML
+ - Write in-line HTML anywhere else
+
+[md]: https://daringfireball.net/projects/markdown
+[md-syntax]: https://daringfireball.net/projects/markdown/syntax
 
 
 The `dictionaria` command-line interface TODO

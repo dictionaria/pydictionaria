@@ -7,78 +7,22 @@ Introduction
 This file describes the format of the `md.json` file and how to use the various
 properties defined in it.  This description is structured as follows:
 
- * *Common traps in JSON files* – Selection of mistakes, people often make, when
-   working with JSON.
- * *List of all properties* – Documentation of every property supported in the
-   `md.json` file
+ * *List of `md.json` properties* – Documentation of every property supported in
+   the `md.json` file
  * *How do I…* – Small tutorials on how to perform common tasks when submitting
    a dictionary, such as the addition of custom fields
 
+TODO put somewhere more sense-making
 
-Common traps in JSON files
---------------------------
+File name conventions:
 
-The JSON file format is very particular about how the data is written.  At times
-this makes editing a JSON file by hand a bit finicky.  This section attempts to
-shed light at some common traps, people fall into when working with JSON.
-
-### Use double quotes
-
-Always use "double quotes" to denote text data – 'single quotes' will *not*
-work.
-
-Do:
-
-    "property": "value"
-
-Don't:
-
-    'property': 'value'
-
-### Use the right kind of bracket
-
-Use square brackets `[…]` for lists of values.  Use curly braces `{…}` for
-mappings from values to values.
-
-Do:
-
-    {
-        "property 1": "value 1",
-        "property 2": ["value 2a", "value 2b", "value 3b"]
-    }
-
-Don't:
-
-    [
-        "property 1": "value 1",
-        "property 2": {"value 2a", "value 2b", "value 3b"}
-    ]
-
-### Beware of trailing commas
-
-Make sure that there is one comma between every element in a list or mapping and
-*no trailing or leading commas*.  Trailing commas tend to sneak in, when the
-elements are arranged vertically for readability.
-
-Do:
-
-    {
-        "property 1": "value 1",
-        "property 2": "value 2",
-        "property 3": "value 3"
-    }
-
-Don't:
-
-    {
-        "property 1": "value 1",
-        "property 2": "value 2",
-        "property 3": "value 3",
-    }
+ * `db.sfm` – Main SFM database containing the dictionary itself
+ * `examples.sfm` – (Optional) SFM database containing examples
+ * `glosses.flextext` – (Optional) Flextext containing glossed examples
 
 
-List of all properties
-----------------------
+List of `md.json` properties
+----------------------------
 
 ### `custom_fields`
 
