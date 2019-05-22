@@ -9,7 +9,7 @@ from clldutils.path import Path, md5, copy, read_text, write_text
 from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
-from pycldf import Dictionary
+from pycldf import Dictionary, TERMS
 from bs4 import BeautifulSoup
 
 from pydictionaria.util import MediaCatalog
@@ -390,6 +390,21 @@ def release(args):
     for table in cldf_md.tables:
         if table.local_name != media_table.name:
             copy(processed / table.local_name, cldf / table.local_name)
+    try:
+        cldf_md['LanguageTable']
+    except KeyError:
+        lid = next(cldf_md['EntryTable'].iterdicts())[
+            cldf_md['EntryTable', 'languageReference'].name]
+        t = cldf_md.add_component('LanguageTable')
+        t.write(
+            [dict(
+                ID=lid,
+                Name=md['language']['name'],
+                Glottocode=md['language'].get('glottocode'),
+                ISO639P3code=md['language'].get('isocode'),
+            )],
+            fname=cldf / 'languages.csv')
+
     if media_table.exists():
         with UnicodeWriter(cldf / media_table.name) as w:
             for i, row in enumerate(reader(media_table, dicts=True)):
