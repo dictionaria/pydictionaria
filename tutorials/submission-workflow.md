@@ -30,11 +30,32 @@ SFM input.
 
 ### Editing the `md.json` metadata file
 
-TODO elaborate
-TODO refer to `submitting-sfm.md`
-
 The metadata file uses the [JSON format][json], which is a widely
-used plain-text format for exchanging data.
+used plain-text format for exchanging data.  The file defines the following
+metadata:
+
+ - `authors` – List of all authors of the dictionary
+ - `language` – name, glottocode, and iso639-3 code of the language
+ - `date_published` – year of publication, e.g. "2019"
+ - `number` – A unique number for the dictionary; to be assigned by the managing
+   editor
+ - `properties` – properties of the dictionaries (depends on the input format)
+
+Example:  `md.json` for a fictious German dictionary.
+
+    {
+        "authors": "Erika Mustermann, Max Mustermann",
+        "language": {
+            "name": "German",
+            "glottocode": "stan1295",
+            "isocode": "deu"
+        },
+        "date_published": "2019",
+        "number": {},
+        "properties": {}
+    }
+
+See `submitting-sfm.md` for a description of the supported properties.
 
 [json]: https://json.org
 
@@ -175,3 +196,12 @@ Rule of thumb:
 
 The `dictionaria` command-line interface TODO
 ----------------------------------------
+
+The `dictionaria` command is organised in a number of subcommands.  For a list
+of all options and subcommands run the following command:
+
+    dictionaria --help
+
+For a short description of a specific subcommand run:
+
+    dictionaria help <subcommand>
