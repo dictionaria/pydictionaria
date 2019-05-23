@@ -91,9 +91,11 @@ Dictionaria.
 The actions performed when processing are input format dependent, but in all
 cases
 
- - the input will be converted into the [CLDF](https://cldf.clld.org) format
+ - the input will be converted into the [Cross Linguistic Data Formats](cldf)
  - references to media files are switched from local filesystem paths to md5
    checksums of the file contents
+
+[cldf]: https://cldf.clld.org
 
 ### Publishing a submission
 
