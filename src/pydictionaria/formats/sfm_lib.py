@@ -171,11 +171,8 @@ class Check(object):
             error(entry, 'no \\de field')
         if len(entry.getall('de')) > 1 and len(entry.getall('de')) != len(entry.getall('sn')):
             error(entry, 'multiple \\de but not matching \\sn')
-        if len(entry.getall('ps')) > 1:
-            if len(set(entry.getall('ps'))) > 1:
-                error(entry, 'multiple different \\ps')
-            else:
-                error(entry, 'multiple \\ps')
+        if len(set(entry.getall('ps'))) > 1:
+            error(entry, 'multiple conflicting \\ps')
         for marker, content in entry:
             if marker in ['cf', 'mn', 'an', 'sy']:
                 for lx in split_ids(content):
