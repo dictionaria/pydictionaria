@@ -35,11 +35,14 @@ used plain-text format for exchanging data.  The file defines the following
 metadata:
 
  - `authors` – List of all authors of the dictionary
- - `language` – name, glottocode, and iso639-3 code of the language
+ - `language` – Name, glottocode, and iso639-3 code of the language
  - `date_published` – year of publication, e.g. "2019"
  - `number` – A unique number for the dictionary; to be assigned by the managing
    editor
- - `properties` – properties of the dictionaries (depends on the input format)
+ - `properties` – A selection of properties needed to correctly process the
+   idiosyncrasies of the dictionary (such as the definition of custom fields or
+   the handling of cross-references).  See `submitting-sfm.md` for a detailed
+   description of the supported properties.
 
 Example:  `md.json` for a fictious German dictionary.
 
@@ -54,8 +57,6 @@ Example:  `md.json` for a fictious German dictionary.
         "number": {},
         "properties": {}
     }
-
-See `submitting-sfm.md` for a description of the supported properties.
 
 [json]: https://json.org
 
