@@ -386,7 +386,11 @@ class SenseExtractor(object):
             lambda pair: pair[0] in self.sense_markers,
             entry)
 
-        for group in group_by_separator(self.sense_sep, extracted_markers):
+        groups = list(group_by_separator(self.sense_sep, extracted_markers))
+        for group in groups:
+            # Drop everything before the first \sn marker
+            if len(groups) > 1 and group[0][0] != self.sense_sep:
+                continue
             new_sense = sfm.Entry(group)
             new_sense.id = self._idgen.next_id()
             new_sense.entry_id = entry.entry_id
