@@ -25,7 +25,7 @@ folder.
 
 TODO what about CLDF input
 
-⇒ See the `submitting-sfm.md` tutorial file for the filename conventions for
+⇒ See the `processing-sfm.md` tutorial file for the filename conventions for
 SFM input.
 
 ### Editing the `md.json` metadata file
@@ -41,7 +41,7 @@ metadata:
    editor
  - `properties` – A selection of properties needed to correctly process the
    idiosyncrasies of the dictionary (such as the definition of custom fields or
-   the handling of cross-references).  See `submitting-sfm.md` for a detailed
+   the handling of cross-references).  See `processing-sfm.md` for a detailed
    description of the supported properties.
 
 Example:  `md.json` for a fictious German dictionary.
