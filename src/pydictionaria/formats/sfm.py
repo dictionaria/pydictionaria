@@ -238,7 +238,8 @@ class Dictionary(base.Dictionary):
                 log.warning('unknown media files: %s', file_list)
 
             try:
-                sfm2cldf.process_links(props, entries, senses, examples)
+                sfm2cldf.process_links(
+                    props, entries, senses, examples, set(flexref_map.values()))
             except ValueError as e:
                 log.warning('could not process links: %s', str(e))
 

@@ -54,7 +54,7 @@ DEFAULT_REFERENCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = ['mn', 'cf', 'cont', 'sy', 'an']
+LINKS_WITH_NO_LABEL = {'mn', 'cf', 'cont', 'sy', 'an'}
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
@@ -454,7 +454,8 @@ class MediaExtractor(object):
 
 class LinkIndex(object):
 
-    def __init__(self, process_links_in_labels, link_display_label, id_regex):
+    def __init__(self, process_links_in_labels, link_display_label, id_regex, no_labels):
+        self.no_labels = LINKS_WITH_NO_LABEL | set(no_labels)
         self.link_display_label = link_display_label
         self.process_links_in_labels = process_links_in_labels
         self.id_regex = id_regex
@@ -478,7 +479,7 @@ class LinkIndex(object):
         def replace_ref(match):
             match_str = match.group().strip()
             replacement = self._index.get(match_str)
-            if replacement and (tag in LINKS_WITH_NO_LABEL):
+            if replacement and (tag in self.no_labels):
                 replacement = replacement.split('(')[1].split(')')[0]
             return replacement or match.group()
 
@@ -494,7 +495,7 @@ class LinkIndex(object):
         return new_entry
 
 
-def process_links(properties, entries, senses, examples):
+def process_links(properties, entries, senses, examples, no_labels):
     process_links_in_labels = set(properties.get(
         'process_links_in_labels',
         DEFAULT_PROCESS_LINKS_IN_LABELS))
@@ -511,7 +512,8 @@ def process_links(properties, entries, senses, examples):
     link_index = LinkIndex(
         process_links_in_labels,
         link_display_label,
-        id_regex)
+        id_regex,
+        no_labels)
     for entry in entries:
         link_index.add_entry(entry)
 
