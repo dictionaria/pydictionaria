@@ -23,6 +23,7 @@ class Metadata(object):
     language = attr.ib()
     date_published = attr.ib()
     number = attr.ib(default=None)
+    doi = attr.ib(default=None)
     properties = attr.ib(default=attr.Factory(dict))
 
     @classmethod
