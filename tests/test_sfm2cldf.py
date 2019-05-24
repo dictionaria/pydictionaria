@@ -98,7 +98,8 @@ class LinkProcessing(unittest.TestCase):
         self.link_index = s.LinkIndex(
             process_links_in_labels,
             link_display_label,
-            id_regex)
+            id_regex,
+            {})
         self.link_index.add_entry(entry1)
         self.link_index.add_entry(entry2)
         self.link_index.add_entry(entry3)
