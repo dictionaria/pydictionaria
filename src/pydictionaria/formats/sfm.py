@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function, division
 import re
 from collections import ChainMap, defaultdict
 from itertools import chain
+from functools import partial
 
 from clldutils.markup import Table
 from clldutils import sfm
@@ -113,6 +114,12 @@ class Dictionary(base.Dictionary):
         files = Files(self.submission)
         self.sfm.visit(files)
 
+        # Process FLEx's cross-references in \lf markers
+        flexref_map = ChainMap(
+            self.submission.md.properties.get('flexref_map', {}),
+            sfm2cldf.DEFAULT_FLEXREF_MAP)
+        self.sfm.visit(partial(sfm2cldf.preprocess_flex_crossrefs, flexref_map))
+
         examples_path = self.submission.dir.joinpath('examples.sfm')
         if examples_path.exists():  # Examples are submitted as separate SFM file.
             examples = Examples()
@@ -158,6 +165,7 @@ class Dictionary(base.Dictionary):
             all_markers -= spec['sense_markers']
             all_markers -= spec['example_markers']
             all_markers -= set(EXAMPLE_MARKER_MAP.values())
+            all_markers -= {'lf', 'lv', 'le'}
             if all_markers:
                 marker_list = ', '.join(sorted(all_markers))
                 log.warning('No CLDF column defined for markers: %s', marker_list)

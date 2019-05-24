@@ -45,6 +45,11 @@ DEFAULT_EXAMPLE_MAP = {
     'gl': 'Gloss',
     'ft': 'Translated_Text'}
 
+DEFAULT_FLEXREF_MAP = {
+    'cf': 'cf',
+    'syn': 'sy',
+    'ant': 'an'}
+
 DEFAULT_REFERENCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
@@ -198,6 +203,42 @@ def prepare_examples(example_id, example_markers, database):
         example_index[old_example.id] = new_example
 
     return example_index
+
+
+def _preprocess_flex_link(link):
+    """Turn FLEx's cross references into the 'lemma hm' format."""
+    m = re.fullmatch(r'(.*?)(\d*)\s*(\d*)', link)
+    if not m:
+        return link
+    lemma, hm, sense_nr = m.groups()
+    if hm:
+        return '{} {}'.format(lemma, hm)
+    return lemma
+
+
+def preprocess_flex_crossrefs(flex_refs, entry):
+    r"""Pre-process FLEx's cross references.
+
+    This turns
+
+        \lf marker_name
+        \lv content
+        \le ...
+
+    into
+
+        \marker_name content
+    """
+    lf = None
+    new_entry = entry.__class__()
+    for marker, content in entry:
+        if marker not in {'lf', 'lv', 'le'}:
+            new_entry.append((marker, content))
+        elif marker == 'lv' and lf in flex_refs:
+            new_entry.append((flex_refs[lf], _preprocess_flex_link(content)))
+        elif marker == 'lf':
+            lf = content
+    return new_entry
 
 
 class EntryExtractor(object):
