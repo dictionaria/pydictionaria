@@ -22,7 +22,6 @@ DEFAULT_ENTRY_MAP = {
     'ps': 'Part_Of_Speech',
     'al': 'Alternative_Form',
     'et': 'Etymology',
-    'hm': 'Homonym',
     'lc': 'Citation_Form',
     'mn': 'Main_Entry',
     'cf': 'Entry_IDs',
