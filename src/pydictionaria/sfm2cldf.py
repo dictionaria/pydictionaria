@@ -499,6 +499,7 @@ def process_links(properties, entries, senses, examples, no_labels):
     process_links_in_labels = set(properties.get(
         'process_links_in_labels',
         DEFAULT_PROCESS_LINKS_IN_LABELS))
+    process_links_in_labels.update(no_labels)
     link_display_label = properties.get(
         'link_display_label',
         DEFAULT_LINK_DISPLAY_LABEL)
