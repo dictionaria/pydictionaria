@@ -1,6 +1,7 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
 import re
+import sys
 from collections import ChainMap, defaultdict
 from itertools import chain
 from functools import partial
@@ -80,6 +81,9 @@ class Dictionary(base.Dictionary):
         self.sfm.visit(checks)
         for entry, marker, name in checks.missing_files:
             pprint(entry, 'missing file', marker, name)
+        # Flushing stdout to ensure the messages from `pprint` always appear
+        # before the messages from the checks below (which print to stderr)
+        sys.stdout.flush()
         self.sfm.visit(Check(self.sfm))
         self.sfm.visit(CheckBibrefs(self.bibentries))
 
