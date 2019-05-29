@@ -21,7 +21,7 @@ class Example(Entry, UnicodeMixin):
         ('ft', 'translation'),
         ('ot', 'alt_translation'),
         ('ota', 'alt_translation2'),
-        ('sf', 'soundfile'),
+        ('sfx', 'soundfile'),
     ])
     name_to_marker = {v: k for k, v in markers.items()}
 
@@ -84,7 +84,7 @@ class Example(Entry, UnicodeMixin):
 
     @property
     def soundfile(self):
-        return self.get('sf')
+        return self.get('sfx')
 
     @property
     def morphemes(self):

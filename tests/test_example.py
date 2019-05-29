@@ -31,7 +31,7 @@ NORM_EXAMPLE = """\
 \\ft My name is Ruth Iarabee.
 \\ot
 \\ota
-\\sf"""
+\\sfx"""
 
 
 def test_Example():
