@@ -14,7 +14,7 @@ requests.packages.urllib3.disable_warnings(SNIMissingWarning)
 
 
 PY3 = sys.version_info[0] == 3
-ID_SEP_PATTERN = re.compile(r'\.|,|;')
+ID_SEP_PATTERN = re.compile(r',|;')
 
 
 def unique(iterable):
