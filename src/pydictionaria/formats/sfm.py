@@ -123,7 +123,7 @@ class Dictionary(base.Dictionary):
         examples_path = self.submission.dir.joinpath('examples.sfm')
         if examples_path.exists():  # Examples are submitted as separate SFM file.
             examples = Examples()
-            examples.read(examples_path)
+            examples.read(examples_path, marker_map={'sf': 'sfx'})
             examples.visit(concat_multilines)
             original_amount = len(examples)
             cited = {
@@ -230,7 +230,7 @@ class Dictionary(base.Dictionary):
             entries.visit(media_extr)
             media_extr.tag = 'pc'
             senses.visit(media_extr)
-            media_extr.tag = 'sf'
+            media_extr.tag = 'sfx'
             examples.visit(media_extr)
 
             if media_extr.orphans:

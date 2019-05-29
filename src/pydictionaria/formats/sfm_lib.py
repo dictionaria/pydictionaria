@@ -315,7 +315,7 @@ EXAMPLE_MARKER_MAP = {
     'xn': 'ot',
     'xr': 'ota',
     'xe': 'ft',
-    'sfx': 'sf',
+    'sfx': 'sfx',
 }
 
 EXAMPLE_START_MARKERS = {'lemma', 'ref', 'rf', 'tx'}
