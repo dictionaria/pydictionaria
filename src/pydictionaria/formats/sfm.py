@@ -243,9 +243,12 @@ class Dictionary(base.Dictionary):
 
             id_index = sfm2cldf.make_id_index(entries)
 
-            crossref_processor = sfm2cldf.CrossRefs(
-                id_index,
-                sfm2cldf.LINKS_WITH_NO_LABEL | set(flexref_map.values()))
+            crossref_markers = (
+                sfm2cldf.DEFAULT_CROSS_REFERENCES
+                | set(props.get('cross_references', ()))
+                | set(flexref_map.values()))
+
+            crossref_processor = sfm2cldf.CrossRefs(id_index, crossref_markers)
             entries.visit(crossref_processor)
             senses.visit(crossref_processor)
             examples.visit(crossref_processor)

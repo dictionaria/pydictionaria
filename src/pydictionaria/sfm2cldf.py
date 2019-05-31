@@ -54,7 +54,7 @@ DEFAULT_SOURCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = {'mn', 'cf', 'cont', 'sy', 'an'}
+DEFAULT_CROSS_REFERENCES = {'mn', 'cf', 'cont', 'sy', 'an'}
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
