@@ -273,9 +273,9 @@ class Dictionary(base.Dictionary):
                 spec['entry_columns'],
                 spec['sense_columns'],
                 spec['example_columns'],
-                spec['entry_refs'],
-                spec['sense_refs'],
-                spec['example_refs'],
+                spec['entry_sources'],
+                spec['sense_sources'],
+                spec['example_sources'],
                 log)
 
             if props.get('labels'):
@@ -289,13 +289,13 @@ class Dictionary(base.Dictionary):
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry, lang_id)
                 for entry in entries]
             sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_refs'], sense)
+                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense)
                 for sense in senses]
             example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_refs'], example, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], example, lang_id)
                 for example in examples]
             media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}

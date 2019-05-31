@@ -66,7 +66,7 @@ SEPARATORS = {
     'Sense_IDs': DEFAULT_SEPARATOR,
     'Main_Entry': DEFAULT_SEPARATOR}
 
-def _local_mapping(json_mapping, default_mapping, marker_set, ref_mapping):
+def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
     mapped_values = set(json_mapping.values())
     global_map = ChainMap(
         json_mapping,
@@ -78,43 +78,43 @@ def _local_mapping(json_mapping, default_mapping, marker_set, ref_mapping):
         if marker in markers}
     columns = set(mapping.values())
 
-    refs = {
+    sources = {
         marker: mapping[target]
-        for marker, target in ref_mapping.items()
+        for marker, target in source_mapping.items()
         if marker in marker_set and target in mapping}
-    markers.update(refs)
+    markers.update(sources)
 
-    return mapping, markers, columns, refs
+    return mapping, markers, columns, sources
 
 
 def make_spec(properties, marker_set):
-    ref_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
+    source_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
 
-    entry_map, entry_markers, entry_columns, entry_refs = _local_mapping(
+    entry_map, entry_markers, entry_columns, entry_sources = _local_mapping(
         properties.get('entry_map', {}),
         DEFAULT_ENTRY_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
     entry_sep = properties.get('entry_sep', DEFAULT_ENTRY_SEP).strip().lstrip('\\')
     entry_id = properties.get('entry_id', DEFAULT_ENTRY_ID)
     entry_markers.update((entry_sep, entry_id, 'sf'))
     entry_columns.add('Media_IDs')
 
-    sense_map, sense_markers, sense_columns, sense_refs = _local_mapping(
+    sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
         properties.get('sense_map', {}),
         DEFAULT_SENSE_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     sense_sep = properties.get('sense_sep', DEFAULT_SENSE_SEP)
     sense_markers.update((sense_sep, 'xref', 'pc'))
     sense_columns.add('Media_IDs')
 
-    example_map, example_markers, example_columns, example_refs = _local_mapping(
+    example_map, example_markers, example_columns, example_sources = _local_mapping(
         properties.get('example_map', {}),
         DEFAULT_EXAMPLE_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     example_id = properties.get('example_id', DEFAULT_EXAMPLE_ID)
     example_markers.update((example_id, 'sfx'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
@@ -127,7 +127,7 @@ def make_spec(properties, marker_set):
         'entry_map': entry_map,
         'entry_markers': entry_markers,
         'entry_columns': entry_columns,
-        'entry_refs': entry_refs,
+        'entry_sources': entry_sources,
         'entry_sep': entry_sep,
         'entry_id': entry_id,
 
@@ -135,13 +135,13 @@ def make_spec(properties, marker_set):
         'sense_markers': sense_markers,
         'sense_columns': sense_columns,
         'sense_sep': sense_sep,
-        'sense_refs': sense_refs,
+        'sense_sources': sense_sources,
 
         'example_map': example_map,
         'example_markers': example_markers,
         'example_columns': example_columns,
         'example_id': example_id,
-        'example_refs': example_refs,
+        'example_sources': example_sources,
         'gloss_ref': gloss_ref}
 
 
@@ -636,16 +636,16 @@ def _add_columns(dataset, table_name, columns, refs, log):
 def make_cldf_dataset(
         folder,
         entry_columns, sense_columns, example_columns,
-        entry_refs, sense_refs, example_refs,
+        entry_sources, sense_sources, example_sources,
         log):
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table('media.csv', 'ID', 'Language_ID', 'Filename')
 
-    _add_columns(dataset, 'EntryTable', entry_columns, entry_refs, log)
-    _add_columns(dataset, 'SenseTable', sense_columns, sense_refs, log)
+    _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, log)
+    _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, log)
     if example_columns:
-        _add_columns(dataset, 'ExampleTable', example_columns, example_refs, log)
+        _add_columns(dataset, 'ExampleTable', example_columns, example_sources, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
         #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
