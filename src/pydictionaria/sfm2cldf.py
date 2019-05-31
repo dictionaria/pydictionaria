@@ -534,16 +534,16 @@ def make_link_processor(properties, id_index, entries):
     link_display_label = properties.get(
         'link_display_label',
         DEFAULT_LINK_DISPLAY_LABEL)
-    id_regex = properties.get('entry_label_as_regex_for_link')
+    link_regex = properties.get('link_regex')
 
     if not process_links_in_labels:
         return None
-    if id_regex is None:
-        raise ValueError('Missing property: entry_label_as_regex_for_link')
+    if link_regex is None:
+        raise ValueError('Missing property: link_regex')
 
     link_labels = make_label_index(link_display_label, entries)
     return LinkProcessor(
-        id_index, link_labels, process_links_in_labels, id_regex)
+        id_index, link_labels, process_links_in_labels, link_regex)
 
 
 def _single_spaces(s):
