@@ -17,12 +17,8 @@ PY3 = sys.version_info[0] == 3
 ID_SEP_PATTERN = re.compile(r',|;')
 
 
-def unique(iterable):
-    return sorted(set(i for i in iterable if i))
-
-
 def split_ids(s, sep=ID_SEP_PATTERN):
-    return unique(id_.strip() for id_ in sep.split(s) if id_.strip())
+    return sorted(set(id_.strip() for id_ in sep.split(s) if id_.strip()))
 
 
 class MediaCatalog(object):
