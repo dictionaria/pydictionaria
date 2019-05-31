@@ -18,7 +18,7 @@ ID_SEP_PATTERN = re.compile(r',|;')
 
 
 def unique(iterable):
-    return list(sorted(set(i for i in iterable if i)))
+    return sorted(set(i for i in iterable if i))
 
 
 def split_ids(s, sep=ID_SEP_PATTERN):
