@@ -53,7 +53,7 @@ DEFAULT_FLEXREF_MAP = {
 DEFAULT_SOURCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
-DEFAULT_LINK_DISPLAY_LABEL = 'lx'
+DEFAULT_LINK_LABEL_MARKER = 'lx'
 DEFAULT_CROSS_REFERENCES = {'mn', 'cf', 'cont', 'sy', 'an'}
 
 DEFAULT_SEPARATOR = ' ; '
@@ -531,9 +531,9 @@ def make_link_processor(properties, id_index, entries):
     process_links_in_labels = set(properties.get(
         'process_links_in_labels',
         DEFAULT_PROCESS_LINKS_IN_LABELS))
-    link_display_label = properties.get(
-        'link_display_label',
-        DEFAULT_LINK_DISPLAY_LABEL)
+    label_marker = properties.get(
+        'link_label_marker',
+        DEFAULT_LINK_LABEL_MARKER)
     link_regex = properties.get('link_regex')
 
     if not process_links_in_labels:
@@ -541,7 +541,7 @@ def make_link_processor(properties, id_index, entries):
     if link_regex is None:
         raise ValueError('Missing property: link_regex')
 
-    link_labels = make_label_index(link_display_label, entries)
+    link_labels = make_label_index(label_marker, entries)
     return LinkProcessor(
         id_index, link_labels, process_links_in_labels, link_regex)
 
