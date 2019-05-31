@@ -7,7 +7,7 @@ from cdstarcat.catalog import Object, Bitstream
 def test_split_ids():
     from pydictionaria.util import split_ids
 
-    assert split_ids('c, b; b, a.') == ['a', 'b', 'c']
+    assert split_ids('c, b; b, a.') == ['a.', 'b', 'c']
 
 
 def test_MediaCatalog(tmpdir):
