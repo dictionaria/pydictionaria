@@ -11,6 +11,7 @@ import pycldf
 import csvw
 
 from pydictionaria import flextext
+from pydictionaria.utils import split_ids
 
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
@@ -449,6 +450,33 @@ class MediaExtractor(object):
 
         # Note: no-op on the actual entry
         return entry
+
+
+def make_id_index(entries):
+    return {
+        entry.original_id: entry.id
+        for entry in entries}
+
+
+class CrossRefs:
+
+    def __init__(self, id_index, crossref_markers):
+        self._index = id_index
+        self.crossref_markers
+
+    def _process_tag(self, tag, value):
+        if tag not in self.markers:
+            return tag, value
+        refs = split_ids(value)
+        refs = [self._index.get(ref, ref) for ref in refs]
+        return tag, ' ; '.join(refs)
+
+    def __call__(self, entry):
+        # Preserve both the type and any potential attributes of the entry
+        new_entry = copy.copy(entry)
+        new_entry.clear()
+        new_entry.extend(self._process_tag(tag, value) for tag, value in entry)
+        return new_entry
 
 
 class LinkIndex(object):
