@@ -50,7 +50,7 @@ DEFAULT_FLEXREF_MAP = {
     'syn': 'sy',
     'ant': 'an'}
 
-DEFAULT_REFERENCES = {}
+DEFAULT_SOURCES = {}
 
 DEFAULT_PROCESS_LINKS_IN_LABELS = ()
 DEFAULT_LINK_DISPLAY_LABEL = 'lx'
@@ -88,7 +88,7 @@ def _local_mapping(json_mapping, default_mapping, marker_set, ref_mapping):
 
 
 def make_spec(properties, marker_set):
-    ref_mapping = ChainMap(properties.get('references', {}), DEFAULT_REFERENCES)
+    ref_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
 
     entry_map, entry_markers, entry_columns, entry_refs = _local_mapping(
         properties.get('entry_map', {}),
