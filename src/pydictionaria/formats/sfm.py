@@ -241,9 +241,22 @@ class Dictionary(base.Dictionary):
                 file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
                 log.warning('unknown media files: %s', file_list)
 
+            id_index = sfm2cldf.make_id_index(entries)
+
+            crossref_processor = sfm2cldf.CrossRefs(
+                id_index,
+                sfm2cldf.LINKS_WITH_NO_LABEL | set(flexref_map.values()))
+            entries.visit(crossref_processor)
+            senses.visit(crossref_processor)
+            examples.visit(crossref_processor)
+
             try:
-                sfm2cldf.process_links(
-                    props, entries, senses, examples, set(flexref_map.values()))
+                link_processor = sfm2cldf.make_link_processor(
+                    props, id_index, entries)
+                if link_processor is not None:
+                    entries.visit(link_processor)
+                    senses.visit(link_processor)
+                    examples.visit(link_processor)
             except ValueError as e:
                 log.warning('could not process links: %s', str(e))
 

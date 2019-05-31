@@ -11,7 +11,7 @@ import pycldf
 import csvw
 
 from pydictionaria import flextext
-from pydictionaria.utils import split_ids
+from pydictionaria.util import split_ids
 
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
@@ -452,17 +452,30 @@ class MediaExtractor(object):
         return entry
 
 
+def _lx_hm_pair(entry):
+    lx = entry.get('lx')
+    hm = entry.get('hm')
+    if hm:
+        return '{} {}'.format(lx, hm)
+    return lx
+
+
 def make_id_index(entries):
-    return {
+    id_index = {
         entry.original_id: entry.id
         for entry in entries}
+    id_index.update(
+        (_lx_hm_pair(entry), entry.id)
+        for entry in entries
+        if entry.get('lx').strip())
+    return id_index
 
 
 class CrossRefs:
 
     def __init__(self, id_index, crossref_markers):
         self._index = id_index
-        self.crossref_markers
+        self.markers = crossref_markers
 
     def _process_tag(self, tag, value):
         if tag not in self.markers:
@@ -479,42 +492,28 @@ class CrossRefs:
         return new_entry
 
 
-class LinkIndex(object):
+class LinkProcessor:
 
-    def __init__(self, process_links_in_labels, link_display_label, id_regex, no_labels):
-        self.no_labels = LINKS_WITH_NO_LABEL | set(no_labels)
-        self.link_display_label = link_display_label
-        self.process_links_in_labels = process_links_in_labels
-        self.id_regex = id_regex
-        self._index = {}
+    def __init__(self, id_index, label_index, link_markers, link_regex):
+        self._ids = id_index
+        self._labels = label_index
+        self.markers = link_markers
+        self.regex = link_regex
 
-    def add_entry(self, entry):
-        v = '[{}]({})'.format(entry.get(self.link_display_label, ''), entry.id)
-        self._index[entry.original_id] = v
-        lx = entry.get('lx')
-        if not lx:
-            # Don't fill the index with empty strings or integers
-            return
-        if entry.get('hm'):
-            lx += ' {0}'.format(entry.get('hm'))
-        self._index[lx] = v
+    def _replace_link(self, match):
+        ref = match.group().strip()
+        if not ref or ref not in self._ids:
+            return ref
+        id_ = self._ids[ref]
+        return '[{}]({})'.format(self._labels.get(id_, id_), id_)
 
     def _process_tag(self, tag, value):
-        if tag not in self.process_links_in_labels:
+        if tag in self.markers:
+            return tag, re.sub(self.regex, self._replace_link, value)
+        else:
             return tag, value
 
-        def replace_ref(match):
-            match_str = match.group().strip()
-            replacement = self._index.get(match_str)
-            if replacement and (tag in self.no_labels):
-                replacement = replacement.split('(')[1].split(')')[0]
-            return replacement or match.group()
-
-        value = re.sub(self.id_regex, replace_ref, value)
-
-        return tag, value
-
-    def process_entry(self, entry):
+    def __call__(self, entry):
         # Preserve both the type and any potential attributes of the entry
         new_entry = copy.copy(entry)
         new_entry.clear()
@@ -522,32 +521,29 @@ class LinkIndex(object):
         return new_entry
 
 
-def process_links(properties, entries, senses, examples, no_labels):
+def make_label_index(link_display_label, entries):
+    return {
+        entry.id: entry.get(link_display_label, entry.id)
+        for entry in entries}
+
+
+def make_link_processor(properties, id_index, entries):
     process_links_in_labels = set(properties.get(
         'process_links_in_labels',
         DEFAULT_PROCESS_LINKS_IN_LABELS))
-    process_links_in_labels.update(no_labels)
     link_display_label = properties.get(
         'link_display_label',
         DEFAULT_LINK_DISPLAY_LABEL)
     id_regex = properties.get('entry_label_as_regex_for_link')
 
     if not process_links_in_labels:
-        return
+        return None
     if id_regex is None:
         raise ValueError('Missing property: entry_label_as_regex_for_link')
 
-    link_index = LinkIndex(
-        process_links_in_labels,
-        link_display_label,
-        id_regex,
-        no_labels)
-    for entry in entries:
-        link_index.add_entry(entry)
-
-    entries.visit(link_index.process_entry)
-    senses.visit(link_index.process_entry)
-    examples.visit(link_index.process_entry)
+    link_labels = make_label_index(link_display_label, entries)
+    return LinkProcessor(
+        id_index, link_labels, process_links_in_labels, id_regex)
 
 
 def _single_spaces(s):
