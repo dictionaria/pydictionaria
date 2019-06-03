@@ -489,7 +489,40 @@ Example for the corresponding `db.sfm` file:
     \xref ex.001
     \xref ex.002
 
-### TODO …process FLEx's `\lf`, `\lv`, and `\le` markers`
+### …process FLEx's `\lf`, `\lv`, and `\le` markers`
+
+Situation:  In FLEx exports, cross-references are stored in a `\lf`, `lv`, `\le`
+triplet like so:
+
+    \lf <name>
+    \lv <lemma> <sense no>
+    \le <label>
+
+Solution:  This is a two step process:
+
+ 1. Use the `flexref_map` property to map the name defined in `\lf` to an SFM
+    marker.
+ 2. Use the `entry_map`, `sense_map`, etc. property to map that SFM marker to
+    a CLDF table column.
+
+Example:  The database contains a field called 'min. pair', which contains
+a reference to another entry.  A FLEx export of this might look like this:
+
+    \lf min. pair
+    \lv Grund2 1
+    \le Grund
+
+To process this reference and add it to a new column in the Sense Table, define
+the following properties:
+
+    "properties": {
+        "flexref_map": {
+            "min. pair": "minpair"
+        },
+        "sense_map": {
+            "minpair": "Minimal_Pair"
+        }
+    }
 
 ### …add glosses in the flextext format
 
