@@ -62,7 +62,39 @@ containing the version number.
 Brief introduction to the Command-line
 --------------------------------------
 
-### TODO Opening a terminal window
+### Opening a terminal window
+
+#### Windows
+
+On Windows there are several options, e.g.:
+
+ * Use the search field in your start menu and search for the term `Command
+   Prompt`.
+ * Use the `Run` dialog (e.g. by pressing `Windows Key + R`) to run the `cmd`
+   command
+ * Right click on the Start button or press `Windows Key + X` to open the "Power
+   User Menu" and click `Command prompt` (or `Powershell`, depending on your
+   system setup)
+ * Manually navigate through your start menu looking for the `Command prompt`
+   menu item.  The exact place differs across the different versions of Windows,
+   but it is usually in a folder called `Accessories`, `System Utilities` or the
+   like.
+
+Note that at the time of writing this, Windows ships with two terminal
+applications: `Command Prompt` (a.k.a. `cmd.exe`) and `Powershell`.  For the
+purpose of this tutorial, either is fine.
+
+#### GNU/Linux
+
+Depending of your distribution, there is usually one or more terminal emulator
+installed.  They are usually in the `System` category of your menu and have the
+term 'terminal' or 'console' in their name (e.g. `GNOME Terminal`, `Konsole`,
+`XTerm`, etc.).
+
+#### macOS
+
+There is a program called `Terminal` installed on your system.  Find it in the
+`Utilities` folder, or search for it using Spotlight.
 
 ### The command-line shell
 
