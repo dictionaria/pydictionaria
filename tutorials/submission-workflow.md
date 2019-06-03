@@ -193,6 +193,9 @@ Rule of thumb:
  - Use Markdown, wherever it is more convenient than HTML
  - Write in-line HTML anywhere else
 
+Note:  It is *not* necessary to manually create a table of contents, as the
+webapp will generate one automatically.
+
 [md]: https://daringfireball.net/projects/markdown
 [md-syntax]: https://daringfireball.net/projects/markdown/syntax
 
