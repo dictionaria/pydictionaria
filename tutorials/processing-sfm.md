@@ -439,7 +439,7 @@ To make the label show the contents `\phon` marker instead (e.g.
         "link_display_label": "phon"
     }
 
-### …use explicit entry ids
+### …use explicit entry ids?
 
 Situation:  The dictionary uses a special SFM marker to store an identifier for
 each entry, which is referenced in other places.
@@ -454,7 +454,7 @@ Example:  A dictionary uses the marker `\id` to store identifiers for entries.
         "entry_id": "id"
     }
 
-### …provide examples in a separate SFM file
+### …provide examples in a separate SFM file?
 
 Situation:  Examples are stored in a separated SFM database.
 
@@ -489,7 +489,7 @@ Example for the corresponding `db.sfm` file:
     \xref ex.001
     \xref ex.002
 
-### …process FLEx's `\lf`, `\lv`, and `\le` markers`
+### …process FLEx's `\lf`, `\lv`, and `\le` markers?
 
 Situation:  In FLEx exports, cross-references are stored in a `\lf`, `lv`, `\le`
 triplet like so:
@@ -524,7 +524,7 @@ the following properties:
         }
     }
 
-### …add glosses in the flextext format
+### …add glosses in the flextext format?
 
 Situation:  In FLEx exports the `db.sfm` only contains unglossed examples, while
 the glosses are exported in a separate file, using the `flextext` format.
@@ -544,7 +544,7 @@ marker, use the `gloss_ref` property in the `md.json`:
         "gloss_ref": "z5"
     }
 
-### …specify the order, in which the fields are displayed in the web app
+### …specify the order, in which the fields are displayed in the web app?
 
 Situation:  When the Dictionaria web app displays entries with custom fields,
 the fields are shown in alphabetical order by default.  This might not be
