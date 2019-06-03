@@ -142,6 +142,34 @@ Example:  Add the markers `\nt` and `\ot` to the example table:
         "ot": "Original_Translation"
     }
 
+### `flexref_map`
+
+The `flexref_map` property specifies, which of FLEx's `\lf`-style
+cross-references are supported.  It maps the contents of the `\lv` marker to a
+separate SFM marker.
+
+Note:  Any non-standard markers defined in the `flexref_map` need to be mapped
+to CLDF columns manually, using the `entry_map`, `sense_map`, etc. properties.
+
+The following cross references are defined automatically:
+
+ * `cf` → `cf`
+ * `syn` → `sy`
+ * `ant` → `an`
+
+Example:  Map a cross-reference named `min. pair` to the marker `\minpair`.
+
+    "flexref_map": {
+        "min. pair": "minpair"
+    }
+
+Since, `\minpair` is not a standard marker, it needs to be mapped to a CLDF
+column, e.g.:
+
+    "sense_map": {
+        "minpair": "Minimal_Pair"
+    }
+
 ### `gloss_ref`
 
 The `gloss_ref` property specifies an SFM marker, which contains the reference
@@ -460,6 +488,8 @@ Example for the corresponding `db.sfm` file:
     \de sandwich
     \xref ex.001
     \xref ex.002
+
+### TODO …process FLEx's `\lf`, `\lv`, and `\le` markers`
 
 ### …add glosses in the flextext format
 
