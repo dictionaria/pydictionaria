@@ -11,6 +11,7 @@ import pycldf
 import csvw
 
 from pydictionaria import flextext
+from pydictionaria.util import split_ids
 
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
@@ -49,11 +50,11 @@ DEFAULT_FLEXREF_MAP = {
     'syn': 'sy',
     'ant': 'an'}
 
-DEFAULT_REFERENCES = {}
+DEFAULT_SOURCES = {}
 
-DEFAULT_PROCESS_LINKS_IN_LABELS = ()
-DEFAULT_LINK_DISPLAY_LABEL = 'lx'
-LINKS_WITH_NO_LABEL = {'mn', 'cf', 'cont', 'sy', 'an'}
+DEFAULT_PROCESS_LINKS_IN_MARKERS = set()
+DEFAULT_LINK_LABEL_MARKER = 'lx'
+DEFAULT_CROSS_REFERENCES = {'mn', 'cf', 'cont', 'sy', 'an'}
 
 DEFAULT_SEPARATOR = ' ; '
 SEPARATORS = {
@@ -65,7 +66,7 @@ SEPARATORS = {
     'Sense_IDs': DEFAULT_SEPARATOR,
     'Main_Entry': DEFAULT_SEPARATOR}
 
-def _local_mapping(json_mapping, default_mapping, marker_set, ref_mapping):
+def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
     mapped_values = set(json_mapping.values())
     global_map = ChainMap(
         json_mapping,
@@ -77,43 +78,43 @@ def _local_mapping(json_mapping, default_mapping, marker_set, ref_mapping):
         if marker in markers}
     columns = set(mapping.values())
 
-    refs = {
+    sources = {
         marker: mapping[target]
-        for marker, target in ref_mapping.items()
+        for marker, target in source_mapping.items()
         if marker in marker_set and target in mapping}
-    markers.update(refs)
+    markers.update(sources)
 
-    return mapping, markers, columns, refs
+    return mapping, markers, columns, sources
 
 
 def make_spec(properties, marker_set):
-    ref_mapping = ChainMap(properties.get('references', {}), DEFAULT_REFERENCES)
+    source_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
 
-    entry_map, entry_markers, entry_columns, entry_refs = _local_mapping(
+    entry_map, entry_markers, entry_columns, entry_sources = _local_mapping(
         properties.get('entry_map', {}),
         DEFAULT_ENTRY_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
     entry_sep = properties.get('entry_sep', DEFAULT_ENTRY_SEP).strip().lstrip('\\')
     entry_id = properties.get('entry_id', DEFAULT_ENTRY_ID)
     entry_markers.update((entry_sep, entry_id, 'sf'))
     entry_columns.add('Media_IDs')
 
-    sense_map, sense_markers, sense_columns, sense_refs = _local_mapping(
+    sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
         properties.get('sense_map', {}),
         DEFAULT_SENSE_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     sense_sep = properties.get('sense_sep', DEFAULT_SENSE_SEP)
     sense_markers.update((sense_sep, 'xref', 'pc'))
     sense_columns.add('Media_IDs')
 
-    example_map, example_markers, example_columns, example_refs = _local_mapping(
+    example_map, example_markers, example_columns, example_sources = _local_mapping(
         properties.get('example_map', {}),
         DEFAULT_EXAMPLE_MAP,
         marker_set,
-        ref_mapping)
+        source_mapping)
     example_id = properties.get('example_id', DEFAULT_EXAMPLE_ID)
     example_markers.update((example_id, 'sfx'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
@@ -126,7 +127,7 @@ def make_spec(properties, marker_set):
         'entry_map': entry_map,
         'entry_markers': entry_markers,
         'entry_columns': entry_columns,
-        'entry_refs': entry_refs,
+        'entry_sources': entry_sources,
         'entry_sep': entry_sep,
         'entry_id': entry_id,
 
@@ -134,13 +135,13 @@ def make_spec(properties, marker_set):
         'sense_markers': sense_markers,
         'sense_columns': sense_columns,
         'sense_sep': sense_sep,
-        'sense_refs': sense_refs,
+        'sense_sources': sense_sources,
 
         'example_map': example_map,
         'example_markers': example_markers,
         'example_columns': example_columns,
         'example_id': example_id,
-        'example_refs': example_refs,
+        'example_sources': example_sources,
         'gloss_ref': gloss_ref}
 
 
@@ -451,42 +452,39 @@ class MediaExtractor(object):
         return entry
 
 
-class LinkIndex(object):
+def _lx_hm_pair(entry):
+    lx = entry.get('lx')
+    hm = entry.get('hm')
+    if hm:
+        return '{} {}'.format(lx, hm)
+    return lx
 
-    def __init__(self, process_links_in_labels, link_display_label, id_regex, no_labels):
-        self.no_labels = LINKS_WITH_NO_LABEL | set(no_labels)
-        self.link_display_label = link_display_label
-        self.process_links_in_labels = process_links_in_labels
-        self.id_regex = id_regex
-        self._index = {}
 
-    def add_entry(self, entry):
-        v = '[{}]({})'.format(entry.get(self.link_display_label, ''), entry.id)
-        self._index[entry.original_id] = v
-        lx = entry.get('lx')
-        if not lx:
-            # Don't fill the index with empty strings or integers
-            return
-        if entry.get('hm'):
-            lx += ' {0}'.format(entry.get('hm'))
-        self._index[lx] = v
+def make_id_index(entries):
+    id_index = {
+        entry.original_id: entry.id
+        for entry in entries}
+    id_index.update(
+        (_lx_hm_pair(entry), entry.id)
+        for entry in entries
+        if entry.get('lx').strip())
+    return id_index
+
+
+class CrossRefs:
+
+    def __init__(self, id_index, crossref_markers):
+        self._index = id_index
+        self.markers = crossref_markers
 
     def _process_tag(self, tag, value):
-        if tag not in self.process_links_in_labels:
+        if tag not in self.markers:
             return tag, value
+        refs = split_ids(value)
+        refs = [self._index.get(ref, ref) for ref in refs]
+        return tag, ' ; '.join(refs)
 
-        def replace_ref(match):
-            match_str = match.group().strip()
-            replacement = self._index.get(match_str)
-            if replacement and (tag in self.no_labels):
-                replacement = replacement.split('(')[1].split(')')[0]
-            return replacement or match.group()
-
-        value = re.sub(self.id_regex, replace_ref, value)
-
-        return tag, value
-
-    def process_entry(self, entry):
+    def __call__(self, entry):
         # Preserve both the type and any potential attributes of the entry
         new_entry = copy.copy(entry)
         new_entry.clear()
@@ -494,32 +492,57 @@ class LinkIndex(object):
         return new_entry
 
 
-def process_links(properties, entries, senses, examples, no_labels):
-    process_links_in_labels = set(properties.get(
-        'process_links_in_labels',
-        DEFAULT_PROCESS_LINKS_IN_LABELS))
-    process_links_in_labels.update(no_labels)
-    link_display_label = properties.get(
-        'link_display_label',
-        DEFAULT_LINK_DISPLAY_LABEL)
-    id_regex = properties.get('entry_label_as_regex_for_link')
+class LinkProcessor:
 
-    if not process_links_in_labels:
-        return
-    if id_regex is None:
-        raise ValueError('Missing property: entry_label_as_regex_for_link')
+    def __init__(self, id_index, label_index, link_markers, link_regex):
+        self._ids = id_index
+        self._labels = label_index
+        self.markers = link_markers
+        self.regex = link_regex
 
-    link_index = LinkIndex(
-        process_links_in_labels,
-        link_display_label,
-        id_regex,
-        no_labels)
-    for entry in entries:
-        link_index.add_entry(entry)
+    def _replace_link(self, match):
+        ref = match.group().strip()
+        if not ref or ref not in self._ids:
+            return ref
+        id_ = self._ids[ref]
+        return '[{}]({})'.format(self._labels.get(id_, id_), id_)
 
-    entries.visit(link_index.process_entry)
-    senses.visit(link_index.process_entry)
-    examples.visit(link_index.process_entry)
+    def _process_tag(self, tag, value):
+        if tag in self.markers:
+            return tag, re.sub(self.regex, self._replace_link, value)
+        else:
+            return tag, value
+
+    def __call__(self, entry):
+        # Preserve both the type and any potential attributes of the entry
+        new_entry = copy.copy(entry)
+        new_entry.clear()
+        new_entry.extend(self._process_tag(tag, value) for tag, value in entry)
+        return new_entry
+
+
+def make_label_index(link_display_label, entries):
+    return {
+        entry.id: entry.get(link_display_label, entry.id)
+        for entry in entries}
+
+
+def make_link_processor(properties, id_index, entries):
+    link_markers = (
+        set(properties.get('process_links_in_markers', ()))
+        | DEFAULT_PROCESS_LINKS_IN_MARKERS)
+    label_marker = properties.get(
+        'link_label_marker',
+        DEFAULT_LINK_LABEL_MARKER)
+    link_regex = properties.get('link_regex')
+
+    if not link_markers:
+        return None
+    if link_regex is None:
+        raise ValueError('Missing property: link_regex')
+
+    link_labels = make_label_index(label_marker, entries)
+    return LinkProcessor(id_index, link_labels, link_markers, link_regex)
 
 
 def _single_spaces(s):
@@ -613,16 +636,16 @@ def _add_columns(dataset, table_name, columns, refs, log):
 def make_cldf_dataset(
         folder,
         entry_columns, sense_columns, example_columns,
-        entry_refs, sense_refs, example_refs,
+        entry_sources, sense_sources, example_sources,
         log):
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table('media.csv', 'ID', 'Language_ID', 'Filename')
 
-    _add_columns(dataset, 'EntryTable', entry_columns, entry_refs, log)
-    _add_columns(dataset, 'SenseTable', sense_columns, sense_refs, log)
+    _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, log)
+    _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, log)
     if example_columns:
-        _add_columns(dataset, 'ExampleTable', example_columns, example_refs, log)
+        _add_columns(dataset, 'ExampleTable', example_columns, example_sources, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
         #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')

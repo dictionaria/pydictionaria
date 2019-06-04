@@ -82,27 +82,18 @@ class GenerateSequentialIDs(unittest.TestCase):
 class LinkProcessing(unittest.TestCase):
 
     def setUp(self):
-        process_links_in_labels = {'linkmarker1', 'linkmarker2'}
-        link_display_label = 'marker'
-        id_regex = r'\bOLDID\d+\b'
-        entry1 = sfm.Entry([('marker', 'entry1')])
-        entry1.id = 'NEWID1'
-        entry1.original_id = 'OLDID1'
-        entry2 = sfm.Entry([('marker', 'entry2')])
-        entry2.id = 'NEWID2'
-        entry2.original_id = 'OLDID2'
-        entry3 = sfm.Entry([('marker', 'entry3')])
-        entry3.id = 'NEWID3'
-        entry3.original_id = 'OLDID3'
-
-        self.link_index = s.LinkIndex(
-            process_links_in_labels,
-            link_display_label,
-            id_regex,
-            {})
-        self.link_index.add_entry(entry1)
-        self.link_index.add_entry(entry2)
-        self.link_index.add_entry(entry3)
+        id_index = {
+            'OLDID1': 'NEWID1',
+            'OLDID2': 'NEWID2',
+            'OLDID3': 'NEWID3'}
+        label_index = {
+            'NEWID1': 'label 1',
+            'NEWID2': 'label 2',
+            'NEWID3': 'label 3'}
+        link_markers = {'linkmarker1', 'linkmarker2'}
+        link_regex = r'\bOLDID\d+\b'
+        self.link_processor = s.LinkProcessor(
+            id_index, label_index, link_markers, link_regex)
 
     def test_entries_without_links_dont_change(self):
         original_entry = sfm.Entry([
@@ -113,7 +104,7 @@ class LinkProcessing(unittest.TestCase):
             ('linkmarker1', 'no link'),
             ('linkmarker2', 'no link'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_single_link_is_replaced(self):
@@ -123,9 +114,9 @@ class LinkProcessing(unittest.TestCase):
             ('othermarker', 'no link')])
         expected = sfm.Entry([
             ('linkmarker1', 'no link'),
-            ('linkmarker2', 'link: [entry1](NEWID1)'),
+            ('linkmarker2', 'link: [label 1](NEWID1)'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_links_in_different_markers_are_replaced(self):
@@ -134,10 +125,10 @@ class LinkProcessing(unittest.TestCase):
             ('linkmarker2', 'link: OLDID1'),
             ('othermarker', 'no link')])
         expected = sfm.Entry([
-            ('linkmarker1', 'link: [entry2](NEWID2)'),
-            ('linkmarker2', 'link: [entry1](NEWID1)'),
+            ('linkmarker1', 'link: [label 2](NEWID2)'),
+            ('linkmarker2', 'link: [label 1](NEWID1)'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_links_in_same_marker_are_replaced(self):
@@ -147,9 +138,9 @@ class LinkProcessing(unittest.TestCase):
             ('othermarker', 'no link')])
         expected = sfm.Entry([
             ('linkmarker1', 'no link'),
-            ('linkmarker2', 'link 1: [entry1](NEWID1); link 2: [entry2](NEWID2)'),
+            ('linkmarker2', 'link 1: [label 1](NEWID1); link 2: [label 2](NEWID2)'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_same_link_twice_in_the_same_marker(self):
@@ -159,9 +150,9 @@ class LinkProcessing(unittest.TestCase):
             ('othermarker', 'no link')])
         expected = sfm.Entry([
             ('linkmarker1', 'no link'),
-            ('linkmarker2', 'link 1: [entry1](NEWID1); link 2: [entry1](NEWID1)'),
+            ('linkmarker2', 'link 1: [label 1](NEWID1); link 2: [label 1](NEWID1)'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_only_process_links_in_specified_markers(self):
@@ -171,9 +162,9 @@ class LinkProcessing(unittest.TestCase):
             ('othermarker', 'link: OLDID2')])
         expected = sfm.Entry([
             ('linkmarker1', 'no link'),
-            ('linkmarker2', 'link: [entry1](NEWID1)'),
+            ('linkmarker2', 'link: [label 1](NEWID1)'),
             ('othermarker', 'link: OLDID2')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_ignore_regex_matches_that_are_not_in_the_index(self):
@@ -185,7 +176,7 @@ class LinkProcessing(unittest.TestCase):
             ('linkmarker1', 'no link'),
             ('linkmarker2', 'link: OLDID1000'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
     def test_dont_mutate_original_entry(self):
@@ -197,7 +188,7 @@ class LinkProcessing(unittest.TestCase):
             ('linkmarker1', 'no link'),
             ('linkmarker2', 'link: OLDID1'),
             ('othermarker', 'no link')])
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(original_entry, expected)
 
     def test_carry_over_attributes(self):
@@ -208,10 +199,10 @@ class LinkProcessing(unittest.TestCase):
         original_entry.id = 'I have an ID, too!'
         expected = sfm.Entry([
             ('linkmarker1', 'no link'),
-            ('linkmarker2', 'link: [entry1](NEWID1)'),
+            ('linkmarker2', 'link: [label 1](NEWID1)'),
             ('othermarker', 'no link')])
         expected.id = 'I have an ID, too!'
-        new_entry = self.link_index.process_entry(original_entry)
+        new_entry = self.link_processor(original_entry)
         self.assertEqual(new_entry, expected)
 
 

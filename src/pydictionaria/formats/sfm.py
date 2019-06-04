@@ -241,9 +241,25 @@ class Dictionary(base.Dictionary):
                 file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
                 log.warning('unknown media files: %s', file_list)
 
+            id_index = sfm2cldf.make_id_index(entries)
+
+            crossref_markers = (
+                sfm2cldf.DEFAULT_CROSS_REFERENCES
+                | set(props.get('cross_references', ()))
+                | set(flexref_map.values()))
+
+            crossref_processor = sfm2cldf.CrossRefs(id_index, crossref_markers)
+            entries.visit(crossref_processor)
+            senses.visit(crossref_processor)
+            examples.visit(crossref_processor)
+
             try:
-                sfm2cldf.process_links(
-                    props, entries, senses, examples, set(flexref_map.values()))
+                link_processor = sfm2cldf.make_link_processor(
+                    props, id_index, entries)
+                if link_processor is not None:
+                    entries.visit(link_processor)
+                    senses.visit(link_processor)
+                    examples.visit(link_processor)
             except ValueError as e:
                 log.warning('could not process links: %s', str(e))
 
@@ -257,9 +273,9 @@ class Dictionary(base.Dictionary):
                 spec['entry_columns'],
                 spec['sense_columns'],
                 spec['example_columns'],
-                spec['entry_refs'],
-                spec['sense_refs'],
-                spec['example_refs'],
+                spec['entry_sources'],
+                spec['sense_sources'],
+                spec['example_sources'],
                 log)
 
             if props.get('labels'):
@@ -273,13 +289,13 @@ class Dictionary(base.Dictionary):
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_refs'], entry, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry, lang_id)
                 for entry in entries]
             sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_refs'], sense)
+                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense)
                 for sense in senses]
             example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_refs'], example, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], example, lang_id)
                 for example in examples]
             media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
