@@ -157,3 +157,60 @@ refer to the current user's home directory:
     bob@work-pc:/etc$ cd ~/Desktop
     bob@work-pc:~/Desktop$ pwd
     /home/bob/Desktop
+
+Wildcard characters TODO
+-------------------
+
+Getting help TODO
+------------
+
+Some useful commands
+--------------------
+
+This section is just a small cheat sheet for some common commands, separated by
+operating system (or rather by Windows vs. not Windows, since Unix-like
+operating systems tend to use the same names for basic programs).
+
+### Windows
+
+Change the current working directory:
+
+    cd <foldername>
+
+Output the name of the current working directory:
+
+    cd
+
+Create a new folder:
+
+    md <foldername>
+
+Delete a file:
+
+    del <filename>
+
+Delete an empty folder:
+
+    rd <foldername>
+
+### Unix-like systems
+
+Change the current working directory:
+
+    cd <foldername>
+
+Output the name of the current working directory:
+
+    pwd
+
+Create a new folder:
+
+    mkdir <foldername>
+
+Delete a file:
+
+    rm <filename>
+
+Delete an empty folder:
+
+    rmdir <foldername>
