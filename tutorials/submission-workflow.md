@@ -64,7 +64,21 @@ Example:  `md.json` for a fictious German dictionary.
 
 The file `submissions/<submission-id>/intro.md` contains an introductory text to
 be displayed on Dictionaria.  The file is written in the [Markdown format][md].
-See section 'Writing the introduction' below for details.
+See section 'Writing in markdown' below for details.
+
+A few notes on the introduction itself:
+
+1. Do not manually add a table of contents -- the webapp will generate its own
+   based on the structure of your document
+
+2. Do not manually add a heading for the document title -- the webapp will
+   generate one from the `md.json`.  By default the title will be "[language
+   name] Dictionary".  To set a custom title for your dictionary, the `title`
+   property to the `md.json` file, e.g.:
+
+    "properties": {
+        "title": "A Comprehensive Dictionary of the Martian Language"
+    }
 
 ### Adding comparison meanings to the dictionary.
 
@@ -166,17 +180,14 @@ Don't:
     }
 
 
-Writing the introduction
-------------------------
+Writing in Markdown
+-------------------
 
-Every submission contains an `intro.md` file, which contains an introduction to
-the dictionary and the language within it.
+The introduction file uses the [Markdown format][md].  It is a plain text
+format, designed to achieve two goals:
 
-The file uses the [Markdown format][md].  It is a plain text format, designed to
-achieve two properties:
-
- 1. It is easy for a human being to read and write
- 2. It is easy for a machine to convert into HTML
+ 1. To be easy for a human being to read and write
+ 2. To be easy for a machine to convert into HTML
 
 For the most part, documents written in Markdown read like regular plain text.
 See [the official specification][md-syntax] for details on the syntax.
@@ -192,9 +203,6 @@ Rule of thumb:
 
  - Use Markdown, wherever it is more convenient than HTML
  - Write in-line HTML anywhere else
-
-Note:  It is *not* necessary to manually create a table of contents, as the
-webapp will generate one automatically.
 
 [md]: https://daringfireball.net/projects/markdown
 [md-syntax]: https://daringfireball.net/projects/markdown/syntax
