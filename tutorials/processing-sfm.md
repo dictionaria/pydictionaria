@@ -24,6 +24,19 @@ File name conventions:
 List of `md.json` properties
 ----------------------------
 
+### `cross_references`
+
+The `cross_references` property contains a list of SFM markers, which contain
+reference to other entries.
+
+The following markers are considered cross-references by default: `an`, `cf`,
+`cont`, `mn`, and `sy`.
+
+Example:  Define that the `\my_ref` and `\my_other_ref` markers contain
+cross-references:
+
+    "cross_references": ["my_ref", "my_other_ref"]
+
 ### `custom_fields`
 
 TODO
@@ -47,16 +60,15 @@ Example:  Use `\lxid` as the identifier:
 
     "entry_id": "lxid"
 
-### `entry_label_as_regex_for_link`
+### `link_regex`
 
-The `entry_label_as_regex_for_link` property is used to find cross-references
-within SFM markers.  It contains a [regular expression][regex] identifying the
-cross-reference.  These cross-references are replaced with links.
+The `link_regex` property defines a [regular expression][regex], which is used
+to find links within SFM markers.  These are replaced with markdown-style links.
 
 Example:  Consider words consisting of LX followed by some numbers
 a cross-reference:
 
-    "entry_label_as_regex_for_link": "\\bLX\d+\\b"
+    "link_regex": "\\bLX\d+\\b"
 
 ### `entry_map`
 
@@ -191,14 +203,14 @@ Example:  Adding labels to the `\cyr` and `\phon` markers:
         "ps": "phonetic representation"
     }
 
-### `link_display_label`
+### `link_label_marker`
 
-The `link_display_label` property defines the SFM marker that is used as a label
+The `link_label_marker` property defines the SFM marker that is used as a label
 attached to a cross-reference (default: `lx`).
 
 Example:  Use the `\phon` marker as the label.
 
-    "link_display_label": "phon"
+    "link_label_marker": "phon"
 
 ### `marker_map`
 
@@ -226,14 +238,14 @@ and `\et` respectively:
         "et_Ger": "et"
     }
 
-### `process_links_in_labels`
+### `process_links_in_markers`
 
-The `process_links_in_labels` property specifies, which SFM markers contain
-cross-references that need to be converted into links.
+The `process_links_in_markers` property specifies, which SFM markers contain
+cross-references that need to be converted into markdown-style links.
 
-Example:  Process all cross-references in the `\de` and `\cf` markers:
+Example:  Process all cross-references in the `\de` marker:
 
-    "process_links_in_labels": ["de", "cf"]
+    "process_links_in_markers": ["de"]
 
 ### `sense_custom_order`
 
@@ -366,40 +378,64 @@ are stored in the `Source` column of the Sense Table.  The same happens with
 `\gl_bibref`.   However, since the contents of the `\gl` marker are stored
 in the Example Table the reference is stored in that table's `Source` column.
 
-### …process cross-references within markers?
+### …process cross-references?
 
-Situation:  Some entries in the dictionary contain cross-references to other
-entries, intended to be a link.
+Situation:  Some markers contain cross-references to other entries.
+
+Solution:  Add these markers to the `cross_references` properties and map them
+to a CLDF column.
+
+Example:  Consider the following Russian dictionary, where imperfective verbs
+contain a reference to the perfective counterparts and vice versa using the
+`\cf_asp` marker:
+
+    \lx rasskazyvat'
+    \de tell (imperf.)
+    \cf_asp rasskazat'
+
+    \lx rasskazat'
+    \de tell (perf.)
+    \cf_asp rasskazyvat'
+
+To process the references in the `\cf_asp` markers, define the following
+properties:
+
+    "properties": {
+        "cross_references": ["cf_asp"],
+        "sense_map": {
+            "cf_asp": "Aspect_Counterpart"
+        }
+    }
+
+### …process links within markers?
+
+Situation:  Some entries in the dictionary contain in-line cross-references to
+other entries, intended to be a link.
 
 Solution:  Link processing requires the definition of two properties:
-`process_links_in_labels` and `entry_label_as_regex_for_link`.  The former lists
-all SFM markers, which need to be scanned for links (none by default).  The
-latter contains a [regular expression][regex], which defines what a reference
-looks like.
+`process_links_in_markers` and `link_regex`.  The former lists all SFM markers,
+which need to be scanned for links (none by default).  The latter contains
+a [regular expression][regex], which defines what a reference looks like.
 
 This works best for dictionaries with explicit entry ids (see next section
 below) that follow a predictable and easily searchable pattern, e.g. single
-words using a common prefix.
+words or numbers using a common prefix.
 
-The process script will look through every of the specified markers, look for
+The process script searches through every of the specified markers, look for
 identifiers using the regular expression, and replace the identifiers with
 [markdown-style links][md-link], which follow the form `[target](anchor)`.  The
 target of the link is filled with the identifier for the respective row in the
 Entry Table.  The anchor of the link is filled with a human readable label.
 
-Note that there is a small set of markers markers, which are treated differently
-(currently `\mn`, `\cf`, `\cont`, `\sy`, and `\an`).  In these cases the
-identifiers are just replaced with the bare CLDF identifiers.
+By default the human readable label comes from the content of the `\lx` marker.
+This can be changed by specifying a different marker in the `link_label_marker`
+property.
 
-Also note that the original id of the dictionary entry may differ from the CLDF
+Note that the original id of the dictionary entry may differ from the CLDF
 identifier of the table row.  The script tries to use the original identifiers
 whenever possible, but any identifiers that are not unique or otherwise
-incompatible with the CLDF spec will be rejected and replaced with newly
-generated ones.
-
-By default the human readable label comes from the content of the `\lx` marker.
-This can be changed by specifying a different marker in the `link_display_label`
-property.
+incompatible with the CLDF specification will be rejected and replaced with
+newly generated ones.
 
 Example:  Consider the following dictionary:
 
@@ -412,31 +448,29 @@ Example:  Consider the following dictionary:
     \id ENTRY00002
     \phon branəmanə
     \de front door; door of a house (ENTRY00001)
-    \cf ENTRY00001
 
-The entry for *brannemanne* contains a reference to *branne* in both the `\de`
-and `\cf` fields.  To process these links, we define the following properties:
+The entry for `brannemanne` contains a reference to `branne` within the `\de`
+marker.  To process this link, we define the following properties:
 
     "properties": {
         "entry_id": "id",
-        "process_links_in_labels": ["de", "cf"],
-        "entry_label_as_regex_for_link": "\\bENTRY\\d+\\b"
+        "process_links_in_markers": ["de"],
+        "link_regex": "\\bENTRY\\d+\\b"
     }
 
-In the `\de` field this replaces the `ENTRY00001` with `[branne](ENTRY00001)`.
-In the `\cf` field, however, the reference is only replaced with a bare link
-like `ENTRY00001`.  Note that in both cases, the identifiers in the links are
-identical to the original ids, but only because `ENTRY00001` and `ENTRY00002`
-are both valid in CLDF.
+This replaces any occurrence of the word `ENTRY` followed by at least one digit
+with a link.  In this case the reference `ENTRY00001` is turned into a link like
+`[branne](ENTRY00001)`.  Note the identifier in the link is identical to the
+original id, but only because `ENTRY00001` *happens* to be a valid id in CLDF.
 
 To make the label show the contents `\phon` marker instead (e.g.
 `[branə](ENTRY00001)`), the properties would change as follows:
 
     "properties": {
         "entry_id": "id",
-        "process_links_in_labels": ["de", "cf"],
-        "entry_label_as_regex_for_link": "\\bENTRY\\d+\\b",
-        "link_display_label": "phon"
+        "process_links_in_markers": ["de"],
+        "link_regex": "\\bENTRY\\d+\\b",
+        "link_label_marker": "phon"
     }
 
 ### …use explicit entry ids?
