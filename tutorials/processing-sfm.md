@@ -60,16 +60,6 @@ Example:  Use `\lxid` as the identifier:
 
     "entry_id": "lxid"
 
-### `link_regex`
-
-The `link_regex` property defines a [regular expression][regex], which is used
-to find links within SFM markers.  These are replaced with markdown-style links.
-
-Example:  Consider words consisting of LX followed by some numbers
-a cross-reference:
-
-    "link_regex": "\\bLX\d+\\b"
-
 ### `entry_map`
 
 The `entry_map` property specifies, which SFM markers are mapped to which
@@ -212,6 +202,16 @@ Example:  Use the `\phon` marker as the label.
 
     "link_label_marker": "phon"
 
+### `link_regex`
+
+The `link_regex` property defines a [regular expression][regex], which is used
+to find links within SFM markers.  These are replaced with markdown-style links.
+
+Example:  Consider words consisting of LX followed by some numbers
+a cross-reference:
+
+    "link_regex": "\\bLX\d+\\b"
+
 ### `marker_map`
 
 The `marker_map` properties provides a way to rename markers in the database.
@@ -237,6 +237,10 @@ and `\et` respectively:
         "lx_Ger": "lx",
         "et_Ger": "et"
     }
+
+### `metalanguages`
+
+TODO
 
 ### `process_links_in_markers`
 
