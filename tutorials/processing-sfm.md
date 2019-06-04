@@ -235,18 +235,6 @@ Example:  Process all cross-references in the `\de` and `\cf` markers:
 
     "process_links_in_labels": ["de", "cf"]
 
-### `references`
-
-The `references` properties specifies markers that provide the sources for other
-markers.  This will be collected into the `Source` column of the respective
-table.
-
-Example:  Define that `\et_bibref` contains the source for the etymology.
-
-    "references": {
-        "et_bibref": "et"
-    }
-
 ### `sense_custom_order`
 
 The `sense_custom_order` property contains a list of CLDF column names
@@ -286,6 +274,18 @@ sense starts (default: `sn`).
 Example:  Use the `\sn_id` marker to separate senses:
 
     "sense_sep": "sn_id"
+
+### `sources`
+
+The `sources` properties specifies markers that provide the sources for other
+markers.  This will be collected into the `Source` column of the respective
+table.
+
+Example:  Define that `\et_bibref` contains the source for the etymology.
+
+    "sources": {
+        "et_bibref": "et"
+    }
 
 
 How do I…
@@ -345,7 +345,7 @@ for markers, which are mapped by default.
 Situation:  There are SFM markers that contain a reference (e.g. a bibliography
 key) to the source of other fields.
 
-Solution:  Use the `references` property to specify, which field a marker is
+Solution:  Use the `sources` property to specify, which field a marker is
 a reference for.
 
 Example:  The dictionary contains a marker `\de_bibref`, containing the source
@@ -354,7 +354,7 @@ scientific name `\sc`, and a marker `\gl_bibref`, containing the source for
 a gloss `\gl`:
 
     "properties": {
-        "references": {
+        "sources": {
             "de_bibref": "de",
             "sc_bibref": "sc",
             "gl_bibref": "gl"
