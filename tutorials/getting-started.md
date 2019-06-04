@@ -62,6 +62,31 @@ containing the version number.
 Brief introduction to the Command-line
 --------------------------------------
 
+Using the command-line is a very easy and straight-forward way of interacting
+with a computer.  However, for whatever reason the mere thought of using it
+makes people feel uneasy or intimidated.
+
+*But… I don't even know how to program!*  You don't need to.  The command-line
+is used for *running* programs, not for making them.
+
+*But… I don't know all the commands!*  Nobody does.  People working on the
+command-line usually only remember the commands they use regularly.  For some,
+this means they've memorised hundreds of commands over the years; other get by
+with just two or three, including `cd`.  Yet others just have a list of commands
+written down in a text file or a sheet of paper on their desk.  Also, there's
+the internet -- an endless resource for looking up commands or asking for help.
+
+*But… it looks so much harder to use than Graphical programs.*  It really isn't.
+Typing a command is not really that different from looking through a menu to
+click the right icon.  Changing configuration through a text file is not really
+that more difficult than spending hours clicking through dialog boxes to find
+the right box to tick.  It just needs some getting used to.  If anything, the
+strictly text-based nature of the command-line makes the user experience more
+consistent across different programs -- there are only so many ways a program
+can say 'file not found'.
+
+TODO revise
+
 ### Opening a terminal window
 
 #### Windows
