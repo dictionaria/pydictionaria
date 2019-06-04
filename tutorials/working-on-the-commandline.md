@@ -5,20 +5,42 @@ Using the command-line is a very easy and straight-forward way of interacting
 with a computer.  However, for whatever reason the mere thought of using it
 makes people feel uneasy or intimidated.
 
-*I don't even know how to program!*  You don't need to.  The command-line
-is used for *running* programs, not for making them.
 
-*I don't know all the commands!*  Nobody does.  People working on the
-command-line usually only remember the commands they use regularly.  For some,
-this means they've memorised hundreds of commands over the years; other get by
-with just two or three, including `cd`.  Yet others just have a list of commands
-written down in a text file or a sheet of paper on their desk.  Also, there's
-the internet -- an endless resource for looking up commands or asking for help.
+Some concerns
+-------------
 
-TODO revise
+### I don't even know how to program!
 
-Opening a terminal window
--------------------------
+You don't need to.  The command-line is used for *running* programs, not for
+making them.
+
+### I don't know all the commands!
+
+Nobody does.  People working on the command-line usually only remember the
+commands they use regularly.  For some, this means they've memorised hundreds of
+commands over the years; other get by with just two or three, including `cd`.
+Yet others just have a list of commands written down in a text file or a sheet
+of paper on their desk.  Also, there's the internet -- an endless resource for
+looking up commands or asking for help.
+
+### I don't want to break my computer!
+
+Command-line programs aren't generally any more or less dangerous than their
+graphical counterparts.  The biggest concern might be data loss, since
+command-line programs often provide fewer save guards, when it comes to changing
+or deleting files.
+
+If you are concerned about your system, just follow these simple rules:
+
+ * Proof-read any command before hitting `Enter`
+ * Back up your data regularly
+ * Don't run programs with admin privileges
+ * Don't copy-paste commands from the internet.  Always look up, what part of
+   a command does what and then type the command by hand.
+
+
+Opening a terminal
+------------------
 
 ### Windows
 
@@ -52,6 +74,7 @@ term 'terminal' or 'console' in their name (e.g. `GNOME Terminal`, `Konsole`,
 There is a program called `Terminal` installed on your system.  Find it in the
 `Utilities` folder, or search for it using Spotlight.
 
+
 The command-line shell
 ----------------------
 
@@ -65,8 +88,9 @@ user.  The workflow on the command-line is as follows:
 
 Windows currently comes with two command-line shells, `cmd.exe` and
 `PowerShell`, while on Unix-like systems there are countless options (`bash`,
-`csh`, `fish`, to name a few).  However, at the end of the day they all work
-pretty much the same way – so, when in doubt, stick with the default.
+`csh`, `fish`, to name a few).  However, at the end of the day they're all doing
+the same thing – so, when in doubt, stick with the default.
+
 
 The prompt
 ----------
@@ -78,9 +102,9 @@ character such as `$`, `%`, or `>`.
 
 Note that on Unix-like systems, a shell prompt ending on a hash symbol `#`
 usually signifies that the current shell is running  with admin privileges.  Be
-careful, when executing commands as an admin, since this may damage your system.
-It is highly recommended to run shell commands as a regular user, whenever
-possible.
+careful when executing commands as an administrator!  You might damage your
+system.  It is highly recommended to run shell commands (or any program for that
+matter) as a regular user, whenever possible.
 
 Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
 (see below) and a greater-than sign `>`.
@@ -92,7 +116,8 @@ name, the computer name, the current working directory, and a dollar sign `$`.
 
     bob@work-pc:~/Desktop$
 
-Running a program
+
+Running a command
 -----------------
 
 A command consists of the name of the command or program you want to run and
@@ -105,6 +130,7 @@ spaces:
 If a command or argument contains spaces itself, put it into quotation marks:
 
     myprogram arg1 "argument 2"
+
 
 The working directory
 ---------------------
@@ -158,11 +184,44 @@ refer to the current user's home directory:
     bob@work-pc:~/Desktop$ pwd
     /home/bob/Desktop
 
-Wildcard characters TODO
+Wildcard characters
 -------------------
+
+Sometimes you want to run a program on multiple files, but typing out every
+file name is tedious and error-prone.  For this one can use wildcard characters
+
+TODO
+
+The two most common wildcard characters are the question mark `?` and the
+asterisk `*`:
+
+ - `?` is a placeholder for a single unkown character.
+ - `*` is a placeholder for any number of characters (or none).
+
+Example 1:  The following command moves files like `text-01.txt`, `text-02.txt`,
+`text-xy.txt` into the folder `backup` (on Windows):
+
+    move text-??.txt backup
+
+Example 2:  The following command deletes every file ending with the extension
+`.exe` from the current working directory (on Windows):
+
+    del *.exe
+
+Note: Be extra careful with commands that delete or change files.  Always
+double-check that the wildcard does not apply to any files you don't want to
+affect.  The command-line does not have an undo button nor a trash bin, so any
+file you accidentally delete will be gone forever.
+
+Also note: On Unix-like systems, wildcards are usually resolved by the shell,
+before a program is run.  On Windows, wildcards are resolved by the programs
+themselves.  Although this difference rarely matters in practice, it is
+something to be aware of.
+
 
 Getting help TODO
 ------------
+
 
 Some useful commands
 --------------------
@@ -180,6 +239,22 @@ Change the current working directory:
 Output the name of the current working directory:
 
     cd
+
+Show the contents of the current working directory:
+
+    dir
+
+Rename a file:
+
+    move <filename> <new filename>
+
+Move a file to a different folder:
+
+    move <filename> <foldername>
+
+Copy a file (does not work with folders):
+
+    copy <filename> <destination>
 
 Create a new folder:
 
@@ -202,6 +277,26 @@ Change the current working directory:
 Output the name of the current working directory:
 
     pwd
+
+Show the contents of the current working directory:
+
+    ls
+
+Rename a file:
+
+    mv <filename> <new filename>
+
+Move a file to a different folder:
+
+    mv <filename> <foldername>
+
+Copy a file (does not work with folders):
+
+    cp <filename> <destination>
+
+Copy an entire folder recursively:
+
+    cp -r <foldername> <destination>
 
 Create a new folder:
 
