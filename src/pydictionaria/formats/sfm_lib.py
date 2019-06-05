@@ -202,7 +202,7 @@ class Files(object):
                 self.files[mtype][as_unicode(p.name)] = p
                 # and just in case, add transliterated variants of file names:
                 try:
-                    nname = translit(as_unicode(p.name), b'ru', reversed=True)
+                    nname = translit(as_unicode(p.name), 'ru', reversed=True)
                     if nname not in self.files[mtype]:
                         self.files[mtype][nname] = p
                 except:
@@ -219,6 +219,13 @@ class Files(object):
                 self.files[spec['type']][as_unicode(fname.stem)] = checksum
                 self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.upper()] = checksum
                 self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.lower()] = checksum
+                # and just in case, add transliterated variants of file names:
+                try:
+                    nname = translit(spec['fname'], 'ru', reversed=True)
+                    if nname not in self.files[spec['type']]:
+                        self.files[spec['type']][nname] = checksum
+                except:
+                    raise
 
     def __call__(self, entry):
         """
