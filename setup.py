@@ -28,7 +28,7 @@ setup(
         'attrs>=19.1',
         'clldutils~=2.0',
         'pycldf',
-        'cdstarcat>=0.2.1',
+        'cdstarcat>=1.0.0',
         'tqdm',
         'transliterate==1.7.6',
         'pyconcepticon>=1.1.1',
