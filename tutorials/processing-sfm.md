@@ -293,7 +293,7 @@ Example:  Use the `\sn_id` marker to separate senses:
 
 ### `sources`
 
-The `sources` properties specifies markers that provide the sources for other
+The `sources` property specifies markers that provide the sources for other
 markers.  This will be collected into the `Source` column of the respective
 table.
 
