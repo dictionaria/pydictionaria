@@ -21,12 +21,13 @@ a skeletal `md.json`.
 ### Adding submitted content to the new directory.
 
 Put the files for the submission directly into the `submissions/<submission-id>`
-folder.
+folder.  For dictionaries in Toolbox's SFM format `dictionaria` expects the
+following file names:
 
-TODO what about CLDF input
+ * `db.sfm` – Main SFM database containing the dictionary itself
+ * `examples.sfm` – (Optional) SFM database containing examples
+ * `glosses.flextext` – (Optional) Flextext containing glossed examples
 
-⇒ See the `processing-sfm.md` tutorial file for the filename conventions for
-SFM input.
 
 ### Editing the `md.json` metadata file
 

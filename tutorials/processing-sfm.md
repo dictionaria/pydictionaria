@@ -12,14 +12,6 @@ properties defined in it.  This description is structured as follows:
  * *How do I…* – Small tutorials on how to perform common tasks when submitting
    a dictionary, such as the addition of custom fields
 
-TODO put somewhere more sense-making
-
-File name conventions:
-
- * `db.sfm` – Main SFM database containing the dictionary itself
- * `examples.sfm` – (Optional) SFM database containing examples
- * `glosses.flextext` – (Optional) Flextext containing glossed examples
-
 
 List of `md.json` properties
 ----------------------------
