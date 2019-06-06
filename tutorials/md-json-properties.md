@@ -7,9 +7,9 @@ Introduction
 This file describes the format of the `md.json` file and how to use the various
 properties defined in it.  This description is structured as follows:
 
- * *List of `md.json` properties* – Documentation of every property supported in
+ - *List of `md.json` properties* – Documentation of every property supported in
    the `md.json` file
- * *How do I…* – Small tutorials on how to perform common tasks when submitting
+ - *How do I…* – Small tutorials on how to perform common tasks when submitting
    a dictionary, such as the addition of custom fields
 
 
@@ -60,16 +60,16 @@ markers to the entry table.
 
 The following markers are mapped automatically:
 
- * `lx` → `Headword`
- * `ps` → `Part_Of_Speech`
- * `al` → `Alternative_Form`
- * `et` → `Etymology`
- * `hm` → `Homonym`
- * `lc` → `Citation_Form`
- * `mn` → `Main_Entry`
- * `cf` → `Entry_IDs`
- * `cont` → `Contains`
- * `va` → `Variant_Form`
+ - `lx` → `Headword`
+ - `ps` → `Part_Of_Speech`
+ - `al` → `Alternative_Form`
+ - `et` → `Etymology`
+ - `hm` → `Homonym`
+ - `lc` → `Citation_Form`
+ - `mn` → `Main_Entry`
+ - `cf` → `Entry_IDs`
+ - `cont` → `Contains`
+ - `va` → `Variant_Form`
 
 Example:  Add the markers `\cyr` and `\phon` to the entry table:
 
@@ -106,24 +106,24 @@ markers to the example table.
 
 The following markers are mapped automatically:
 
- * `rf` → `Corpus_Reference`
- * `tx` → `Primary_Text`
- * `mb` → `Analyzed_Word`
- * `gl` → `Gloss`
- * `ft` → `Translated_Text`
+ - `rf` → `Corpus_Reference`
+ - `tx` → `Primary_Text`
+ - `mb` → `Analyzed_Word`
+ - `gl` → `Gloss`
+ - `ft` → `Translated_Text`
 
 Note that the example extraction process renames some of the markers internally.
 This happens *after* the `marker_map` is applied, but *before* any other
 processing steps.  The following markers are renamed:
 
- * `xv` → `tx`
- * `xvm` → `mb`
- * `xeg` → `gl`
- * `xo` → `ot`
- * `xn` → `ot`
- * `xr` → `ota`
- * `xe` → `ft`
- * `sfx` → `sf`
+ - `xv` → `tx`
+ - `xvm` → `mb`
+ - `xeg` → `gl`
+ - `xo` → `ot`
+ - `xn` → `ot`
+ - `xr` → `ota`
+ - `xe` → `ft`
+ - `sfx` → `sf`
 
 Also note that this only applies to examples contained in the SFM database of
 the dictionary itself.  Examples that are supplied using a separate SFM file are
@@ -147,9 +147,9 @@ to CLDF columns manually, using the `entry_map`, `sense_map`, etc. properties.
 
 The following cross references are defined automatically:
 
- * `cf` → `cf`
- * `syn` → `sy`
- * `ant` → `an`
+ - `cf` → `cf`
+ - `syn` → `sy`
+ - `ant` → `an`
 
 Example:  Map a cross-reference named `min. pair` to the marker `\minpair`.
 
@@ -215,12 +215,12 @@ properties in the `md.json` need to refer to the *new* names of the marker.
 
 The following markers are mapped automatically:
 
- * `d_Eng` → `de`
- * `g_Eng` → `ge`
- * `ps_Eng` → `ps`
- * `sc_Eng` → `sc`
- * `sd_Eng` → `sd`
- * `x_Eng` → `xe`
+ - `d_Eng` → `de`
+ - `g_Eng` → `ge`
+ - `ps_Eng` → `ps`
+ - `sc_Eng` → `sc`
+ - `sd_Eng` → `sd`
+ - `x_Eng` → `xe`
 
 Example:  Map FLEx's language-specific `\lx_Ger` and `\et_Ger` to generic `\lx`
 and `\et` respectively:
@@ -261,12 +261,12 @@ markers to the sense table.
 
 The following markers are mapped automatically:
 
- * `de` → `Description`
- * `nt` → `Comment`
- * `sc` → `Scientific_Name`
- * `sd` → `Semantic_Domain`
- * `sy` → `Synonym`
- * `zcom1` → `Concepticon_ID`
+ - `de` → `Description`
+ - `nt` → `Comment`
+ - `sc` → `Scientific_Name`
+ - `sd` → `Semantic_Domain`
+ - `sy` → `Synonym`
+ - `zcom1` → `Concepticon_ID`
 
 Example:  Add the marker `\gr` to the sense table:
 
@@ -491,9 +491,9 @@ Situation:  Examples are stored in a separated SFM database.
 Solution:  Provide the examples as part of the submission using the file name
 `examples.sfm`.  The conv
 
- * In `examples.sfm`: Each example should specify a unique identifier in the
+ - In `examples.sfm`: Each example should specify a unique identifier in the
    `\ref` marker.
- * In `db.sfm`: The senses should refer to their examples by specifying the
+ - In `db.sfm`: The senses should refer to their examples by specifying the
    example ID in the `\xref` marker.
 
 Example for an `examples.sfm` file:

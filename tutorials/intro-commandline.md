@@ -32,10 +32,10 @@ or deleting files.
 
 If you are concerned about your system, just follow these simple rules:
 
- * Proof-read any command before hitting `Enter`
- * Back up your data regularly
- * Don't run programs with admin privileges
- * Don't copy-paste commands from the internet.  Always look up, what part of
+ - Proof-read any command before hitting `Enter`
+ - Back up your data regularly
+ - Don't run programs with admin privileges
+ - Don't copy-paste commands from the internet.  Always look up, what part of
    a command does what and then type the command by hand.
 
 
@@ -46,14 +46,14 @@ Opening a terminal
 
 On Windows there are several options, e.g.:
 
- * Use the search field in your start menu and search for the term `Command
+ - Use the search field in your start menu and search for the term `Command
    Prompt`.
- * Use the `Run` dialog (e.g. by pressing `Windows Key + R`) to run the `cmd`
+ - Use the `Run` dialog (e.g. by pressing `Windows Key + R`) to run the `cmd`
    command
- * Right click on the Start button or press `Windows Key + X` to open the "Power
+ - Right click on the Start button or press `Windows Key + X` to open the "Power
    User Menu" and click `Command prompt` (or `Powershell`, depending on your
    system setup)
- * Manually navigate through your start menu looking for the `Command prompt`
+ - Manually navigate through your start menu looking for the `Command prompt`
    menu item.  The exact place differs across the different versions of Windows,
    but it is usually in a folder called `Accessories`, `System Utilities` or the
    like.

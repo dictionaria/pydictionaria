@@ -5,13 +5,13 @@ Brief introduction to Git
 What is what?
 -------------
 
- * git: A version control system (VCS), which allows collaborators to manage and
+ - git: A version control system (VCS), which allows collaborators to manage and
    keep track of changes to a project.
 
- * git repository (*repo* for short): A repository holds all the project files,
+ - git repository (*repo* for short): A repository holds all the project files,
    and a record of all changes.
 
- * GitHub: A website run by Microsoft, which hosts git repositories and provides
+ - GitHub: A website run by Microsoft, which hosts git repositories and provides
    means to collaborators for communication.
 
 

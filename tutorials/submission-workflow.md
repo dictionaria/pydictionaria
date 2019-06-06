@@ -24,9 +24,9 @@ Put the files for the submission directly into the `submissions/<submission-id>`
 folder.  For dictionaries in Toolbox's SFM format `dictionaria` expects the
 following file names:
 
- * `db.sfm` – Main SFM database containing the dictionary itself
- * `examples.sfm` – (Optional) SFM database containing examples
- * `glosses.flextext` – (Optional) Flextext containing glossed examples
+ - `db.sfm` – Main SFM database containing the dictionary itself
+ - `examples.sfm` – (Optional) SFM database containing examples
+ - `glosses.flextext` – (Optional) Flextext containing glossed examples
 
 
 ### Editing the `md.json` metadata file
@@ -42,10 +42,10 @@ metadata:
    editor
  - `properties` – A selection of properties needed to correctly process the
    idiosyncrasies of the dictionary (such as the definition of custom fields or
-   the handling of cross-references).  See `processing-sfm.md` for a detailed
-   description of the supported properties.
+   the handling of cross-references).  See `md-json-properties.md` for
+   a detailed description of the supported properties.
 
-Example:  `md.json` for a fictious German dictionary.
+Example:  `md.json` for a fictitious German dictionary.
 
     {
         "authors": "Erika Mustermann, Max Mustermann",
