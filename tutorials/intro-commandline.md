@@ -40,50 +40,8 @@ In general, follow the following guide lines:
    a command does what and then type the command by hand.
 
 
-What is what?
--------------
-
-### The command-line shell
-
-The *shell* is the program, that reads and interprets commands entered by the
-user.  The workflow on the command-line is as follows:
-
- 1. Wait for the user to enter a command
- 2. Run the command
- 3. Show the output of the command
- 4. Rinse, repeat
-
-Windows currently comes with two command-line shells, `cmd.exe` and
-`PowerShell`, while on Unix-like systems there are countless options (`bash`,
-`csh`, `fish`, to name a few).  However, at the end of the day they're all doing
-the same thing – so, when in doubt, stick with the default.
-
-### The prompt
-
-The *prompt* is a piece of text that signals to the user that the shell is
-waiting for a command.  In many cases the prompt provides some context about the
-current environment.  Many shells also end the prompt with some special
-character such as `$`, `%`, or `>`.
-
-Note that on Unix-like systems, a shell prompt ending on a hash symbol `#`
-usually signifies that the current shell is running  with admin privileges.  Be
-careful when executing commands as an administrator!  You might damage your
-system.  It is highly recommended to run shell commands (or any program for that
-matter) as a regular user, whenever possible.
-
-Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
-(see below) and a greater-than sign `>`.
-
-    C:\Users\Bob\Desktop>
-
-Example 2:  On Ubuntu, the prompt of `bash`, the default shell, shows the user
-name, the computer name, the current working directory, and a dollar sign `$`.
-
-    bob@work-pc:~/Desktop$
-
-
-Opening a terminal
-------------------
+Starting the command-line
+-------------------------
 
 ### Windows
 
@@ -133,8 +91,135 @@ If a command or argument contains spaces itself, put it into quotation marks:
     myprogram arg1 "argument 2"
 
 
-The working directory
----------------------
+What is what?
+-------------
+
+### The command-line shell
+
+The *shell* is the program, that reads and interprets commands entered by the
+user.  This program in itself is not very complicated.  Its functionality
+usually boils down to the following steps:
+
+ 1. Wait for the user to enter a command
+ 2. Run the command
+ 3. Show the output of the command
+ 4. Rinse, repeat
+
+Windows currently comes with two command-line shells, `cmd.exe` and
+`PowerShell`, while on Unix-like systems there are countless options (`bash`,
+`csh`, `fish`, to name a few).  However, at the end of the day they're all doing
+the same thing – so, when in doubt, stick with the default.
+
+### The prompt
+
+The *prompt* is a piece of text that signals to the user that the shell is
+waiting for a command.  In many cases the prompt provides some context about the
+current environment.  Many shells also end the prompt with some special
+character such as `$`, `%`, or `>`.
+
+Note that on Unix-like systems, a shell prompt ending on a hash symbol `#`
+usually signifies that the current shell is running  with admin privileges.  Be
+careful when executing commands as an administrator!  You might damage your
+system.  It is highly recommended to run shell commands (or any program for that
+matter) as a regular user, whenever possible.
+
+Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
+(see below) and a greater-than sign `>`.
+
+    C:\Users\Bob\Desktop>
+
+Example 2:  On Ubuntu, the prompt of `bash`, the default shell, shows the user
+name, the computer name, the current working directory, and a dollar sign `$`.
+
+    bob@work-pc:~/Desktop$
+
+### The working directory
+
+Whenever a program executes, it is running from within a certain *working
+directory*.  This means that every time the program references a file name it
+will interpret it relative to that directory.  For example, consider the
+following command (Windows version):
+
+    C:\Users\Bob> notepad my-textfile.txt
+
+The prompt tells us that the shell's current working directory `C:\Users\Bob`
+The command itself instructs the program `notepad` to open the file
+`my-textfile.txt`.  Since `notepad` was not given a complete path to the text
+file, it will automatically interpret the file name as
+`C:\Users\Bob\my-textfile.txt`.
+
+
+What's in a path?
+-----------------
+
+In many cases, the arguments passed into a program, are the names of files or
+folders.  This section describes how to tell a program how to find the file
+(some of which may seem obvious, others not so much).
+
+Everybody, who has used a computer before, is probably aware that the files on
+a computer are organised in folders; and folders within the folders; and folders
+within *these* folders; and so on.  On the command-line – and in many graphical
+programs – the position of a file is written by spelling out the path across the
+folder tree separating each element in the path with `\` on Windows or `/` on
+Unix-like systems.
+
+A path, which traces all the way to the top of the file system is called an
+*absolute path* and the folder that makes up the top of the file system is
+called the *root folder*.  Absolute paths are indicated by the fact that there
+is a folder separator (`\` or `/`) in front of the first folder/file in the
+path.
+
+Note:  On Windows the file system has several folder trees, each with their own
+root folder.  They are identified using the drive letters `a:` to `z:` (although
+`a:` and `b:` are reserved for floppy drives, which are somewhat rare nowadays).
+
+Example of an absolute path on Windows:
+
+    C:\Users\Bob\Documents\Projects\Thesis\text-file.txt
+
+Example of an absolute path on Unix-like systems:
+
+    /home/bob/Documents/Projects/Thesis/text-file.txt
+
+Also note:  On Unix-like systems, programs like to use the tilde `~` as
+a shorthand for the current user's home directory, meaning the example above
+can also be shortened as follows:
+
+    ~/Documents/Projects/Thesis/text-file.txt
+
+Reminder:  The command-line uses spaces to separate arguments from each other.
+This means, if any element in a path contains a space, the whole path needs to
+be put in quotation marks, to make sure it is interpreted as one entity:
+
+    "C:\Users\Bob\Documents\My Projects\text file.txt"
+
+The opposite of an absolute path is a *relative* path.  A relative starts with
+the name of a file or folder, without the path separator in front of it.
+Relative paths are always interpreted relative to the current working directory
+a program is running in.
+
+Example of a relative path on Windows:
+
+    Thesis\text-file.txt
+
+Example of a relative path on Unix-like systems:
+
+    Thesis/text-file.txt
+
+There are two special path names, defined by the operating system: single dot
+`.` and double dot `..`.  `.` refers a shorthand for the current directory,
+while `..` refers to the parent folder of the current directory.  Consider the
+following example (Windows version):
+
+    ..\..\Thesis\text-file.txt
+
+A program trying to find `text-file.txt` starts in the current working
+directory, moves *up* two folders, looks into the `Thesis` folder and tries to
+open the file from there.
+
+
+Navigating between folders
+--------------------------
 
 Every program is running in a *working directory*.  This means that every file
 or folder name that is not an absolute path is interpreted relative to the
