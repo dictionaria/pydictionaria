@@ -2,12 +2,13 @@ Brief introduction to the Command-line
 ======================================
 
 Using the command-line is a very easy and straight-forward way of interacting
-with a computer.  However, for whatever reason the mere thought of using it
-makes people feel uneasy or intimidated.
+with a computer.  However, for whatever reason people feel uneasy or
+intimidated, when confronted with command-line interfaces.  This document aims
+to alleviate this uneasiness by introducing the basic concepts at work.
 
 
-Some concerns
--------------
+Frequently Uttered Concerns
+---------------------------
 
 ### I don't even know how to program!
 
@@ -18,7 +19,7 @@ making them.
 
 Nobody does.  People working on the command-line usually only remember the
 commands they use regularly.  For some, this means they've memorised hundreds of
-commands over the years; other get by with just two or three, including `cd`.
+commands over the years; others get by with just two or three, including `cd`.
 Yet others just have a list of commands written down in a text file or a sheet
 of paper on their desk.  Also, there's the internet -- an endless resource for
 looking up commands or asking for help.
@@ -27,16 +28,58 @@ looking up commands or asking for help.
 
 Command-line programs aren't generally any more or less dangerous than their
 graphical counterparts.  The biggest concern might be data loss, since
-command-line programs often provide fewer save guards, when it comes to changing
-or deleting files.
+command-line programs tend to provide fewer save guards, when it comes to
+changing or deleting files.
 
-If you are concerned about your system, just follow these simple rules:
+In general, follow the following guide lines:
 
  - Proof-read any command before hitting `Enter`
  - Back up your data regularly
  - Don't run programs with admin privileges
  - Don't copy-paste commands from the internet.  Always look up, what part of
    a command does what and then type the command by hand.
+
+
+What is what?
+-------------
+
+### The command-line shell
+
+The *shell* is the program, that reads and interprets commands entered by the
+user.  The workflow on the command-line is as follows:
+
+ 1. Wait for the user to enter a command
+ 2. Run the command
+ 3. Show the output of the command
+ 4. Rinse, repeat
+
+Windows currently comes with two command-line shells, `cmd.exe` and
+`PowerShell`, while on Unix-like systems there are countless options (`bash`,
+`csh`, `fish`, to name a few).  However, at the end of the day they're all doing
+the same thing – so, when in doubt, stick with the default.
+
+### The prompt
+
+The *prompt* is a piece of text that signals to the user that the shell is
+waiting for a command.  In many cases the prompt provides some context about the
+current environment.  Many shells also end the prompt with some special
+character such as `$`, `%`, or `>`.
+
+Note that on Unix-like systems, a shell prompt ending on a hash symbol `#`
+usually signifies that the current shell is running  with admin privileges.  Be
+careful when executing commands as an administrator!  You might damage your
+system.  It is highly recommended to run shell commands (or any program for that
+matter) as a regular user, whenever possible.
+
+Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
+(see below) and a greater-than sign `>`.
+
+    C:\Users\Bob\Desktop>
+
+Example 2:  On Ubuntu, the prompt of `bash`, the default shell, shows the user
+name, the computer name, the current working directory, and a dollar sign `$`.
+
+    bob@work-pc:~/Desktop$
 
 
 Opening a terminal
@@ -73,48 +116,6 @@ term 'terminal' or 'console' in their name (e.g. `GNOME Terminal`, `Konsole`,
 
 There is a program called `Terminal` installed on your system.  Find it in the
 `Utilities` folder, or search for it using Spotlight.
-
-
-The command-line shell
-----------------------
-
-The *shell* is the program, that reads and interprets commands entered by the
-user.  The workflow on the command-line is as follows:
-
- 1. Wait for the user to enter a command
- 2. Run the command
- 3. Show the output of the command
- 4. Rinse, repeat
-
-Windows currently comes with two command-line shells, `cmd.exe` and
-`PowerShell`, while on Unix-like systems there are countless options (`bash`,
-`csh`, `fish`, to name a few).  However, at the end of the day they're all doing
-the same thing – so, when in doubt, stick with the default.
-
-
-The prompt
-----------
-
-The *prompt* is a piece of text that signals to the user that the shell is
-waiting for a command.  In many cases the prompt provides some context about the
-current environment.  Many shells also end the prompt with some special
-character such as `$`, `%`, or `>`.
-
-Note that on Unix-like systems, a shell prompt ending on a hash symbol `#`
-usually signifies that the current shell is running  with admin privileges.  Be
-careful when executing commands as an administrator!  You might damage your
-system.  It is highly recommended to run shell commands (or any program for that
-matter) as a regular user, whenever possible.
-
-Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
-(see below) and a greater-than sign `>`.
-
-    C:\Users\Bob\Desktop>
-
-Example 2:  On Ubuntu, the prompt of `bash`, the default shell, shows the user
-name, the computer name, the current working directory, and a dollar sign `$`.
-
-    bob@work-pc:~/Desktop$
 
 
 Running a command
