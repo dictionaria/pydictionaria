@@ -124,7 +124,7 @@ system.  It is highly recommended to run shell commands (or any program for that
 matter) as a regular user, whenever possible.
 
 Example 1:  The prompt of Windows' `cmd.exe` shows the current working directory
-(see below) and a greater-than sign `>`.
+(more on that later) and a greater-than sign `>`.
 
     C:\Users\Bob\Desktop>
 
@@ -132,21 +132,6 @@ Example 2:  On Ubuntu, the prompt of `bash`, the default shell, shows the user
 name, the computer name, the current working directory, and a dollar sign `$`.
 
     bob@work-pc:~/Desktop$
-
-### The working directory
-
-Whenever a program executes, it is running from within a certain *working
-directory*.  This means that every time the program references a file name it
-will interpret it relative to that directory.  For example, consider the
-following command (Windows version):
-
-    C:\Users\Bob> notepad my-textfile.txt
-
-The prompt tells us that the shell's current working directory `C:\Users\Bob`
-The command itself instructs the program `notepad` to open the file
-`my-textfile.txt`.  Since `notepad` was not given a complete path to the text
-file, it will automatically interpret the file name as
-`C:\Users\Bob\my-textfile.txt`.
 
 
 What's in a path?
@@ -162,6 +147,8 @@ within *these* folders; and so on.  On the command-line – and in many graphica
 programs – the position of a file is written by spelling out the path across the
 folder tree separating each element in the path with `\` on Windows or `/` on
 Unix-like systems.
+
+### Absolute paths
 
 A path, which traces all the way to the top of the file system is called an
 *absolute path* and the folder that makes up the top of the file system is
@@ -193,10 +180,21 @@ be put in quotation marks, to make sure it is interpreted as one entity:
 
     "C:\Users\Bob\Documents\My Projects\text file.txt"
 
+### Relative paths and the working directory
+
 The opposite of an absolute path is a *relative* path.  A relative starts with
 the name of a file or folder, without the path separator in front of it.
-Relative paths are always interpreted relative to the current working directory
-a program is running in.
+Relative paths are always interpreted relative to the current *working
+directory*.
+
+When a program gets started, it gets assigned a working directory by whoever
+started it.  In our case that's the shell:  Whenever you run a command from the
+command-line, the shell assigns 'the folder that you are currently in' as that
+command's working directory.
+
+Side note:  Windows actually assigns *multiple* working directories to a program
+– one for each drive letter.  However, we're going to ignore this in this
+introduction.
 
 Example of a relative path on Windows:
 
@@ -206,69 +204,137 @@ Example of a relative path on Unix-like systems:
 
     Thesis/text-file.txt
 
-There are two special path names, defined by the operating system: single dot
-`.` and double dot `..`.  `.` refers a shorthand for the current directory,
-while `..` refers to the parent folder of the current directory.  Consider the
+### Dot and double-dot
+
+There are two special path names, defined by the operating system: a single dot
+`.` and double dot `..`.  The double dot `..` refers to the parent directory of
+a folder, while the single `.` refers to the directory itself.  Consider the
 following example (Windows version):
 
-    ..\..\Thesis\text-file.txt
+    ..\Thesis\text-file.txt
 
-A program trying to find `text-file.txt` starts in the current working
-directory, moves *up* two folders, looks into the `Thesis` folder and tries to
-open the file from there.
+This path refers to a text file, in a folder called `Thesis`, which is in the
+folder one level above the current working directory.
+
+If the example were to use a single dot `.` instead, the path would refer to
+a text file in the folder `Thesis` *within* the current working directory:
+
+    .\Thesis\text-file.txt
+
+Note that these shorthands also work *within* a path.  It is entirely possible
+to specify the following path:
+
+    C:\Users\Bob\.\Music\..\Documents\Projects\..\..\Desktop\text-file.txt
+
+If we tried to find `text-file.txt` by following the path literally, we would
+take the following steps:
+
+ - Start at the root of drive `C:`
+ - Step into `Users`
+ - Step into `Bob`
+ - Step into the current directory of `Bob` (i.e. do nothing)
+ - Step into `Music`
+ - Step into the parent directory of `Music` (i.e. back to `Bob`)
+ - Step into `Documents`
+ - Step into `Projects`
+ - Step into the parent directory of `Projects` (i.e. back to `Documents`)
+ - Step into the parent directory of `Documents` (i.e. back to `Bob` again)
+ - Step into `Desktop`
+ - Look for `text-file.txt` in there
+
+Long story short, the path can be rewritten as follows:
+
+    C:\Users\Bob\Documents\Desktop\text-file.txt
+
+Using `.` and `..` like in the middle of a path is rarely useful when writing
+paths by hand.  However it is something to be aware of, since you might
+encounter paths like this in the wild, especially if they were generated
+automatically by a program.
 
 
 Navigating between folders
 --------------------------
 
-Every program is running in a *working directory*.  This means that every file
-or folder name that is not an absolute path is interpreted relative to the
-working directory.  Usually the shell shows the current working directory within
-the command prompt.  However it is also possible to show the working directory
-using the `cd` command on Windows:
+### Windows
 
-    C:\Users\Bob> cd
-    C:\Users\Bob
-    C:\Users\Bob>
+To move to a different folder, use the `cd` ('change directory') command and
+give it the path of the new working directory.  `cd` accepts both absolute and
+relative paths:
 
-Or the `pwd` command on Unix-like systems:
 
-    bob@work-pc:~$ pwd
-    /home/bob
-    bob@work-pc:~$
-
-The working directory can be changed using the `cd` ('change directory')
-command.  The following command changes the directory to `C:\Users\Bob`.
-
-    C:\Users\Bob> cd "C:\Program Files"
-    C:\Program Files>
-
-The `cd` command itself is run from the current working directory, which means
-it is possible to change to a directory relative to the current directory.  The
-following command changes to the directory
-
-    C:\Users\Bob> cd Desktop
+    C:\Users\Bob> cd Documents
+    C:\Users\Bob\Documents> cd C:\Users\Bob\Desktop
     C:\Users\Bob\Desktop>
 
-There are two special folder names: single period `.`, which refers to the
-current directory, and `..` which refers to the parent directory.  The latter
-can be used to move up the directory tree:
+If `cd` is run without any arguments, it will just output the current working
+directory:
 
-    C:\Users\Bob\Desktop> cd ..\Documents
-    C:\Users\Bob\Documents> cd ..
-    C:\Users\Bob
+    C:\Users\Bob\Desktop> cd
+    C:\Users\Bob\Desktop
+    C:\Users\Bob\Desktop>
 
-Additionally, on Unix-like systems there is the special folder name tilde `~` to
-refer to the current user's home directory:
+To move up a folder, run `cd` and give it the double dot `..` as an argument.
 
-    bob@work-pc:~$ pwd
-    /home/bob
-    bob@work-pc:~$ cd /etc
-    bob@work-pc:/etc$ pwd
-    /etc
-    bob@work-pc:/etc$ cd ~/Desktop
+    C:\Users\Bob\Desktop> cd ..
+    C:\Users\Bob> cd ..\..
+    C:\>
+
+If you are unsure, where to go next, it might be helpful to look at the contents
+of the current folder.  To do so, run the `dir` ('directory content') command.
+
+    C:\Users\Bob\Desktop> dir
+     Volume in C is OS
+     Volume serial number is ....-....
+
+     Directory of C:\Users\Bob
+
+    dd/mm/yyyy  hh:mm    <DIR>           .
+    dd/mm/yyyy  hh:mm    <DIR>           ..
+    dd/mm/yyyy  hh:mm    <DIR>           backups
+    dd/mm/yyyy  hh:mm    <DIR>           photos
+    dd/mm/yyyy  hh:mm            632.000 text-file (Copy).txt
+    dd/mm/yyyy  hh:mm            712.000 text-file.txt
+                   2 files
+                   4 dirs
+
+### Unix-like systems
+
+To move to a different folder, use the `cd` ('change directory') command and
+give it the path of the new working directory.  `cd` accepts both absolute and
+relative paths:
+
+    bob@work-pc:~$ cd Documents
+    bob@work-pc:~/Documents$ cd /usr/share
+    bob@work-pc:/usr/share$ cd ~/Desktop
+    bob@work-pc:~/Desktop$
+
+If `cd` is run without any arguments, it will move to the current user's home
+directory:
+
+    bob@work-pc:~/Desktop$ cd
+    bob@work-pc:~$
+
+To output the current working directory, use the `pwd` ('print working
+directory') command.
+
     bob@work-pc:~/Desktop$ pwd
     /home/bob/Desktop
+    bob@work-pc:~/Desktop$
+
+To move up a folder, run `cd` and give it the double dot `..` as an argument.
+
+    bob@work-pc:~/Desktop$ cd ..
+    bob@work-pc:~$ cd ../..
+    bob@work-pc:/$
+
+If you are unsure, where to go next, it might be helpful to look at the contents
+of the current folder.  To do so, run the `ls` ('list directory content')
+command.
+
+    bob@work-pc:~/Desktop$ ls
+    backup   photos  'text-file (Copy).txt'   text-file.txt
+    bob@work-pc:~/Desktop$
+
 
 Wildcard characters
 -------------------
