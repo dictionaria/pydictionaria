@@ -21,7 +21,7 @@ Nobody does.  People working on the command-line usually only remember the
 commands they use regularly.  For some, this means they've memorised hundreds of
 commands over the years; others get by with just two or three, including `cd`.
 Yet others just have a list of commands written down in a text file or a sheet
-of paper on their desk.  Also, there's the internet -- an endless resource for
+of paper on their desk.  Also, there's the internet – an endless resource for
 looking up commands or asking for help.
 
 ### I don't want to break my computer!
@@ -38,6 +38,22 @@ In general, follow the following guide lines:
  - Don't run programs with admin privileges
  - Don't copy-paste commands from the internet.  Always look up, what part of
    a command does what and then type the command by hand.
+
+
+Operating System
+----------------
+
+Note that a lot of the details depend on the operating system you are using.
+Luckily a lot of operating systems (such as GNU/Linux, BSD, macOS, etc.) are
+either heavily inspired by or direct descendants of the Unix operating system,
+which means they share a lot of the same commands.  The most notable exception
+to this rule is Microsoft Windows.
+
+Long story short, this document splits most operating-system-dependent advice
+into two categories:
+
+ 1. Microsoft Windows
+ 2. Unix-like operating systems
 
 
 Starting the command-line
@@ -67,7 +83,7 @@ purpose of this tutorial, either is fine.
 
 Depending of your distribution, there is usually one or more terminal emulator
 installed.  They are usually in the `System` category of your menu and have the
-term 'terminal' or 'console' in their name (e.g. `GNOME Terminal`, `Konsole`,
+term ‘terminal’ or ‘console’ in their name (e.g. `GNOME Terminal`, `Konsole`,
 `XTerm`, etc.).
 
 ### macOS
@@ -89,6 +105,13 @@ spaces:
 If a command or argument contains spaces itself, put it into quotation marks:
 
     myprogram arg1 "argument 2"
+
+Note:  Make sure you use the proper plain-text quotation mark `"` symbol.
+Anything else, like forward- or backticks, or typographical quotation marks (“”
+or ‘’) are not considered quotation marks as far as the command-line is
+concerned.  The only exceptions is that Unix-like systems also allow single
+quotes (using the apostrophe key on your keyboard) `'`.  This does not work on
+Windows, however.
 
 
 What is what?
@@ -189,7 +212,7 @@ directory*.
 
 When a program gets started, it gets assigned a working directory by whoever
 started it.  In our case that's the shell:  Whenever you run a command from the
-command-line, the shell assigns 'the folder that you are currently in' as that
+command-line, the shell assigns ‘the folder that you are currently in’ as that
 command's working directory.
 
 Side note:  Windows actually assigns *multiple* working directories to a program
@@ -257,7 +280,7 @@ Navigating between folders
 
 ### Windows
 
-To move to a different folder, use the `cd` ('change directory') command and
+To move to a different folder, use the `cd` (‘change directory’) command and
 give it the path of the new working directory.  `cd` accepts both absolute and
 relative paths:
 
@@ -280,7 +303,7 @@ To move up a folder, run `cd` and give it the double dot `..` as an argument.
     C:\>
 
 If you are unsure, where to go next, it might be helpful to look at the contents
-of the current folder.  To do so, run the `dir` ('directory content') command.
+of the current folder.  To do so, run the `dir` (‘directory content’) command.
 
     C:\Users\Bob\Desktop> dir
      Volume in C is OS
@@ -299,7 +322,7 @@ of the current folder.  To do so, run the `dir` ('directory content') command.
 
 ### Unix-like systems
 
-To move to a different folder, use the `cd` ('change directory') command and
+To move to a different folder, use the `cd` (‘change directory’) command and
 give it the path of the new working directory.  `cd` accepts both absolute and
 relative paths:
 
@@ -314,8 +337,8 @@ directory:
     bob@work-pc:~/Desktop$ cd
     bob@work-pc:~$
 
-To output the current working directory, use the `pwd` ('print working
-directory') command.
+To output the current working directory, use the `pwd` (’print working
+directory’) command.
 
     bob@work-pc:~/Desktop$ pwd
     /home/bob/Desktop
@@ -328,7 +351,7 @@ To move up a folder, run `cd` and give it the double dot `..` as an argument.
     bob@work-pc:/$
 
 If you are unsure, where to go next, it might be helpful to look at the contents
-of the current folder.  To do so, run the `ls` ('list directory content')
+of the current folder.  To do so, run the `ls` (‘list directory content’)
 command.
 
     bob@work-pc:~/Desktop$ ls
@@ -371,93 +394,67 @@ themselves.  Although this difference rarely matters in practice, it is
 something to be aware of.
 
 
-Getting help TODO
+Getting help
 ------------
 
 
-Some useful commands
---------------------
+### Self-documenting programs
 
-This section is just a small cheat sheet for some common commands, separated by
-operating system (or rather by Windows vs. not Windows, since Unix-like
-operating systems tend to use the same names for basic programs).
+Some command-line programs include a brief description of all their options and
+arguments in the program itself.  You can usually access this description by
+specifying a special argument.
 
-### Windows
+The command-line tools included in Windows usually use the `/?` argument
+(forward slash and a question mark).  This means, if you want to look up some
+help on how to use the `dir` command, you can run the following command:
 
-Change the current working directory:
+    C:\Users\Bob> dir /?
 
-    cd <foldername>
+On Unix-like systems, programs tend to use either `-h` (one dash and the letter
+`h`) or `--help` (two dashes and the word `help`), for example:
 
-Output the name of the current working directory:
+    bob@work-pc:~$ ls --help
 
-    cd
+Note that third-party programs tend to favour the Unix way, including
+`dictionaria`:
 
-Show the contents of the current working directory:
+    C:\Users\Bob> dictionaria --help
 
-    dir
+### Unix manual pages
 
-Rename a file:
+Unix-like systems traditionally come pre-installed with a comprehensive
+reference manual that documents a lot of the commands, file formats, programming
+libraries, etc. the operating ships with.  This manual is organised as
+a collection of separate manual pages – a.k.a. `manpages`.  Each manpage talks
+about one subject, e.g. a specific program and, despite being called a ‘page’,
+they go into far more detail about a program than most built-in help messages.
 
-    move <filename> <new filename>
+Manpages can be accessed using a program called `man`.  For instance, to read
+the manpage for the `ls` command, run the following command:
 
-Move a file to a different folder:
+    bob@work-pc:~$ man ls
 
-    move <filename> <foldername>
+If you are unsure about the exact name of a manpage, you can use the `apropos`
+program to output a list of related manual pages, each with a short summary.
 
-Copy a file (does not work with folders):
+    bob@work-pc:~$ apropos pwd
 
-    copy <filename> <destination>
+Note the `apropos` program also includes the summaries in its search.  This
+means you can look for , like so:
 
-Create a new folder:
+    bob@work-pc:~$ apropos working directory
 
-    md <foldername>
+If you want to find out more about the manual in detail, the manual also
+contains a page for the `man` program itself:
 
-Delete a file:
+    bob@work-pc:~$ man man
 
-    del <filename>
+### The Internet
 
-Delete an empty folder:
-
-    rd <foldername>
-
-### Unix-like systems
-
-Change the current working directory:
-
-    cd <foldername>
-
-Output the name of the current working directory:
-
-    pwd
-
-Show the contents of the current working directory:
-
-    ls
-
-Rename a file:
-
-    mv <filename> <new filename>
-
-Move a file to a different folder:
-
-    mv <filename> <foldername>
-
-Copy a file (does not work with folders):
-
-    cp <filename> <destination>
-
-Copy an entire folder recursively:
-
-    cp -r <foldername> <destination>
-
-Create a new folder:
-
-    mkdir <foldername>
-
-Delete a file:
-
-    rm <filename>
-
-Delete an empty folder:
-
-    rmdir <foldername>
+This seems obvious, but people sometimes can't see the forest for the trees
+– especially when they're stuck:  There are a lot of people working on the
+command-line and there are a lot of people learning how to work on the
+command-line.  And many of them have asked questions on-line, answered questions
+on-line, written blog-posts, etc.  So whenever you're faced with a problem, no
+matter how stupid you think your question might be, don't be shy to type it into
+your search engine of choice.
