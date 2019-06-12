@@ -28,6 +28,7 @@ setup(
         'attrs>=19.1',
         'clldutils~=2.0',
         'pycldf',
+        'pycdstar>=1.0.1',
         'cdstarcat>=1.0.0',
         'tqdm',
         'transliterate==1.7.6',
