@@ -230,6 +230,16 @@ and `\et` respectively:
         "et_Ger": "et"
     }
 
+### `media_lookup`
+
+When looking for media files in *cdstar*, the processing script only considers
+files associated with the current submission by default.  This behaviour can be
+changed by specifying a list of submission IDs in the `media_lookup` property.
+
+Example:  Include media files with the IDs `German` and IDs `German_LegalTerms`:
+
+    "media_lookup": ["German", "German_LegalTerms"]
+
 ### `metalanguages`
 
 TODO
