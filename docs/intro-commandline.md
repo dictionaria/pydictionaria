@@ -67,8 +67,8 @@ On Windows there are several options, e.g.:
    Prompt`.
  - Use the `Run` dialog (e.g. by pressing `Windows Key + R`) to run the `cmd`
    command
- - Right click on the Start button or press `Windows Key + X` to open the "Power
-   User Menu" and click `Command prompt` (or `Powershell`, depending on your
+ - Right click on the Start button or press `Windows Key + X` to open the ‘Power
+   User Menu’ and click `Command prompt` (or `Powershell`, depending on your
    system setup)
  - Manually navigate through your start menu looking for the `Command prompt`
    menu item.  The exact place differs across the different versions of Windows,
@@ -362,36 +362,116 @@ command.
 Wildcard characters
 -------------------
 
-Sometimes you want to run a program on multiple files, but typing out every
-file name is tedious and error-prone.  For this one can use wildcard characters
-
-TODO
-
-The two most common wildcard characters are the question mark `?` and the
+Sometimes you want to run a program on multiple files, but typing out every file
+name is tedious and error-prone.  This is where *wildcard characters* come in.
+Wildcard characters are metacharacters that stand in for one or more unknown
+characters.  The two most common examples are the question mark `?` and the
 asterisk `*`:
 
- - `?` is a placeholder for a single unkown character.
- - `*` is a placeholder for any number of characters (or none).
+ - `?` serves as a placeholder for a single unkown character.
+ - `*` serves as a placeholder for any number of characters (or none).
 
 Example 1:  The following command moves files like `text-01.txt`, `text-02.txt`,
-`text-xy.txt` into the folder `backup` (on Windows):
+`text-xy.txt`, etc. into the folder `backup` (Windows version):
 
     move text-??.txt backup
 
 Example 2:  The following command deletes every file ending with the extension
-`.exe` from the current working directory (on Windows):
+`.exe` from the current working directory (Windows version):
 
     del *.exe
 
 Note: Be extra careful with commands that delete or change files.  Always
-double-check that the wildcard does not apply to any files you don't want to
-affect.  The command-line does not have an undo button nor a trash bin, so any
+double-check that the wildcard does not apply to any files you don't want
+affected.  The command-line does not have an undo button nor a trash bin, so any
 file you accidentally delete will be gone forever.
 
 Also note: On Unix-like systems, wildcards are usually resolved by the shell,
 before a program is run.  On Windows, wildcards are resolved by the programs
 themselves.  Although this difference rarely matters in practice, it is
 something to be aware of.
+
+
+What's in a `PATH`
+------------------
+
+This section aims to answer two questions:
+
+ 1. Where are all those commands coming from?
+ 2. How do I add new commands to the command-line?
+
+
+### Where are the commands?
+
+Some commands are separate programs installed on your computer, others are built
+directly into the shell.  For instance, on a Unix-like program using the `bash`
+shell, the `cd` and `pwd` commands are builtin commands provided by `bash`
+itself, but `ls` is its own program.
+
+Now where does the shell look for programs to run?
+
+For this the operating system defines an environment variable called `PATH`.
+
+*Environment variables* are named pieces of information that are defined by the
+operating system and that can be accessed from any program.  There is for
+instance a variable called `USERNAME` on Windows, or just `USER` on Unix-like
+systems, which holds the user name of the current user; or another called
+`USERPROFILE` (Windows) or `HOME` (Unix-like), which contains the name of the
+current user's home directory; and so on.  And of course, aforementioned `PATH`
+variable.
+
+The `PATH` variable contains a list of directories.  Whenever you type in the
+bare name of a program, the shell will look through these directories in order
+and when the directory contains a program of the same name, execute it.
+
+Note:  On Windows you can omit file extensions like `.exe` or `.bat`.  The shell
+will look for those extensions automatically.
+
+However, what if the program you want to run is not in any of the directories
+listed in `PATH`?  Then there are two options:
+
+First, type in the path to the program – either as an absolute path or as a path
+relative to your working directory.  For example, to run `7zip`'s command-line
+tool on Windows you might run the following command-line (notice the quotation
+marks because of the space in the name of the `Program Files` folder):
+
+    C:\Users\Bob>"C:\Program Files\7-Zip\7z.exe" --help
+
+Note:  On Unix-like systems, relative paths need *at least one folder name*,
+otherwise the shell only look for programs in the `PATH`.   Luckily, this folder
+name may also be a single dot `.`, so if you want to run a program in the
+current working directory, you can run the following command:
+
+    bob@work-pc:~$ ./my-program --help
+
+The second option involves adding the directory of the program to your `PATH`,
+so the shell knows where to find the program.
+
+
+### Changing the `PATH` on Windows
+
+TODO PATH on windows
+TODO Powershell vs cmd
+
+    C:\Users\Bob> echo Hello
+    Hello
+
+    C:\Users\Bob> echo %PATH%
+    C:\Windows\System32;
+
+    PS C:\Users\Bob> echo $Env:PATH
+    C:\Windows\System32;
+
+
+### Changing the `PATH` on Unix-like systems
+
+TODO PATH on unix
+
+    bob@work-pc:~$ echo Hello
+    Hello
+
+    bob@work-pc:~$ echo $PATH
+    /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 
 
 Getting help
