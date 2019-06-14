@@ -477,7 +477,7 @@ example:
     C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;[...]
 
 As you can see the variable contains a list of absolute paths, separated by
-semicolons.
+*semicolons*.
 
 To change the variable you can use the `Environment Variables` dialog in
 Windows.  There are different ways to get to the dialog depending on the version
@@ -511,30 +511,122 @@ enclosed in percentage signs `%` just like on `cmd.exe`.  This means you can
 use the `USERPROFILE` variable to point to paths with your home directory
 without typing it out directly every time.
 
-Example:  Say we want to add two folders to our `PATH`:  The folder where `7zip`
-is installed and a folder called `My Programs`, located in our `Documents`
-folder.  Then we would add the following text to the `PATH` variable:
+Example:  Say you have installed the `7zip` program to `C:\Program Files\7-Zip`,
+and you have a bunch of little programs in a folder `Programs` in your
+`Documents` folder.  To add both to your path, add the following text to your
+`PATH` variable:
 
-    C:\Program Files\7-Zip;%USERPROFILE%\Documents\My Programs
+    C:\Program Files\7-Zip;%USERPROFILE%\Documents\Programs
 
-To reiterate: `C:\Program Files\7-Zip` is an absolute path to the `7zip`
-program, the semicolon `;` separates the two paths, and
-`%USERPROFILE%\Documents\My Programs` uses the `USERPROFILE` variable to refer
-to the current user's home directory, meaning the path is interpreted as
-something like `C:\Users\Bob\Documents\My Programs`.
+To reiterate:
+
+ - `C:\Program Files\7-Zip` is an absolute path to the `7zip` program
+ - The semicolon `;` separates the two paths
+ - `%USERPROFILE%\Documents\Programs` uses the `USERPROFILE` variable to refer
+   to the current user's home directory, meaning the path is interpreted as
+   something like `C:\Users\Bob\Documents\Programs`
 
 Also note that changes to environment variables only apply to newly started
 programs, meaning you may have to restart your terminal window.
 
 ### Changing the `PATH` on Unix-like systems
 
-TODO PATH on unix
+First of all, you can look at the current value of the path variable using the
+command-line.  To do this we make use of the `echo` command.  The `echo` command
+outputs its own command-line arguments directly to the command line:
 
     bob@work-pc:~$ echo Hello
     Hello
 
+In addition to this the `echo` command is able to expand environment variables
+like `PATH`.  To do so put a dollar sign `$` in front of the variable name:
+
     bob@work-pc:~$ echo $PATH
     /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+As you can see the variable contains a list of absolute paths, separated by
+*colons*.
+
+To change environment variables, go to your home directory and open the file
+`.profile` in your text editor of choice.  If the file does not exit, create it.
+Note that many file managers hide files starting with a dot `.` by default, so
+you might have to turn on the ‘show hidden files‘ option – it's often under
+`View` in the menu bar.
+
+Note that some shells might use a different name for the file.  If you're using
+the `bash` shell (default on most GNU/Linux or macOS systems), the file might be
+called `.bash_profile` instead.  For the `zsh` shell (default on macOS 10.15
+‘Catalina’ or higher) it is called `.zprofile`.  Also, if you are using a less
+common shell such as `csh` or `fish`, read the documentation for your shell on
+how to set environment variables permanently.
+
+To find out which shell you are running, run the following command (that is
+a dollar sign `$` followed by the number zero `0`):
+
+    bob@work-pc:~$ echo $0
+    /bin/bash
+
+Variables are changed by adding a new line to the profile file like so:
+
+    export MY_VARIABLE="new value"
+
+This will set the variable `MY_VARIABLE` to the value `new value`.  Note that
+this completely replaces any old value the variable might have had.  Luckily you
+can include environment variables within the new value – including the old value
+of the same variable.  To include the value of an environment variable, put a
+dollar sign `$` in front of its name – just like in the `echo` command.
+
+For example, you put can put another line below the line above like so:
+
+    export MY_VARIABLE="this is not a $MY_VARIABLE anymore"
+
+Then the value of `MY_VARIABLE` becomes the following:
+
+    "this is not a new value anymore"
+
+This behaviour can be used to add new paths to the `PATH` variable.  Say, you
+installed firefox manually into the folder `/opt/firefox` and want to add it to
+your `PATH`.  Then you can add the folder to the back of the list by adding the
+following line to your `~/.profile`:
+
+    export PATH="$PATH:/opt/firefox"
+
+This sets the `PATH` variable to a new value:
+
+ - The old `PATH`
+ - A colon `:` as a separator
+ - The absolute path `/opt/firefox`
+
+In other words the value of `PATH` changes from this:
+
+    /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+To this:
+
+    /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/opt/firefox
+
+It is also possible to create a similar line, where the new path is added at the
+front of the list:
+
+    export PATH="/opt/firefox:$PATH"
+
+This would result in the following new value:
+
+    /opt/firefox:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+*However:*  Remember that the shell starts searches the folders for programs *in
+order*.  If there are two programs with the same name in both `/opt/firefox` and
+`/usr/bin` the shell will run whatever comes first in the list.  This means that
+a third-party program you installed after the fact, might actually overshadow
+a program from your operating system.  Changes you make in `~/.profile` only
+affect your current user account, so you are unlikely to do any real harm to
+your computer, *buuut* overshadowing pre-installed software with random programs
+from the internet is still not a particularly safe idea.  So don't do it.
+
+Long story short, always add new paths to the *back* of the list.
+
+After changing the file, save it, log off your user account and log back in
+again, to apply the changes.
 
 
 Getting help
