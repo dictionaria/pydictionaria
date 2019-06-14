@@ -447,21 +447,84 @@ current working directory, you can run the following command:
 The second option involves adding the directory of the program to your `PATH`,
 so the shell knows where to find the program.
 
-
 ### Changing the `PATH` on Windows
 
-TODO PATH on windows
-TODO Powershell vs cmd
+First of all, you can look at the current value of the path variable using the
+command-line.  To do this we make use of the `echo` command.  The `echo` command
+outputs its own command-line arguments directly to the command line:
 
     C:\Users\Bob> echo Hello
     Hello
 
+In addition to this the `echo` command is able to expand environment variables
+like `PATH`.  The exact syntax is different for `cmd.exe` and Powershell.  If
+you are unsure, which one you are using, you can easily tell them apart by their
+default colour scheme:
+
+1. `cmd.exe` uses white letters on a black background
+2. The Powershell is very blue
+
+On the `cmd.exe` shell the name of the variable has to be enclosed in percentage
+signs `%`, for example:
+
     C:\Users\Bob> echo %PATH%
-    C:\Windows\System32;
+    C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;[...]
+
+On Powershell put the string `$Env:` directly in front of the variable name, for
+example:
 
     PS C:\Users\Bob> echo $Env:PATH
-    C:\Windows\System32;
+    C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;[...]
 
+As you can see the variable contains a list of absolute paths, separated by
+semicolons.
+
+To change the variable you can use the `Environment Variables` dialog in
+Windows.  There are different ways to get to the dialog depending on the version
+of Windows you are using.
+
+1. Find the `System` dialog in the Control Centre
+2. Open the `Advanced system settings` dialog
+3. Go to the `Advanced` tab
+4. Click the `Environment Variables`
+
+On Windows 8 or 10 you can also use the Windows Search in your start menu to
+look for something along the lines of ‘Change environment variables for you user
+account’.  Note that you do not have to type out the whole thing.  The search
+will incrementally offer you results.
+
+In this dialog there are two sections:  `User Variables` and `System Variables`.
+It is recommended to leave the system-wide settings alone and only change the
+variables for your user account.
+
+To change the `PATH` variable click on its respective line in the list and press
+the `Edit…` button.  Add the absolute paths of the folders with the programs you
+want to run to the back of the list, separated using semicolons.
+
+If there is no `PATH` variable in the `User Variables` section of the dialog,
+you can use the `New…` button to create it.  Don't worry about the fact that
+there different `PATH` variables in the user and system-wide section of the
+dialog.  Windows will automatically combine the two internally.
+
+Note that the `PATH` variable itself can contain other environment variables,
+enclosed in percentage signs `%` just like on `cmd.exe`.  This means you can
+use the `USERPROFILE` variable to point to paths with your home directory
+without typing it out directly every time.
+
+Example:  Say we want to add two folders to our `PATH`:  The folder where `7zip`
+is installed and a folder called `My Programs`, located in our `Documents`
+folder.  Then we would add the following text to the `PATH` variable:
+
+    C:\Program Files\7-Zip;%USERPROFILE%\Documents\My Programs
+
+To reiterate: `C:\Program Files\7-Zip` is an absolute path to the `7zip`
+program, the semicolon `;` separates the two paths, and
+`%USERPROFILE%\Documents\My Programs` uses the `USERPROFILE` variable to refer
+to the current user's home directory, meaning the path is interpreted as
+something like `C:\Users\Bob\Documents\My Programs`.
+
+Also note that changes to environment variables only apply to newly started
+programs, meaning you may have to restart your terminal window.
 
 ### Changing the `PATH` on Unix-like systems
 
