@@ -54,7 +54,7 @@ that an entry is lacking such a marker.
 1. If the dictionary uses a different marker for the description *consistently
    throughout the entire database*, add it to the `marker_map` property in the
    `md.json`.
-2. Otherwise manually edit the entry in the `db.sfm`.
+2. Otherwise manually fix the entry in the original database.
 
 ### `ERROR \lx <headword>: multiple \de but not matching \sn`
 
@@ -67,7 +67,7 @@ markers and the number of `\de` markers.  This could have multiple causes:
 
 *How do I fix this?*
 
-Manually edit the entry in the `db.sfm`.
+Manually fix the entry in the original database.
 
 ### `ERROR \lx <headword>: multiple conflicting \ps`
 
@@ -92,8 +92,7 @@ point to a non-existent entries.
 
 Check the reference for typos and make sure the affected reference contains the
 exact identifier or headword.  Pay extra attention to missing or wrong homonym
-numbers.  Also make sure there is a single space ` ` between a lemma and its
-homonym number.
+numbers.
 
 ### `ERROR \lx <headword>: invalid bibkey: \bibref [...]`
 
@@ -132,7 +131,7 @@ is missing the example is dropped.
 
 *How do I fix this?*
 
-Manually edit the `db.sfm` and fix or delete the affected example.
+Manually fix or delete the affected example in the original database.
 
 ### `# cannot merge [...] and [...]`
 
@@ -175,9 +174,8 @@ the example will be dropped.
 
 *How do I fix this?*
 
-Edit the `db.sfm` to add content to the `\ps` marker of the entry.  If the part
-of speech of entry is uncertain set the value of the `\ps` marker to
-`uncertain`.
+Edit the original entry and add content to the `\ps` marker.  If the part of
+speech of entry is uncertain set the value of the `\ps` marker to `uncertain`.
 
 ### `ERROR \lx <headword>: entry dropped due to conflicting \ps markers: [...]`
 
@@ -197,7 +195,7 @@ likely to happen, if examples are provided in a separate `examples.sfm` file.
 
 *How do I fix this?*
 
-Check the reference for typos and edit the `db.sfm` appropriately.
+Check the reference for typos or remove the reference.
 
 ### `WARNING unknown media files: [...]`
 
@@ -252,8 +250,8 @@ might be senses that were removed due to previous errors.
 
 *How do I fix this?*
 
-Look for the entry in the `db.sfm` and fix it.  Also, run the `check`
-subcommand and look for entries with missing `\de` fields.
+Look for the original entry and fix it.  Also, run the `check` subcommand and
+look for entries with missing `\de` fields.
 
 ### CLDF validation errors
 
@@ -265,5 +263,39 @@ file.  These messages follow the following shape:
     WARNING/ERROR <table file>:<lineno> <message>
 
 
-`glosses.log` TODO
+`glosses.log`
 -------------
+
+The `glosses.log` file is created, when glosses are provided in a separate
+`glosses.flextext` file.  The file may contain errors from the parsing process,
+although *technically*, these that should never occur in FLEx exports (unless
+FLEx decides to randomly change their output format).  Other than that there are
+a few possible messages:
+
+### `ERROR md.json does not specify 'gloss_ref' marker`
+
+The `gloss_ref` property specifies the SFM marker, FLEx uses in examples to
+store the reference to its gloss.  Because FLEx defines a different marker for
+every dictionary – which is outside of the control of the user – there is no
+default value to this property.  As a result, glosses cannot be processed if the
+`gloss_ref` property is missing.
+
+*How do I fix it?*
+
+Look through the examples in the `db.sfm` and find out, which marker contains
+a reference to the gloss and edit your `md.json` accordingly.
+
+### `ERROR Gloss '\\?? <gloss id> not found (ex: <example id>)`
+
+This means that an example refers to a gloss, which was not found in the
+`glosses.flextext`.  Since the association between the two is done
+automatically,
+
+*How do I fix it?*
+
+1. Double-check the `md.json`, if you have set the right `gloss_ref` marker.
+   FLEx defines like a dozen different markers named `\z...`, so it is easy to
+   mix them up.
+2. The `db.sfm` and the `glosses.flextext` files might be out of sync.  Have
+   FLEx re-export both files.
+3. If the reference is truly wrong, fix it from within FLEx and re-export.
