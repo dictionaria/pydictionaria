@@ -710,11 +710,10 @@ def remove_senseless_entries(sense_rows, entry_rows, log):
         for row in sense_rows
         if 'Entry_ID' in row}
     for entry in entry_rows:
-        entry_id = entry.get('ID', '').strip()
-        if entry_id in referenced_entries:
+        if entry.get('ID', '').strip() in referenced_entries:
             yield entry
         else:
-            log.error("%s: entry dropped since there aren't any senses referring to it", entry_id)
+            log.error("\\lx %s: entry dropped since there aren't any senses referring to it", entry['Headword'])
 
 
 def merge_gloss_into_example(glosses, example_row):

@@ -121,35 +121,148 @@ new marker to the `cross-references` property in the `md.json`.
 `examples.log`
 --------------
 
-### `# incomplete example in lx <headword> - missing [...]` TODO
+The `examples.log` file in the submission folder is created, when the processing
+script extracts examples from the `db.sfm` (i.e. the examples were not provided
+in a separate `examples.sfm` file).
 
-### `# cannot merge [...] and [...]` TODO
+### `# incomplete example in lx <headword> - missing xv/xe`
 
+Every example must at least have a `\xv` and `\xe` field.  If any of those two
+is missing the example is dropped.
+
+*How do I fix this?*
+
+Manually edit the `db.sfm` and fix or delete the affected example.
+
+### `# cannot merge [...] and [...]`
+
+In SFM databases, examples are embedded directly in their respective dictionary entries.
+As result, if multiple entries are exemplified by the same example, the example
+has to be copied into every entry – in its entirety.
+
+To avoid duplicates in the CLDF database, the processing script attempts to
+merge any examples that share the same text and the same translation into one.
+The error message means that the merging process failed.   In this case both
+variants of the example will be added to the CLDF database as separate examples.
+
+*How do I fix this?*
+
+Edit the examples, such that none of the fields conflict with each other.
 
 `cldf.log`
 ----------
 
-### `WARNING No CLDF column defined for markers: [...]` TODO
+The `cldf.log` file in the submission folder is created by the processing
+script.  It contains warnings and errors that occurred on the way from the
+original `db.sfm` to the final CLDF database.  The messages usually appear in
+the same order as they are presented here.
 
-### `ERROR \lx <headword>: entry dropped due to missing \ps marker` TODO
+### `WARNING No CLDF column defined for markers: [...]`
 
-### `ERROR \lx <headword>: entry dropped due to empty \ps marker` TODO
+This is just a list of every SFM marker, which has not been processed in any
+way.
 
-### `ERROR \lx <headword>: entry dropped due to conflicting \ps markers: [...]` TODO
+*How do I fix this?*
 
-### `WARNING senses refer to non-existent examples: [...]` TODO
+Edit the `md.json` file to map the SFM markers to their respective table
+columns.  Note that some markers are just time stamps, ‘notes to self’, or other
+supplementary information.  Those can safely be ignored.
 
-### `WARNING unknown media files: [...]` TODO
+### `ERROR \lx <headword>: entry dropped due to missing/empty \ps marker`
 
-### `WARNING could not process links: missing property: link_regex` TODO
+Every entry needs a Part of Speech.  If the `\ps` marker is missing or empty,
+the example will be dropped.
 
-### `ERROR <table name>: Could not add column: [...]` TODO
+*How do I fix this?*
 
-### `ERROR <table name>: row dropped due to missing required fields: [...]` TODO
+Edit the `db.sfm` to add content to the `\ps` marker of the entry.  If the part
+of speech of entry is uncertain set the value of the `\ps` marker to
+`uncertain`.
 
-### `ERROR <entry id>: entry dropped since there aren't any senses referring to it` TODO
+### `ERROR \lx <headword>: entry dropped due to conflicting \ps markers: [...]`
 
-TODO messages in dataset validation – is there a place I can tell people to go to?
+This message occurs, when an entry has multiple `\ps` markers with different
+values.
+
+*How do I fix this?*
+
+See section above on the message
+`ERROR \lx <headword>: multiple conflicting \ps`
+in the section above on the `check` subcommand.
+
+### `WARNING senses refer to non-existent examples: [...]`
+
+This message occurs, when a sense contains a reference to an example.  This is more
+likely to happen, if examples are provided in a separate `examples.sfm` file.
+
+*How do I fix this?*
+
+Check the reference for typos and edit the `db.sfm` appropriately.
+
+### `WARNING unknown media files: [...]`
+
+This message accumulates all files referred to in the database, which were not
+found in the CDSTAR database.
+
+*How do I fix this?*
+
+Run the `check` subcommand to get a list of all `missing files`.  See the
+respective section above for more information.
+
+### `WARNING could not process links: missing property: link_regex`
+
+Link processing requires the definition of two `md.json` properties:
+`process_links_in_markers` and `link_regex`.  If the former is empty or missing,
+the script just assumes that link processing is not desired and moves on.
+However, if `process_links_in_markers` is present, but no `link_regex` was
+defined, the script indicates that using this error message.
+
+*How do I fix this?*
+
+Add the appropriate `link_regex` property to the `md.json` file.
+
+### `ERROR <table name>: Could not add column: [...]`
+
+This message occurs, when the CLDF database is initialised.  It means that the
+script was unable to add a table column to a table in the database.  This can
+be caused for instance, by an invalid column name (containing spaces etc.).
+Read the reason at the end of the message for more information.
+
+*How do I fix this?*
+
+Edit the `md.json`.  The exact fix depends on the actual error message.
+
+### `ERROR <table name>: row dropped due to missing required fields: [...]`
+
+The CLDF specification marks several table columns as `required`, meaning their
+value must not be empty.  If it *is* empty, the entire row is dropped from the
+table.
+
+*How do I fix this?*
+
+Below the error message you find a list of the fields, that *are* defined.  Use
+this information to find the original entry in the `db.sfm` and/or
+`examples.sfm`.  Also, you might find it helpful to re-run the `check`
+subcommand, as it catches common cases such as `\de` or `\ps`.
+
+### `ERROR \lx <headword>: entry dropped since there aren't any senses referring to it`
+
+Every entry needs at least one sense, otherwise it is dropped.  Note that there
+might be senses that were removed due to previous errors.
+
+*How do I fix this?*
+
+Look for the entry in the `db.sfm` and fix it.  Also, run the `check`
+subcommand and look for entries with missing `\de` fields.
+
+### CLDF validation errors
+
+After the CLDF dataset is created the processing script validates the created
+CLDF to find problems that might have slipped through the processing above.  Any
+warnings produced by the validator are appended at the bottom of the `cldf.log`
+file.  These messages follow the following shape:
+
+    WARNING/ERROR <table file>:<lineno> <message>
 
 
 `glosses.log` TODO
