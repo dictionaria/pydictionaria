@@ -105,6 +105,18 @@ to a bibliography entry not found in the `sources.bib`.
 1. Check the entry for types.
 2. Add any missing bibliography entries to you `sources.bib`
 
+### `ERROR \lx <headword>: illegal marker: \se`
+
+The `\se` marker is commonly used to create subentries.  Dictionaria does not
+support subentries.
+
+*How do I fix this?*
+
+Split any subentries off into separate entries.  If you want to preserve the
+notion that the subentry relates to the parent entry, specify a new marker in
+the subentry and add a cross-reference to the parent entry.  Remember to add the
+new marker to the `cross-references` property in the `md.json`.
+
 
 `examples.log`
 --------------
