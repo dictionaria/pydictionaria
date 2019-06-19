@@ -454,11 +454,11 @@ class MediaExtractor(object):
         return entry
 
 
-def _lx_hm_pair(entry):
+def _lx_hm_pair(entry, space=True):
     lx = entry.get('lx')
     hm = entry.get('hm')
     if hm:
-        return '{} {}'.format(lx, hm)
+        return '{}{}{}'.format(lx, ' ' if space else '',  hm)
     return lx
 
 
@@ -467,7 +467,11 @@ def make_id_index(entries):
         entry.original_id: entry.id
         for entry in entries}
     id_index.update(
-        (_lx_hm_pair(entry), entry.id)
+        (_lx_hm_pair(entry, True), entry.id)
+        for entry in entries
+        if entry.get('lx').strip())
+    id_index.update(
+        (_lx_hm_pair(entry, False), entry.id)
         for entry in entries
         if entry.get('lx').strip())
     return id_index
