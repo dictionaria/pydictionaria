@@ -2,15 +2,47 @@ Getting Started
 ===============
 
 
+Prerequisites
+-------------
+
+ - If you do not know how to use the command-line read the file
+   `intro-commandline.md`
+ - If you do not know the ins and outs of `git`, read the file `intro-git.md`
+
+
+Installing a text editor
+------------------------
+
+Submissions for dictionaria all come in some form of plain-text, be it an SFM
+database or the `csv` and `json` files used by the CLDF format.  Because of this
+it is highly recommended to use a good text editor.  This is especially true for
+users of Microsoft Windows, since Notepad is… lacking in a few areas.
+
+Here is a quick selection of popular free and open source text editors:
+
+ - [Notepad++][notepadpp] by Don Ho (Windows only)
+ - [Visual Studio Code][vscode] by Microsoft
+ - [Atom][atom] by Github
+ - [Vim][vim] by Bram Moolenaar
+ - [GNU Emacs][emacs] by the Free Software Foundation
+
+[notepadpp]: https://notepad-plus-plus.org
+[vscode]: https://code.visualstudio.com
+[atom]: https://atom.io
+[vim]: https://www.vim.org
+[emacs]: https://www.gnu.org/software/emacs
+
+
 Installing Python 3
 -------------------
 
 ### Installation (Windows)
 
-Go to [the download page](https://www.python.org/downloads/windows/) of the
-Python website.  From there, go to the "Stable Releases" section and download
-the installer for the latest version of Python 3.  `pydictionaria` will *not*
-work with Python 2.
+Go to [the download page][python-dl] on the Python website.  From there, go to
+the "Stable Releases" section and download the installer for the latest version
+of Python 3.  `pydictionaria` will *not* work with Python 2.
+
+[python-dl]: https://www.python.org/downloads/windows/
 
 However, note that Python 2 and 3 can coexist on the same system, meaning it is
 not necessary to uninstall Python 2, if it is already there.
@@ -43,7 +75,7 @@ distributions.
 
 Note that Python 2 and 3 can coexist on the same system, meaning it is not
 necessary do uninstall Python 2, if it is already there (in fact, depending on
-your system configuration uninstalling Python 2 might flat-out be impossible).
+your system configuration uninstalling Python 2 might be flat-out impossible).
 
 Example:  To install Python 3 on Ubuntu or other Debian-based systems, run:
 
@@ -64,8 +96,9 @@ Installing `pydictionaria`
 
 ### Clone the repository
 
-Clone the [pydictionaria repository](https://github.com/dictionaria/pydictionaria)
-to a folder of your choice.
+Clone the [pydictionaria repository][repo] to a folder of your choice.
+
+[repo]: https://github.com/dictionaria/pydictionaria
 
 ### Install `pydictionaria`
 
@@ -128,6 +161,19 @@ for your user password before running the actual command.
 
     sudo python3 setup.py install
 
-### TODO Running `dictionaria` shows the message `command not found`, even though the installation finished successfully
+### Running `dictionaria` shows the message `command not found`, even though the installation finished successfully
 
-note: tell about $PATH
+If your shell is unable to find `dictionaria`, it might mean that you need to add
+its installation folder to your `PATH` (read the file `intro-commandline.md` if
+you don't know how to add folders to your `PATH`).
+
+On Windows Python puts its scripts in the following folder:
+
+    %USERPROFILE%\AppData\Local\Programs\Python37\Scripts
+
+Be sure to replace the version number in the `Python37` folder with the right
+version for your Python installation (e.g. `Python38` for Python 3.8):
+
+On Unix-like systems Python puts its scripts in the following folder:
+
+    $HOME/.local/bin
