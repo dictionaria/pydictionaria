@@ -309,9 +309,6 @@ class Rearrange(object):
             entry.insert(insert, ('rf', content))
 
         move_marker(entry, 'xsf', 'xe')
-        move_marker(entry, 'xo', 'xe')
-        move_marker(entry, 'xr', 'xe')
-        move_marker(entry, 'xn', 'xe')
 
 
 EXAMPLE_MARKER_MAP = {
