@@ -199,12 +199,18 @@ class Dictionary(base.Dictionary):
             self.sfm.visit(lambda e: sfm2cldf.validate_ps(e, log))
             self.sfm.visit(sfm2cldf.merge_pos)
 
+            crossref_markers = (
+                sfm2cldf.DEFAULT_CROSS_REFERENCES
+                | set(props.get('cross_references', ()))
+                | set(flexref_map.values()))
+
             entry_extr = sfm2cldf.EntryExtractor(
                 spec['entry_id'],
                 spec['entry_markers'])
             sense_extr = sfm2cldf.SenseExtractor(
                 spec['sense_sep'],
                 spec['sense_markers'],
+                crossref_markers,
                 log)
 
             rest = [entry_extr(entry) for entry in self.sfm]
@@ -243,11 +249,6 @@ class Dictionary(base.Dictionary):
                 log.warning('unknown media files: %s', file_list)
 
             id_index = sfm2cldf.make_id_index(entries)
-
-            crossref_markers = (
-                sfm2cldf.DEFAULT_CROSS_REFERENCES
-                | set(props.get('cross_references', ()))
-                | set(flexref_map.values()))
 
             crossref_processor = sfm2cldf.CrossRefs(id_index, crossref_markers)
             entries.visit(crossref_processor)

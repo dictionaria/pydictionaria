@@ -377,10 +377,11 @@ def merge_pos(entry):
 
 class SenseExtractor(object):
 
-    def __init__(self, sense_sep, sense_markers, log):
+    def __init__(self, sense_sep, sense_markers, crossref_markers, log):
         self.sense_sep = sense_sep
         self.sense_markers = sense_markers
         self.log = log
+        self.crossrefs = crossref_markers
         self._idgen = IDGenerator('SN')
 
         self.senses = sfm.SFM()
@@ -397,10 +398,11 @@ class SenseExtractor(object):
                 msg = ', '.join(sorted({
                     '\\%s' % m
                     for m, _ in group
-                    if m not in ('lf', 'lv', 'le')}))
-                self.log.warning(
-                    r'\lx %s: sense markers before first \sn: %s',
-                    entry.original_entry_id, msg)
+                    if m not in self.crossrefs}))
+                if msg:
+                    self.log.warning(
+                        r'\lx %s: sense markers before first \sn: %s',
+                        entry.original_entry_id, msg)
                 continue
             new_sense = sfm.Entry(group)
             new_sense.id = self._idgen.next_id()
