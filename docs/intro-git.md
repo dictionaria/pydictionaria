@@ -2,8 +2,8 @@ Brief introduction to Git
 =========================
 
 
-What is this `git` thing?
--------------------------
+Introduction
+------------
 
 `git` is a distributed version control system, which allows collaborators to
 manage and keep track of changes to the project.  Dictionaria uses `git` to
@@ -32,8 +32,8 @@ for all major operating systems.
 [git-inst]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
 
-What is `git`?
---------------
+What is this `git` thing?
+-------------------------
 
 `git` is a *version control system* (VCS).  As the name suggests it is
 a *system* that *controls* different *versions* of a project.  This actually
@@ -55,12 +55,14 @@ from each other – in theory, at least.
 In practice people instead create a central repository somewhere on-line, which
 serves as *the* copy of the project; the one that everybody pushes their changes
 to and the one that everybody pulls from, if they want to get the most recent
-version of the project.  Some bigger projects host their `git` repositories on
-their own website, for example the [Linux kernel][linux-repos] or the [GNU
-project][gnu-savannah].  Many smaller projects on the other hand rely on
-third-party companies that offer to host `git` repositories, such as
-[Github][github] or Atlassian's [Bitbucket][bitbucket].  At the time of writing
-all of Dictionaria's code and data reside on Github.
+changes to the project.
+
+Some bigger projects host their `git` repositories on their own website, for
+example the [Linux kernel][linux-repos] or the [GNU project][gnu-savannah].
+Many smaller projects on the other hand rely on third-party companies that offer
+to host `git` repositories, such as [Github][github] or Atlassian's
+[Bitbucket][bitbucket].  At the time of writing all of Dictionaria's code and
+data reside on Github.
 
 [linux-repos]: https://git.kernel.org
 [gnu-savannah]: https://savannah.gnu.org
@@ -76,33 +78,101 @@ with all the unpublished data can only be accessed by project members.
 [apache2]: https://github.com/dictionaria/pydictionaria/blob/master/LICENSE
 
 
-TODO Cloning a repository
--------------------------
+Cloning a repository
+--------------------
 
-Because git is a *distributed* VCS every collaborator contains a full copy
-('clone') of the repository on their computer.
+To recieve your very own copy of a project, you need to create a ‘clone’ of the
+remote repository on your computer.  To do this you can use the `clone`
+subcommand of `git`:
 
     git clone <url>
 
-This will create a new folder with the same name as the repo in the current
-working directory.  This folder will contain a complete copy of the repository.
+This will create a new folder in the current working directory and fills it with
+the most recent project files.  Note that this will also clone the entire
+history of every branch of the project in one go, so if the project as a very
+long and active history, this might take a while.
 
-    git clone <url> <folder name>
+If you want a different name for your project folder, add it as an additional
+argument to the `git` command:
 
-This will do the same, but specify a different name for the folder.  Remember to
-put folder names in "quotation marks", if they contain spaces.
+    git clone <url> <foldername>
 
 Example:  Cloning the `pydictionaria` repo.
 
     git clone https://github.com/dictionaria/pydictionaria
 
 
-Keeping a repository up-to-date
--------------------------------
+Exploring a project
+-------------------
 
-To download all new changes from the original repository, `cd` to the folder
-containing the repository and run the `pull` subcommand:
+`git` knows everything about your project and is willing to share this
+information with you.  To look at the current state of your project, run the
+`status` subcommand:
 
-    git pull
+    git status
 
-This will download all changes from the original remote repository.
+Note that almost every `git` command aside from `clone` is run from within the
+project folder – so, unless stated otherwise, `cd` into your project folder
+before running any of the `git` commands.
+
+If you just cloned a repository the output will most like look some thing like
+this:
+
+    On branch master
+    Your branch is up to date with 'origin/master'
+
+    nothing to commit, working tree clean
+
+Now what does any of this mean?
+
+ - `On branch master`:
+   We'll worry about branches later.  For now, just remember that `master` is
+   usually the name used for the ‘main branch’ of the project.
+
+ - `Your branch is up to date with 'origin/master'`:
+   This means that there are no new changes to the remote repository *that this
+   working copy knows of*.  This is important to remember:  The `status`
+   subcommand does not actually connect to the internet and fetch any new
+   changes – there is a separate command for that.
+
+ - `nothing to commit, working tree clean`:
+   This means, there are no changes to any of the project's files.
+
+Another useful command is the `log` subcommand:
+
+    git log
+
+As the name suggests this command shows a list of all changes made to the
+project starting at the most recent.  It also contains information about *who*
+made the change and *when*.
+
+
+Keeping in sync with the remote repository
+------------------------------------------
+
+As mentioned before, `git` does not pull any changes from the remote repository
+unless you specifically tell it to.  To do so run the `fetch` subcommand:
+
+    git fetch
+
+If you run `git status` after this, it will tell you how many commits were added
+to the remote repository (a ‘commit’ is VCS-talk for a single change made to the
+project):
+
+    On branch master
+    Your branch is behind 'origin/master' by 4 commits, and can be fast-forwarded.
+      (use "git pull" to update your local branch)
+    [...]
+
+As this message suggests, none of the changes on the remote repositories have
+actually been applied to your working copy, yet.  To do so, run the `merge`
+subcommand without any further arguments:
+
+    git merge
+
+TODO staging and commiting
+TODO pushing
+TODO branches
+TODO merging
+TODO merge conflicts
+TODO pull requests
