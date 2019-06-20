@@ -278,6 +278,7 @@ class EntryExtractor(object):
         self.entries.append(new_entry)
 
         rest.entry_id = new_entry.id
+        rest.original_entry_id = original_id
         return rest
 
 
@@ -376,9 +377,10 @@ def merge_pos(entry):
 
 class SenseExtractor(object):
 
-    def __init__(self, sense_sep, sense_markers):
+    def __init__(self, sense_sep, sense_markers, log):
         self.sense_sep = sense_sep
         self.sense_markers = sense_markers
+        self.log = log
         self._idgen = IDGenerator('SN')
 
         self.senses = sfm.SFM()
@@ -392,6 +394,13 @@ class SenseExtractor(object):
         for group in groups:
             # Drop everything before the first \sn marker
             if len(groups) > 1 and group[0][0] != self.sense_sep:
+                msg = ', '.join(sorted({
+                    '\\%s' % m
+                    for m, _ in group
+                    if m not in ('lf', 'lv', 'le')}))
+                self.log.warning(
+                    r'\lx %s: sense markers before first \sn: %s',
+                    entry.original_entry_id, msg)
                 continue
             new_sense = sfm.Entry(group)
             new_sense.id = self._idgen.next_id()

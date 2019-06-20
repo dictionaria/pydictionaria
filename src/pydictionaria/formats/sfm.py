@@ -204,7 +204,8 @@ class Dictionary(base.Dictionary):
                 spec['entry_markers'])
             sense_extr = sfm2cldf.SenseExtractor(
                 spec['sense_sep'],
-                spec['sense_markers'])
+                spec['sense_markers'],
+                log)
 
             rest = [entry_extr(entry) for entry in self.sfm]
             rest = [sense_extr(entry) for entry in rest if entry]
