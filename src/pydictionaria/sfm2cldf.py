@@ -43,8 +43,8 @@ DEFAULT_EXAMPLE_MAP = {
     'tx': 'Primary_Text',
     'mb': 'Analyzed_Word',
     'gl': 'Gloss',
-    'ot': 'Original_Translation',
-    'ota': 'alt_translation1',
+    'ot': 'alt_translation1',
+    'ota': 'alt_translation2',
     'ft': 'Translated_Text'}
 
 DEFAULT_FLEXREF_MAP = {
