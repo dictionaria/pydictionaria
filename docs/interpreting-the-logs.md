@@ -188,6 +188,16 @@ See section above on the message
 `ERROR \lx <headword>: multiple conflicting \ps`
 in the section above on the `check` subcommand.
 
+### `WARNING \lx <headword>: sense markers before first \sn: [...]`
+
+Every sense needs to start with an `\sn` marker – the sole exception being
+entries with exactly one `\sn` marker.
+
+*How do I fix this?*
+
+Check the original entry for typos or missing `\sn` markers and edit it
+accordingly.
+
 ### `WARNING senses refer to non-existent examples: [...]`
 
 This message occurs, when a sense contains a reference to an example.  This is more
