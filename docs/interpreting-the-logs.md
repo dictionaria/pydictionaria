@@ -170,12 +170,12 @@ supplementary information.  Those can safely be ignored.
 ### `ERROR \lx <headword>: entry dropped due to missing/empty \ps marker`
 
 Every entry needs a Part of Speech.  If the `\ps` marker is missing or empty,
-the example will be dropped.
+the entry will be dropped.
 
 *How do I fix this?*
 
 Edit the original entry and add content to the `\ps` marker.  If the part of
-speech of entry is uncertain set the value of the `\ps` marker to `uncertain`.
+speech of entry is uncertain at your stage of language documentation set the value of the `\ps` marker to `uncertain`.
 
 ### `ERROR \lx <headword>: entry dropped due to conflicting \ps markers: [...]`
 
