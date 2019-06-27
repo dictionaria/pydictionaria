@@ -480,11 +480,11 @@ def make_id_index(entries):
     id_index.update(
         (_lx_hm_pair(entry, True), entry.id)
         for entry in entries
-        if entry.get('lx').strip())
+        if entry.get('lx', '').strip())
     id_index.update(
         (_lx_hm_pair(entry, False), entry.id)
         for entry in entries
-        if entry.get('lx').strip())
+        if entry.get('lx', '').strip())
     return id_index
 
 
