@@ -3,6 +3,7 @@ from __future__ import unicode_literals, print_function, division
 from collections import Counter, defaultdict, OrderedDict
 import re
 import copy
+import unicodedata
 
 from transliterate import translit
 from clldutils.sfm import FIELD_SPLITTER_PATTERN, SFM
@@ -22,6 +23,10 @@ def split(s):
 
 def join(l):
     return ' ; '.join(l)
+
+
+def fsname(n):
+    return unicodedata.normalize('NFC', as_unicode(n))
 
 
 class Entry(BaseEntry):
@@ -215,10 +220,10 @@ class Files(object):
             # Register files already uploaded to CDStar:
             if spec['sid'] in submission.media_sids:
                 fname = Path(spec['fname'])
-                self.files[spec['type']][spec['fname']] = checksum
-                self.files[spec['type']][as_unicode(fname.stem)] = checksum
-                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.upper()] = checksum
-                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.lower()] = checksum
+                self.files[spec['type']][fsname(spec['fname'])] = checksum
+                self.files[spec['type']][fsname(as_unicode(fname.stem))] = checksum
+                self.files[spec['type']][fsname(fname.stem) + fname.suffix.upper()] = checksum
+                self.files[spec['type']][fsname(fname.stem) + fname.suffix.lower()] = checksum
                 # and just in case, add transliterated variants of file names:
                 try:
                     nname = translit(spec['fname'], 'ru', reversed=True)
@@ -238,7 +243,7 @@ class Files(object):
             if mtypes:
                 normalized = []
                 for fname in split_ids(content, self.file_sep):
-                    fname = re.split(r'/|\\', fname)[-1]
+                    fname = fsname(re.split(r'/|\\', fname)[-1])
                     for mtype in mtypes:
                         p = self.files[mtype].get(fname)
                         if p:
