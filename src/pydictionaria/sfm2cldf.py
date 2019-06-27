@@ -568,7 +568,7 @@ def _single_spaces(s):
     return s
 
 
-def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
+def sfm_entry_to_cldf_row(table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None):
     # XXX What if the same tag appears multiple times?
     #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
@@ -576,9 +576,9 @@ def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
     row = defaultdict(list)
     sources = []
     for tag, value in entry:
-        if tag in refs:
+        if tag in source_refs:
             sources.extend(
-                '{}[{}]'.format(s.strip(), refs[tag])
+                '{}[{}]'.format(s.strip(), source_refs[tag])
                 for s in value.split(';'))
         key = mapping.get(tag)
         if key and value:
@@ -598,34 +598,27 @@ def sfm_entry_to_cldf_row(table_name, mapping, refs, entry, language_id=None):
     if sources:
         row['Source'] = sources
 
-    # In the CLDF spec, the columns `Gloss` and `Analyzed_Word` are defined with
-    # the property `separator="\t"`.  For these columns the `csvw` package
-    # assumes that the value comes as a *list* not a string.
-    # TODO Check the spec for other columns with separators
+    # The `csvw` package expects lists as input for fields with separators
     if table_name == 'ExampleTable':
         if 'Gloss' in row:
             row['Gloss'] = row['Gloss'].split()
         if 'Analyzed_Word' in row:
             row['Analyzed_Word'] = row['Analyzed_Word'].split()
-    elif table_name == 'EntryTable':
-        for col in ['Main_Entry', 'Entry_IDs', 'Contains']:
-            if col in row:
-                row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
-    elif table_name == 'SenseTable':
-        for col in ['Synonym', 'Antonym']:
-            if col in row:
-                row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
+    for col in cross_ref_columns:
+        if col in row:
+            row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
+
     return row
 
 
-def _add_columns(dataset, table_name, columns, refs, log):
+def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
     for column in sorted(columns):
         col = column
-        if column in SEPARATORS:
+        if column in SEPARATORS or column in cross_refs:
             col = {
                 'name': column,
                 'datatype': 'string',
-                'separator': SEPARATORS[column]}
+                'separator': SEPARATORS.get(column, DEFAULT_SEPARATOR)}
         try:
             dataset.add_columns(table_name, col)
         except ValueError as error:
@@ -634,13 +627,11 @@ def _add_columns(dataset, table_name, columns, refs, log):
             if not msg.startswith('Duplicate column name:'):
                 log.error('%s: Could not add column: %s', table_name, msg)
 
-        if table_name == 'EntryTable' and column in ['Main_Entry', 'Entry_IDs', 'Contains']:
-            dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
-        if table_name == 'SenseTable' and column in ['Synonym', 'Antonym']:
+        if column in cross_refs:
             dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
         if column == 'Media_IDs':
             dataset[table_name].add_foreign_key(column, 'media.csv', 'ID')
-    if refs:
+    if sources:
         try:
             dataset.add_columns(
                 table_name,
@@ -654,15 +645,16 @@ def make_cldf_dataset(
         folder,
         entry_columns, sense_columns, example_columns,
         entry_sources, sense_sources, example_sources,
+        entry_crossrefs, sense_crossrefs, example_crossrefs,
         log):
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table('media.csv', 'ID', 'Language_ID', 'Filename')
 
-    _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, log)
-    _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, log)
+    _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
+    _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)
     if example_columns:
-        _add_columns(dataset, 'ExampleTable', example_columns, example_sources, log)
+        _add_columns(dataset, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
         #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')

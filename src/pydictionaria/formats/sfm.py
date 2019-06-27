@@ -270,6 +270,9 @@ class Dictionary(base.Dictionary):
                 or self.submission.md.language.glottocode
                 or '')
 
+            entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
+            sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
+            example_crossref_cols = {c for m, c in spec['example_map'].items() if m in crossref_markers}
             dataset = sfm2cldf.make_cldf_dataset(
                 outdir,
                 spec['entry_columns'],
@@ -278,6 +281,9 @@ class Dictionary(base.Dictionary):
                 spec['entry_sources'],
                 spec['sense_sources'],
                 spec['example_sources'],
+                entry_crossref_cols,
+                sense_crossref_cols,
+                example_crossref_cols,
                 log)
 
             if props.get('labels'):
@@ -291,13 +297,13 @@ class Dictionary(base.Dictionary):
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry_crossref_cols, entry, lang_id)
                 for entry in entries]
             sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense)
+                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense_crossref_cols, sense)
                 for sense in senses]
             example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], example, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], sense_crossref_cols, example, lang_id)
                 for example in examples]
             media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
