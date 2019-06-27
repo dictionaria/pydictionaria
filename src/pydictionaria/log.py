@@ -3,9 +3,11 @@ from __future__ import unicode_literals, print_function, division
 import logging
 from functools import partial
 
-from termcolor import colored
-
 _logger = None
+
+
+def colored(msg, *args, **kw):
+    return msg
 
 
 def get_logger():
