@@ -170,6 +170,8 @@ class Check(object):
                 print(entry.__class__)
                 print(entry)
             self.lexemes.add(entry.id)
+            # Check for both 'lemma 1' and 'lemma1' variants
+            self.lexemes.add(re.sub(r'\s+(\d+)$', r'\1', entry.id))
 
     def __call__(self, entry):
         if not entry.get('de'):
