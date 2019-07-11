@@ -100,7 +100,7 @@ def make_spec(properties, marker_set):
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
     entry_sep = properties.get('entry_sep', DEFAULT_ENTRY_SEP).strip().lstrip('\\')
     entry_id = properties.get('entry_id', DEFAULT_ENTRY_ID)
-    entry_markers.update((entry_sep, entry_id, 'hm', 'sf'))
+    entry_markers.update((entry_sep, entry_id, 'hm', 'sf', 'lc'))
     entry_columns.add('Media_IDs')
 
     sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
@@ -473,6 +473,14 @@ def _lx_hm_pair(entry, space=True):
     return lx
 
 
+def _lc_hm_pair(entry, space=True):
+    lc = entry.get('lc')
+    hm = entry.get('hm')
+    if hm:
+        return '{}{}{}'.format(lc, ' ' if space else '',  hm)
+    return lc
+
+
 def make_id_index(entries):
     id_index = {
         entry.original_id: entry.id
@@ -485,6 +493,14 @@ def make_id_index(entries):
         (_lx_hm_pair(entry, False), entry.id)
         for entry in entries
         if entry.get('lx', '').strip())
+    id_index.update(
+        (_lc_hm_pair(entry, True), entry.id)
+        for entry in entries
+        if entry.get('lc', '').strip())
+    id_index.update(
+        (_lc_hm_pair(entry, False), entry.id)
+        for entry in entries
+        if entry.get('lc', '').strip())
     return id_index
 
 
