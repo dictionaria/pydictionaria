@@ -87,7 +87,8 @@ class Dictionary(base.Dictionary):
         enc = self.submission.md.properties.get('encoding', 'utf8')
         sfm = Database(self.submission.dir.joinpath(self._fname), encoding=enc)
         repair(sfm)
-        with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
+        with self.submission.dir.joinpath(
+                self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
                 fp.write(str(entry))
                 fp.write('\n\n')
@@ -97,7 +98,8 @@ class Dictionary(base.Dictionary):
         sfm = Database(
             self.submission.dir.joinpath(self._fname), encoding=enc, keep_empty=True)
         sfm.visit(ComparisonMeanings(concepticon, marker=marker))
-        with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
+        with self.submission.dir.joinpath(
+                self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
                 fp.write(str(entry))
                 fp.write('\n\n')
@@ -268,7 +270,8 @@ class Dictionary(base.Dictionary):
 
             entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
             sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
-            example_crossref_cols = {c for m, c in spec['example_map'].items() if m in crossref_markers}
+            example_crossref_cols = {
+                c for m, c in spec['example_map'].items() if m in crossref_markers}
             dataset = sfm2cldf.make_cldf_dataset(
                 outdir,
                 spec['entry_columns'],
@@ -293,13 +296,30 @@ class Dictionary(base.Dictionary):
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry_crossref_cols, entry, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'EntryTable',
+                    spec['entry_map'],
+                    spec['entry_sources'],
+                    entry_crossref_cols,
+                    entry,
+                    lang_id)
                 for entry in entries]
             sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense_crossref_cols, sense)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'SenseTable',
+                    spec['sense_map'],
+                    spec['sense_sources'],
+                    sense_crossref_cols,
+                    sense)
                 for sense in senses]
             example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], sense_crossref_cols, example, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'ExampleTable',
+                    spec['example_map'],
+                    spec['example_sources'],
+                    sense_crossref_cols,
+                    example,
+                    lang_id)
                 for example in examples]
             media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
@@ -308,10 +328,14 @@ class Dictionary(base.Dictionary):
             # Separator in log file
             print(file=logfile)
 
-            entry_rows = list(sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
-            sense_rows = list(sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
-            example_rows = list(sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
-            media_rows = list(sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
+            entry_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
+            sense_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
+            example_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
+            media_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
 
             entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
 

@@ -166,7 +166,7 @@ class Check(object):
             try:
                 if entry.id in self.lexemes:
                     error(entry, 'duplicate lemma')
-            except:
+            except:  # noqa: E722
                 print(entry.__class__)
                 print(entry)
             self.lexemes.add(entry.id)
@@ -212,7 +212,7 @@ class Files(object):
                     nname = translit(as_unicode(p.name), 'ru', reversed=True)
                     if nname not in self.files[mtype]:
                         self.files[mtype][nname] = p
-                except:
+                except:  # noqa: E722
                     continue
                 self.files[mtype][as_unicode(p.stem) + p.suffix.lower()] = p
                 self.files[mtype][as_unicode(p.stem) + p.suffix.upper()] = p
@@ -227,12 +227,9 @@ class Files(object):
                 self.files[spec['type']][fsname(fname.stem) + fname.suffix.upper()] = checksum
                 self.files[spec['type']][fsname(fname.stem) + fname.suffix.lower()] = checksum
                 # and just in case, add transliterated variants of file names:
-                try:
-                    nname = translit(spec['fname'], 'ru', reversed=True)
-                    if nname not in self.files[spec['type']]:
-                        self.files[spec['type']][nname] = checksum
-                except:
-                    raise
+                nname = translit(spec['fname'], 'ru', reversed=True)
+                if nname not in self.files[spec['type']]:
+                    self.files[spec['type']][nname] = checksum
 
     def __call__(self, entry):
         """

@@ -1,6 +1,4 @@
-from __future__ import unicode_literals, division, print_function
 import sys
-import argparse
 
 from clldutils.clilib import ArgumentParserWithLogging
 from clldutils.path import Path
@@ -11,7 +9,7 @@ assert commands
 
 
 def main():  # pragma: no cover
-    parser = ArgumentParserWithLogging('pydictionaria')
+    parser = ArgumentParserWithLogging(pydictionaria.__name__)
     parser.add_argument('--internal', dest='internal', action='store_true')
     parser.add_argument('--no-internal', dest='internal', action='store_false')
     parser.add_argument('--repos', type=Path, default=Path('dictionaria-internal'))

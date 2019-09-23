@@ -66,6 +66,7 @@ SEPARATORS = {
     'Sense_IDs': DEFAULT_SEPARATOR,
     'Main_Entry': DEFAULT_SEPARATOR}
 
+
 def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
     mapped_values = set(json_mapping.values())
     global_map = ChainMap(
@@ -467,7 +468,7 @@ def _lx_hm_pair(entry, space=True):
     lx = entry.get('lx')
     hm = entry.get('hm')
     if hm:
-        return '{}{}{}'.format(lx, ' ' if space else '',  hm)
+        return '{}{}{}'.format(lx, ' ' if space else '', hm)
     return lx
 
 
@@ -475,7 +476,7 @@ def _lc_hm_pair(entry, space=True):
     lc = entry.get('lc')
     hm = entry.get('hm')
     if hm:
-        return '{}{}{}'.format(lc, ' ' if space else '',  hm)
+        return '{}{}{}'.format(lc, ' ' if space else '', hm)
     return lc
 
 
@@ -582,7 +583,8 @@ def _single_spaces(s):
     return s
 
 
-def sfm_entry_to_cldf_row(table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None):
+def sfm_entry_to_cldf_row(
+        table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None):
     # XXX What if the same tag appears multiple times?
     #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
@@ -668,12 +670,13 @@ def make_cldf_dataset(
     _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
     _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)
     if example_columns:
-        _add_columns(dataset, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
+        _add_columns(
+            dataset, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
-        #ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
-        #if ft:
-        #    ft.required = True
+        # ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
+        # if ft:
+        #     ft.required = True
 
     return dataset
 

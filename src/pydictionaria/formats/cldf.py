@@ -65,7 +65,7 @@ DEFAULT_METADATA = """\
             "tableSchema": {
                 "columns": [
                     {
-                        "name": "ID", 
+                        "name": "ID",
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#id",
                         "datatype": {"base": "string"},
                         "required": true

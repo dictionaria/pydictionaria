@@ -8,7 +8,7 @@ from clldutils.path import md5, copy
 from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
-from pycldf import Dictionary, TERMS
+from pycldf import Dictionary
 from bs4 import BeautifulSoup
 
 from pydictionaria.util import MediaCatalog
@@ -36,11 +36,7 @@ def _upload(repos, d, catalog, name):
                             'path': '%s' % fname.relative_to(repos),
                             'dictionary': name,
                         }
-                        try:
-                            _, _, obj = list(cat.create(fname, md, filter_=lambda f: True))[0]
-                        except:
-                            print(fname)
-                            raise
+                        _, _, obj = list(cat.create(fname, md, filter_=lambda f: True))[0]
                         mcat.add(obj, sid=name, type=fname.parent.name, fname=fname.name)
 
 
@@ -73,7 +69,7 @@ def ls(args):
         try:
             s = Submission(d, args.repos)
             md = s.md
-        except:
+        except:  # noqa: E722
             args.log.exception('error loading submission {0}'.format(d))
             continue
         if md:
@@ -84,7 +80,7 @@ def ls(args):
                 md.language.glottocode,
                 md.author_names,
                 md.date_published or '',
-                ])
+            ])
     print(table.render(tablefmt='simple', sortkey=lambda r: r[0], condensed=False))
 
 
@@ -230,22 +226,23 @@ def _submission_dir(args, path_or_id=None):
     return None
 
 
+TRAVIS_BASE_URL = "https://travis-ci.org/dictionaria/"
 README_TEMPLATE = """\
 # {title}
 
 > by {authors}
 
 This repository contains the data underlying the published version of the dictionary
-at [Dictionaria]({url}) as [CLDF](https://cldf.clld.org) 
-[Dictionary](cldf) 
-[![Build Status](https://travis-ci.org/dictionaria/{id}.svg?branch=master)](https://travis-ci.org/dictionaria/{id})
+at [Dictionaria]({url}) as [CLDF](https://cldf.clld.org)
+[Dictionary](cldf)
+[![Build Status](%s{id}.svg?branch=master)](%s{id})
 
-Releases of this repository are archived with and accessible through 
+Releases of this repository are archived with and accessible through
 [ZENODO](https://zenodo.org/communities/dictionaria) and the latest release
 is published on the [Dictionaria website](https://dictionaria.clld.org).
 
 {intro}
-"""
+""" % (TRAVIS_BASE_URL, TRAVIS_BASE_URL)
 
 TRAVIS_YML = """\
 language: python
