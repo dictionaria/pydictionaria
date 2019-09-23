@@ -1,9 +1,8 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
+from pathlib import Path
 
 from clldutils import jsonlib
 from clldutils.misc import lazyproperty
-from clldutils.path import import_module, Path
+from clldutils.path import import_module
 import attr
 
 from pydictionaria.formats import FORMATS

@@ -1,7 +1,4 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
-from clldutils.path import write_text, Path
+from pathlib import Path
 
 
 EAF_SFM = """

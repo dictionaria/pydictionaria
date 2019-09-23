@@ -1,7 +1,4 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
-from clldutils.path import read_text, Path
+from pathlib import Path
 
 from pydictionaria import commands
 
@@ -44,8 +41,8 @@ def test_check_sfm(mocker, repos):
 def test_process_sfm(mocker, repos, tmpdir):
     commands.process(_args(mocker, repos, 'sub_sfm'))
     proc = repos.joinpath('submissions', 'sub_sfm', 'processed')
-    assert "Custom" in read_text(proc / 'senses.csv').split('\n')[0]
-    assert "Custom" in read_text(proc / 'entries.csv').split('\n')[0]
+    assert "Custom" in (proc / 'senses.csv').read_text(encoding='utf-8').split('\n')[0]
+    assert "Custom" in (proc / 'entries.csv').read_text(encoding='utf-8').split('\n')[0]
 
     commands.process(_args(mocker, repos, 'sub_sfm_with_examples'))
     commands.release(_args(mocker, repos, 'sub_sfm_with_examples', Path(str(tmpdir))))

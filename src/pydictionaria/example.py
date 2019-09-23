@@ -1,16 +1,14 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 from collections import OrderedDict
 from hashlib import md5
 
 from clldutils.sfm import Entry, SFM
-from clldutils.misc import slug, UnicodeMixin, lazyproperty
+from clldutils.misc import slug, lazyproperty
 
 
 MULTILINE_MARKERS = {'tx', 'mb', 'gl'}
 
 
-class Example(Entry, UnicodeMixin):
+class Example(Entry):
     markers = OrderedDict([
         ('ref', 'id'),
         ('lemma', None),
@@ -94,7 +92,7 @@ class Example(Entry, UnicodeMixin):
     def gloss(self):
         return self.normalize(self.get('gl'))
 
-    def __unicode__(self):
+    def __str__(self):
         lines = []
         for key in self.markers:
             value = self.get(key) or ''

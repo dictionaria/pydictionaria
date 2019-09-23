@@ -1,11 +1,10 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 import os
+from pathlib import Path
 
 from csvw.dsv import reader, UnicodeWriter
 from clldutils.clilib import ParserError, command
 from clldutils import jsonlib
-from clldutils.path import Path, md5, copy, read_text, write_text
+from clldutils.path import md5, copy
 from clldutils.markup import Table
 from cdstarcat.catalog import Catalog
 from pyconcepticon.api import Concepticon
@@ -359,7 +358,7 @@ def release(args):
             res.append(name)
         return ' '.join(res)
 
-    intro = BeautifulSoup(read_text(d / 'intro.md'), 'html.parser')
+    intro = BeautifulSoup((d / 'intro.md').read_text(encoding='utf-8'), 'html.parser')
     for div in intro.find_all('div', class_='sentence-wrapper'):
         igt_to_table(intro, div)
 
@@ -371,7 +370,7 @@ def release(args):
         'title': md['properties'].get('title') or md['language']['name'] + ' dictionary',
         'authors': format_authors(md['authors']),
     }
-    write_text(outdir / 'README.md', README_TEMPLATE.format(**md_readme))
+    (outdir / 'README.md').write_text(README_TEMPLATE.format(**md_readme), encoding='utf-8')
     cldf = outdir / 'cldf'
 
     if not cldf.exists():
@@ -425,5 +424,5 @@ def release(args):
     new_md = cldf / 'Dictionary-metadata.json'
     cldf_md.write_metadata(new_md)
     Dictionary.from_metadata(new_md).validate(log=args.log)
-    write_text(outdir / '.travis.yml', TRAVIS_YML)
-    write_text(outdir / 'test.py', TEST_PY)
+    (outdir / '.travis.yml').write_text(TRAVIS_YML, encoding='utf-8')
+    (outdir / 'test.py').write_text(TEST_PY, encoding='utf-8')

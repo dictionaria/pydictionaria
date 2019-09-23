@@ -1,5 +1,7 @@
+from pathlib import Path
+
 import pytest
-from clldutils.path import Path, copytree
+from clldutils.path import copytree
 
 
 @pytest.fixture

@@ -1,5 +1,4 @@
 from collections import OrderedDict, ChainMap, defaultdict
-from itertools import chain
 import re
 import logging
 import copy
@@ -8,7 +7,6 @@ import sys
 
 from clldutils import sfm
 import pycldf
-import csvw
 
 from pydictionaria import flextext
 from pydictionaria.util import split_ids

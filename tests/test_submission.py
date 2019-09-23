@@ -1,6 +1,3 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
 from clldutils.jsonlib import dump
 
 from pydictionaria.submission import Submission, Metadata, Language

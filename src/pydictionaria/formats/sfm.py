@@ -1,13 +1,9 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-import re
 import sys
-from collections import ChainMap, defaultdict
+from collections import ChainMap
 from itertools import chain
 from functools import partial
 
 from clldutils.markup import Table
-from clldutils import sfm
 
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
@@ -93,7 +89,7 @@ class Dictionary(base.Dictionary):
         repair(sfm)
         with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
-                fp.write(entry.__unicode__())
+                fp.write(str(entry))
                 fp.write('\n\n')
 
     def add_comparison_meanings(self, concepticon, marker):
@@ -103,7 +99,7 @@ class Dictionary(base.Dictionary):
         sfm.visit(ComparisonMeanings(concepticon, marker=marker))
         with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
-                fp.write(entry.__unicode__())
+                fp.write(str(entry))
                 fp.write('\n\n')
 
     def _process(self, outdir):
