@@ -8,7 +8,7 @@ import unicodedata
 from transliterate import translit
 from clldutils.sfm import FIELD_SPLITTER_PATTERN, SFM
 from clldutils.sfm import Entry as BaseEntry
-from clldutils.path import md5, as_unicode, Path
+from clldutils.path import md5, Path
 from clldutils.misc import slug
 from clldutils.text import split_text
 
@@ -26,7 +26,7 @@ def join(l):
 
 
 def fsname(n):
-    return unicodedata.normalize('NFC', as_unicode(n))
+    return unicodedata.normalize('NFC', n)
 
 
 class Entry(BaseEntry):
@@ -206,24 +206,24 @@ class Files(object):
         for mtype, files in submission.media.items():
             # Register files in known media sub-directories of the submission dir:
             for p in files:
-                self.files[mtype][as_unicode(p.name)] = p
+                self.files[mtype][p.name] = p
                 # and just in case, add transliterated variants of file names:
                 try:
-                    nname = translit(as_unicode(p.name), 'ru', reversed=True)
+                    nname = translit(p.name, 'ru', reversed=True)
                     if nname not in self.files[mtype]:
                         self.files[mtype][nname] = p
                 except:  # noqa: E722
                     continue
-                self.files[mtype][as_unicode(p.stem) + p.suffix.lower()] = p
-                self.files[mtype][as_unicode(p.stem) + p.suffix.upper()] = p
-                self.files[mtype][as_unicode(p.stem)] = p
+                self.files[mtype][p.stem + p.suffix.lower()] = p
+                self.files[mtype][p.stem + p.suffix.upper()] = p
+                self.files[mtype][p.stem] = p
 
         for checksum, spec in submission.cdstar.items.items():
             # Register files already uploaded to CDStar:
             if spec['sid'] in submission.media_sids:
                 fname = Path(spec['fname'])
                 self.files[spec['type']][fsname(spec['fname'])] = checksum
-                self.files[spec['type']][fsname(as_unicode(fname.stem))] = checksum
+                self.files[spec['type']][fsname(fname.stem)] = checksum
                 self.files[spec['type']][fsname(fname.stem) + fname.suffix.upper()] = checksum
                 self.files[spec['type']][fsname(fname.stem) + fname.suffix.lower()] = checksum
                 # and just in case, add transliterated variants of file names:
