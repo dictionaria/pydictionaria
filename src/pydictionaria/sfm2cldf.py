@@ -34,7 +34,7 @@ DEFAULT_SENSE_MAP = {
     'sd': 'Semantic_Domain',
     'sy': 'Synonym',
     'an': 'Antonym',
-    'zcom1': 'Concepticon_ID'}
+    'zcom1': 'Concepticon_IDs'}
 
 DEFAULT_EXAMPLE_MAP = {
     'rf': 'Corpus_Reference',
@@ -64,6 +64,7 @@ SEPARATORS = {
     'Entry_IDs': DEFAULT_SEPARATOR,
     'Media_IDs': DEFAULT_SEPARATOR,
     'Sense_IDs': DEFAULT_SEPARATOR,
+    'Concepticon_IDs': DEFAULT_SEPARATOR,
     'Main_Entry': DEFAULT_SEPARATOR}
 
 
@@ -620,6 +621,11 @@ def sfm_entry_to_cldf_row(
             row['Gloss'] = row['Gloss'].split()
         if 'Analyzed_Word' in row:
             row['Analyzed_Word'] = row['Analyzed_Word'].split()
+    if 'Concepticon_IDs' in row:
+        row['Concepticon_IDs'] = [
+            cell.strip()
+            for cell in row['Concepticon_IDs'].split(';')
+            if cell.strip()]
     for col in cross_ref_columns:
         if col in row:
             row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
