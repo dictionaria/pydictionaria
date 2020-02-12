@@ -44,7 +44,7 @@ setup(
             'tox',
             'mock',
             'pluggy>=0.7',
-            'pytest>=3.7',
+            'pytest>=4.3',
             'pytest-mock',
             'pytest-cov',
             'coverage>=4.2',
