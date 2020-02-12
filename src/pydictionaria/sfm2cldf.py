@@ -647,6 +647,8 @@ def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
             dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
         if column == 'Media_IDs':
             dataset[table_name].add_foreign_key(column, 'media.csv', 'ID')
+        if column == 'Sense_IDs':
+            dataset[table_name].add_foreign_key(column, 'senses.csv', 'ID')
     if sources:
         try:
             dataset.add_columns(
