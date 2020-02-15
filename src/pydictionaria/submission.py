@@ -39,9 +39,9 @@ class Metadata(object):
 
 
 class Submission(object):
-    def __init__(self, d, repos):
+    def __init__(self, d, repos=None):
         self.dir = Path(d)
-        self.repos = repos
+        self.repos = repos or self.dir.parent
         assert self.dir.exists()
 
     @lazyproperty
