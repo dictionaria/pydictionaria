@@ -7,6 +7,11 @@ from pydictionaria.cli_util import add_submission, get_submission
 def register(parser):
     add_submission(parser)
 
-
+from clldutils.jsonlib import update_ordered
 def run(args):
-    get_submission(args).dictionary.process()
+    s = get_submission(args)
+    s.dictionary.process()
+    if s.module:
+        pp = getattr(s.module, 'postprocess', None)
+        if pp:
+            pp(s.dir / 'processed')
