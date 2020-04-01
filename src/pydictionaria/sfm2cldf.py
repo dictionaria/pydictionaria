@@ -99,7 +99,9 @@ def make_spec(properties, marker_set):
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
     entry_sep = properties.get('entry_sep', DEFAULT_ENTRY_SEP).strip().lstrip('\\')
     entry_id = properties.get('entry_id', DEFAULT_ENTRY_ID)
-    entry_markers.update((entry_sep, entry_id, 'hm', 'sf', 'lc'))
+    link_label_marker = properties.get('link_label_marker', DEFAULT_LINK_LABEL_MARKER)
+    entry_markers.update((
+        link_label_marker, entry_sep, entry_id, 'hm', 'sf', 'lc'))
     entry_columns.add('Media_IDs')
 
     sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
