@@ -45,6 +45,21 @@ DEFAULT_EXAMPLE_MAP = {
     'ota': 'alt_translation2',
     'ft': 'Translated_Text'}
 
+DEFAULT_LABELS = {
+    'al': 'alternative form',
+    'et': 'etymology',
+    'lc': 'citation form',
+    'mn': 'main entry',
+    'cont': 'contains',
+    'va': 'variant form',
+    'de': 'description',
+    'nt': 'comment',
+    'sc': 'scientific name',
+    'sd': 'semantic domain',
+    'sy': 'synonym',
+    'an': 'antonym',
+    'rf': 'corpus reference'}
+
 DEFAULT_FLEXREF_MAP = {
     'cf': 'cf',
     'syn': 'sy',

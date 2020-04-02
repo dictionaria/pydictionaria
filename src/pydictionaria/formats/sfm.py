@@ -285,13 +285,15 @@ class Dictionary(base.Dictionary):
                 example_crossref_cols,
                 log)
 
-            if props.get('labels'):
-                sfm2cldf.attach_column_titles(
-                    dataset['EntryTable'], spec['entry_map'], props['labels'])
-                sfm2cldf.attach_column_titles(
-                    dataset['SenseTable'], spec['sense_map'], props['labels'])
-                sfm2cldf.attach_column_titles(
-                    dataset['ExampleTable'], spec['example_map'], props['labels'])
+            labels = ChainMap(
+                props.get('labels') or {},
+                sfm2cldf.DEFAULT_LABELS)
+            sfm2cldf.attach_column_titles(
+                dataset['EntryTable'], spec['entry_map'], labels)
+            sfm2cldf.attach_column_titles(
+                dataset['SenseTable'], spec['sense_map'], labels)
+            sfm2cldf.attach_column_titles(
+                dataset['ExampleTable'], spec['example_map'], labels)
 
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
