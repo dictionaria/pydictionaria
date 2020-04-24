@@ -1,8 +1,5 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-
 from pycldf import Dictionary as CldfDictionary
-from clldutils.path import md5, path_component, write_text, copy
+from clldutils.path import md5, path_component, copy
 
 from pydictionaria.formats import base
 
@@ -12,7 +9,7 @@ class Dictionary(base.Dictionary):
         base.Dictionary.__init__(self, submission)
         cldf_md = submission.dir.joinpath('cldf-md.json')
         if not cldf_md.exists():
-            write_text(cldf_md, DEFAULT_METADATA)
+            cldf_md.write_text(DEFAULT_METADATA, encoding='utf-8')
         self.cldf = CldfDictionary.from_metadata(cldf_md)
 
     def _path_to_md5(self, maintype, fname):
@@ -68,7 +65,7 @@ DEFAULT_METADATA = """\
             "tableSchema": {
                 "columns": [
                     {
-                        "name": "ID", 
+                        "name": "ID",
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#id",
                         "datatype": {"base": "string"},
                         "required": true

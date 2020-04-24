@@ -3,11 +3,12 @@ from __future__ import unicode_literals, print_function, division
 from collections import Counter, defaultdict, OrderedDict
 import re
 import copy
+import unicodedata
 
 from transliterate import translit
 from clldutils.sfm import FIELD_SPLITTER_PATTERN, SFM
 from clldutils.sfm import Entry as BaseEntry
-from clldutils.path import md5, as_unicode, Path
+from clldutils.path import md5, Path
 from clldutils.misc import slug
 from clldutils.text import split_text
 
@@ -22,6 +23,10 @@ def split(s):
 
 def join(l):
     return ' ; '.join(l)
+
+
+def fsname(n):
+    return unicodedata.normalize('NFC', n)
 
 
 class Entry(BaseEntry):
@@ -161,10 +166,12 @@ class Check(object):
             try:
                 if entry.id in self.lexemes:
                     error(entry, 'duplicate lemma')
-            except:
+            except:  # noqa: E722
                 print(entry.__class__)
                 print(entry)
             self.lexemes.add(entry.id)
+            # Check for both 'lemma 1' and 'lemma1' variants
+            self.lexemes.add(re.sub(r'\s+(\d+)$', r'\1', entry.id))
 
     def __call__(self, entry):
         if not entry.get('de'):
@@ -199,33 +206,30 @@ class Files(object):
         for mtype, files in submission.media.items():
             # Register files in known media sub-directories of the submission dir:
             for p in files:
-                self.files[mtype][as_unicode(p.name)] = p
+                self.files[mtype][p.name] = p
                 # and just in case, add transliterated variants of file names:
                 try:
-                    nname = translit(as_unicode(p.name), 'ru', reversed=True)
+                    nname = translit(p.name, 'ru', reversed=True)
                     if nname not in self.files[mtype]:
                         self.files[mtype][nname] = p
-                except:
+                except:  # noqa: E722
                     continue
-                self.files[mtype][as_unicode(p.stem) + p.suffix.lower()] = p
-                self.files[mtype][as_unicode(p.stem) + p.suffix.upper()] = p
-                self.files[mtype][as_unicode(p.stem)] = p
+                self.files[mtype][p.stem + p.suffix.lower()] = p
+                self.files[mtype][p.stem + p.suffix.upper()] = p
+                self.files[mtype][p.stem] = p
 
         for checksum, spec in submission.cdstar.items.items():
             # Register files already uploaded to CDStar:
             if spec['sid'] in submission.media_sids:
                 fname = Path(spec['fname'])
-                self.files[spec['type']][spec['fname']] = checksum
-                self.files[spec['type']][as_unicode(fname.stem)] = checksum
-                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.upper()] = checksum
-                self.files[spec['type']][as_unicode(fname.stem) + fname.suffix.lower()] = checksum
+                self.files[spec['type']][fsname(spec['fname'])] = checksum
+                self.files[spec['type']][fsname(fname.stem)] = checksum
+                self.files[spec['type']][fsname(fname.stem) + fname.suffix.upper()] = checksum
+                self.files[spec['type']][fsname(fname.stem) + fname.suffix.lower()] = checksum
                 # and just in case, add transliterated variants of file names:
-                try:
-                    nname = translit(spec['fname'], 'ru', reversed=True)
-                    if nname not in self.files[spec['type']]:
-                        self.files[spec['type']][nname] = checksum
-                except:
-                    raise
+                nname = translit(spec['fname'], 'ru', reversed=True)
+                if nname not in self.files[spec['type']]:
+                    self.files[spec['type']][nname] = checksum
 
     def __call__(self, entry):
         """
@@ -238,7 +242,7 @@ class Files(object):
             if mtypes:
                 normalized = []
                 for fname in split_ids(content, self.file_sep):
-                    fname = re.split(r'/|\\', fname)[-1]
+                    fname = fsname(re.split(r'/|\\', fname)[-1])
                     for mtype in mtypes:
                         p = self.files[mtype].get(fname)
                         if p:
@@ -309,8 +313,6 @@ class Rearrange(object):
             entry.insert(insert, ('rf', content))
 
         move_marker(entry, 'xsf', 'xe')
-        move_marker(entry, 'xo', 'xe')
-        move_marker(entry, 'xr', 'xe')
 
 
 EXAMPLE_MARKER_MAP = {

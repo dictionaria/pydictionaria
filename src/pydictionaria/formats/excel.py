@@ -1,10 +1,8 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 import re
 
 import xlrd
 
-from clldutils.dsv import UnicodeWriter
+from csvw.dsv import UnicodeWriter
 from clldutils.misc import lazyproperty
 from clldutils.markup import Table
 from clldutils.path import md5, path_component

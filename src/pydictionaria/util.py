@@ -1,4 +1,3 @@
-from __future__ import unicode_literals, division, print_function
 import sys
 import re
 from collections import OrderedDict

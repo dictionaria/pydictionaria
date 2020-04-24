@@ -1,13 +1,9 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-import re
 import sys
-from collections import ChainMap, defaultdict
+from collections import ChainMap
 from itertools import chain
 from functools import partial
 
 from clldutils.markup import Table
-from clldutils import sfm
 
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
@@ -91,9 +87,10 @@ class Dictionary(base.Dictionary):
         enc = self.submission.md.properties.get('encoding', 'utf8')
         sfm = Database(self.submission.dir.joinpath(self._fname), encoding=enc)
         repair(sfm)
-        with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
+        with self.submission.dir.joinpath(
+                self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
-                fp.write(entry.__unicode__())
+                fp.write(str(entry))
                 fp.write('\n\n')
 
     def add_comparison_meanings(self, concepticon, marker):
@@ -101,9 +98,10 @@ class Dictionary(base.Dictionary):
         sfm = Database(
             self.submission.dir.joinpath(self._fname), encoding=enc, keep_empty=True)
         sfm.visit(ComparisonMeanings(concepticon, marker=marker))
-        with self.submission.dir.joinpath(self._fname).open('w', encoding=enc, errors='replace') as fp:
+        with self.submission.dir.joinpath(
+                self._fname).open('w', encoding=enc, errors='replace') as fp:
             for entry in sfm:
-                fp.write(entry.__unicode__())
+                fp.write(str(entry))
                 fp.write('\n\n')
 
     def _process(self, outdir):
@@ -270,6 +268,10 @@ class Dictionary(base.Dictionary):
                 or self.submission.md.language.glottocode
                 or '')
 
+            entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
+            sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
+            example_crossref_cols = {
+                c for m, c in spec['example_map'].items() if m in crossref_markers}
             dataset = sfm2cldf.make_cldf_dataset(
                 outdir,
                 spec['entry_columns'],
@@ -278,26 +280,48 @@ class Dictionary(base.Dictionary):
                 spec['entry_sources'],
                 spec['sense_sources'],
                 spec['example_sources'],
+                entry_crossref_cols,
+                sense_crossref_cols,
+                example_crossref_cols,
                 log)
 
-            if props.get('labels'):
-                sfm2cldf.attach_column_titles(
-                    dataset['EntryTable'], spec['entry_map'], props['labels'])
-                sfm2cldf.attach_column_titles(
-                    dataset['SenseTable'], spec['sense_map'], props['labels'])
-                sfm2cldf.attach_column_titles(
-                    dataset['ExampleTable'], spec['example_map'], props['labels'])
+            labels = ChainMap(
+                props.get('labels') or {},
+                sfm2cldf.DEFAULT_LABELS)
+            sfm2cldf.attach_column_titles(
+                dataset['EntryTable'], spec['entry_map'], labels)
+            sfm2cldf.attach_column_titles(
+                dataset['SenseTable'], spec['sense_map'], labels)
+            sfm2cldf.attach_column_titles(
+                dataset['ExampleTable'], spec['example_map'], labels)
 
             sfm2cldf.add_gloss_columns(dataset, glosses)
 
             entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('EntryTable', spec['entry_map'], spec['entry_sources'], entry, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'EntryTable',
+                    spec['entry_map'],
+                    spec['entry_sources'],
+                    entry_crossref_cols,
+                    entry,
+                    lang_id)
                 for entry in entries]
             sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('SenseTable', spec['sense_map'], spec['sense_sources'], sense)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'SenseTable',
+                    spec['sense_map'],
+                    spec['sense_sources'],
+                    sense_crossref_cols,
+                    sense)
                 for sense in senses]
             example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row('ExampleTable', spec['example_map'], spec['example_sources'], example, lang_id)
+                sfm2cldf.sfm_entry_to_cldf_row(
+                    'ExampleTable',
+                    spec['example_map'],
+                    spec['example_sources'],
+                    sense_crossref_cols,
+                    example,
+                    lang_id)
                 for example in examples]
             media_rows = [
                 {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
@@ -306,10 +330,14 @@ class Dictionary(base.Dictionary):
             # Separator in log file
             print(file=logfile)
 
-            entry_rows = list(sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
-            sense_rows = list(sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
-            example_rows = list(sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
-            media_rows = list(sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
+            entry_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
+            sense_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
+            example_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
+            media_rows = list(
+                sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
 
             entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
 

@@ -214,13 +214,13 @@ class MapSfmToCldf(unittest.TestCase):
     def test_map_id(self):
         sfm_entry = sfm.Entry()
         sfm_entry.id = 'id1'
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(cldf_row, {'ID': 'id1'})
 
     def test_map_columns(self):
         sfm_entry = sfm.Entry([('marker1', 'value1'), ('marker2', 'value2')])
         sfm_entry.id = 'id1'
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Column2': 'value2'})
@@ -228,7 +228,7 @@ class MapSfmToCldf(unittest.TestCase):
     def test_ignore_unexpected_sfm_markers(self):
         sfm_entry = sfm.Entry([('marker1', 'value1'), ('unknown', 'value2')])
         sfm_entry.id = 'id1'
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1'})
@@ -237,7 +237,7 @@ class MapSfmToCldf(unittest.TestCase):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
         sfm_entry.id = 'id1'
         sfm_entry.entry_id = 'entry1'
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Entry_ID': 'entry1'})
@@ -246,7 +246,7 @@ class MapSfmToCldf(unittest.TestCase):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
         sfm_entry.id = 'id1'
         sfm_entry.sense_ids = ['sense1', 'sense2']
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': ['sense1', 'sense2']})
@@ -255,7 +255,7 @@ class MapSfmToCldf(unittest.TestCase):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
         sfm_entry.id = 'id1'
         sfm_entry.sense_ids = ['sense1', 'sense2']
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry, 'lang1')
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry, 'lang1')
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Sense_IDs': ['sense1', 'sense2'], 'Language_ID': 'lang1'})
@@ -264,7 +264,7 @@ class MapSfmToCldf(unittest.TestCase):
         sfm_entry = sfm.Entry([('marker1', 'value1')])
         sfm_entry.id = 'id1'
         sfm_entry.media_ids = ['file1', 'file2']
-        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, sfm_entry)
+        cldf_row = s.sfm_entry_to_cldf_row(None, self.mapping, {}, set(), sfm_entry)
         self.assertEqual(
             cldf_row,
             {'ID': 'id1', 'Column1': 'value1', 'Media_IDs': ['file1', 'file2']})
@@ -272,19 +272,19 @@ class MapSfmToCldf(unittest.TestCase):
 
 def test_gloss():
     sfm_entry = sfm.Entry([('ge', 'abc\tdef')])
-    cldf_row = s.sfm_entry_to_cldf_row(None, {'ge': 'Gloss'}, {}, sfm_entry)
+    cldf_row = s.sfm_entry_to_cldf_row(None, {'ge': 'Gloss'}, {}, set(), sfm_entry)
     assert cldf_row['Gloss'] == 'abc\tdef'
-    cldf_row = s.sfm_entry_to_cldf_row('ExampleTable', {'ge': 'Gloss'}, {}, sfm_entry)
+    cldf_row = s.sfm_entry_to_cldf_row('ExampleTable', {'ge': 'Gloss'}, {}, set(), sfm_entry)
     assert cldf_row['Gloss'] == ['abc', 'def']
 
 
 def test_cf():
     sfm_entry = sfm.Entry([('cf', 'val1'), ('cf', 'val2;val3')])
-    cldf_row = s.sfm_entry_to_cldf_row('EntryTable', {'cf': 'Entry_IDs'}, {}, sfm_entry)
+    cldf_row = s.sfm_entry_to_cldf_row('EntryTable', {'cf': 'Entry_IDs'}, {}, {'Entry_IDs'}, sfm_entry)
     assert cldf_row['Entry_IDs'] == ['val1', 'val2', 'val3']
 
 
 def test_multimarkers():
     sfm_entry = sfm.Entry([('cf', 'val1'), ('cf', 'val2')])
-    cldf_row = s.sfm_entry_to_cldf_row(None, {'cf': 'See_Also'}, {}, sfm_entry)
+    cldf_row = s.sfm_entry_to_cldf_row(None, {'cf': 'See_Also'}, {}, set(), sfm_entry)
     assert cldf_row['See_Also'] == 'val1 ; val2'

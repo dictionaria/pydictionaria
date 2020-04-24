@@ -1,9 +1,7 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
 from collections import defaultdict, OrderedDict
 
 from clldutils.misc import lazyproperty
-from clldutils.dsv import reader, UnicodeWriter
+from csvw.dsv import reader, UnicodeWriter
 from clldutils.markup import Table
 
 from pydictionaria.formats import base

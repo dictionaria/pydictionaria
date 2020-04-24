@@ -52,30 +52,35 @@ def separate_examples(document, log=None):
         languages, vernacular = _extract_languages(text)
         if not languages:
             if log:
-                log.warn("Missing languages in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+                log.warn("Missing languages in interlinear text '{}'".format(
+                    text.attrib.get('guid', '???')))
             continue
         if not vernacular:
             if log:
-                log.warn("Missing vernacular in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+                log.warn("Missing vernacular in interlinear text '{}'".format(
+                    text.attrib.get('guid', '???')))
             continue
 
         text_id = _extract_text_id(text, vernacular)
         if not text_id:
             if log:
-                log.warn("Missing title in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+                log.warn("Missing title in interlinear text '{}'".format(
+                    text.attrib.get('guid', '???')))
             continue
 
         paragraphs = text.find('paragraphs')
         if not paragraphs:
             if log:
-                log.warn("No paragraphs in interlinear text '{}'".format(text.attrib.get('guid', '???')))
+                log.warn("No paragraphs in interlinear text '{}'".format(
+                    text.attrib.get('guid', '???')))
             continue
 
         for paragraph in paragraphs.iter('paragraph'):
             phrases = paragraph.find('phrases')
             if not phrases:
                 if log:
-                    log.warn("No phrases in paragraph '{}'".format(paragraph.attrib.get('guid', '???')))
+                    log.warn("No phrases in paragraph '{}'".format(
+                        paragraph.attrib.get('guid', '???')))
                 continue
 
             examples = OrderedDict()
@@ -83,7 +88,8 @@ def separate_examples(document, log=None):
                 segnum = get_item(phrase, 'segnum')
                 if not segnum:
                     if log:
-                        log.warn("Missing segnum in phrase '{}'".format(phrase.attrib.get('guid', '???')))
+                        log.warn("Missing segnum in phrase '{}'".format(
+                            phrase.attrib.get('guid', '???')))
                     continue
 
                 prefix = segnum.split('.')[0] or segnum
@@ -144,7 +150,7 @@ def _find_morphemes(phrase):
 def _column_name(name, lang):
     lang_suffix = ''
     if lang != 'en':
-        lang_suffix  = '_{}{}'.format(lang[0].upper(), lang[1:])
+        lang_suffix = '_{}{}'.format(lang[0].upper(), lang[1:])
     return '{}{}'.format(name, lang_suffix)
 
 

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pydictionaria',
-    version='0.1.0',
+    version='1.1.1.dev0',
     description='',
     long_description='',
     classifiers=[
@@ -26,7 +26,7 @@ setup(
         'csvw>=1.5.4',
         'BeautifulSoup4',
         'attrs>=19.1',
-        'clldutils~=2.0',
+        'clldutils>=3.5',
         'pycldf',
         'pycdstar>=1.0.1',
         'cdstarcat>=1.0.0',
@@ -43,8 +43,8 @@ setup(
         'test': [
             'tox',
             'mock',
-            'pluggy>=0.7',
-            'pytest>=3.7',
+            'pluggy>=0.12',
+            'pytest>=4.3',
             'pytest-mock',
             'pytest-cov',
             'coverage>=4.2',
