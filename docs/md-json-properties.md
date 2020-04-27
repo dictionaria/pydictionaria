@@ -31,7 +31,21 @@ cross-references:
 
 ### `custom_fields`
 
-TODO
+The `custom_fields` property contains a list of columns, which will be displayed
+in the `Words` tab on the Dictionaria web app.  This property contains the
+*labels* of each column as opposed to their CLDF column names (see the `labels`
+and `metalanguages` properties).
+
+If a column does not have an explicit label, the web app will use the CLDF column
+name *with all underscores replaced by spaces*.
+
+Note that the web app only allows for up to *two* custom fields in the `Words`
+tab, otherwise table columns would get squished beyond readability on
+non-widescreen devices.
+
+Example:  Add the phonetic form and the semantic domain to the Words tab:
+
+    "custom_fields": ["Phonetic Form", "Semantic Domain"]
 
 ### `entry_custom_order`
 
@@ -94,9 +108,9 @@ The `example_custom_order` property contains a list of CLDF column names
 specifying the order, in which custom columns for an example are displayed in
 the Dictionaria web app.  By default, custom columns are sorted alphabetically.
 
-Example:  Order the `Comment` column before the `French_Translation`.
+Example:  Order the `Comment` column before the `Grammar_Note`.
 
-    "example_custom_order": ["French_Translation", "Comment"]
+    "example_custom_order": ["Grammar_Note", "Comment"]
 
 ### `example_map`
 
@@ -110,6 +124,8 @@ The following markers are mapped automatically:
  - `tx` → `Primary_Text`
  - `mb` → `Analyzed_Word`
  - `gl` → `Gloss`
+ - `ot` → `alt_translation1`,
+ - `ota` → `alt_translation2`,
  - `ft` → `Translated_Text`
 
 Note that the example extraction process renames some of the markers internally.
@@ -181,8 +197,8 @@ will be used as headers for the respective table columns in CLDF.
 Example:  Adding labels to the `\cyr` and `\phon` markers:
 
     "labels": {
-        "cyr": "cyrillic form",
-        "ps": "phonetic representation"
+        "cyr": "Cyrillic Form",
+        "ps": "Phonetic Representation"
     }
 
 ### `link_label_marker`
@@ -242,7 +258,16 @@ Example:  Include media files with the IDs `German` and IDs `German_LegalTerms`:
 
 ### `metalanguages`
 
-TODO
+The `metalanguages` property sets the labels for translations in languages other
+than English.  It maps the SFM markers `gxx` and `gxy` to the first and second
+meta language respectively.
+
+Example:  Add Spanish and Quichua as meta languages.
+
+    "metalanguages": {
+        "gxx": "Spanish",
+        "gxy": "Quichua"
+    }
 
 ### `process_links_in_markers`
 
@@ -252,6 +277,24 @@ cross-references that need to be converted into markdown-style links.
 Example:  Process all cross-references in the `\de` marker:
 
     "process_links_in_markers": ["de"]
+
+### `second_tab`
+
+The `custom_fields` property contains a list of columns, which will be displayed
+in the `Words extra` tab on the Dictionaria web app.  This property contains the
+*labels* of each column as opposed to their CLDF column names (see the `labels`
+and `metalanguages` properties).
+
+If a column does not have an explicit label, the web app will use the CLDF column
+name *with all underscores replaced by spaces*.
+
+Note that the web app only allows for up to *three* custom fields in the `Words
+extra` tab, otherwise table columns would get squished beyond readability on
+non-widescreen devices.
+
+Example:  Add the phonetic form and the semantic domain to the Words tab:
+
+    "second_tab": ["French", "Phonetic Form", "Semantic Domain"]
 
 ### `sense_custom_order`
 
@@ -276,12 +319,13 @@ The following markers are mapped automatically:
  - `sc` → `Scientific_Name`
  - `sd` → `Semantic_Domain`
  - `sy` → `Synonym`
+ - `an` → `Antonym`
  - `zcom1` → `Concepticon_ID`
 
-Example:  Add the marker `\gr` to the sense table:
+Example:  Add the marker `\ge` to the sense table:
 
     "sense_map": {
-        "gr": "Russian_Translation"
+        "ge": "Gloss"
     }
 
 ### `sense_sep`
@@ -357,6 +401,64 @@ Example:  Defining custom columns for `\cyr`, `\phon`, `\gr`, and `\ot`.
 
 See the sections on the `entry_map`, `sense_map`, and `example_map` properties
 for markers, which are mapped by default.
+
+### …add translations in languages other than English
+
+Situation:  The dictionary provides translations in other meta languages in
+addition to English.
+
+Solution:  Map the respective markers to the `alt_translation1` and
+`alt_translation2` columns and add the names of the meta language to the
+`metalanguages` properties, using `gxx` for the first and `gxy` for the second
+meta language.
+
+Example:  A dictionary provides a Spanish translation in the `\d_es` marker and
+a Quichua translation in the `\d_qu` marker:
+
+    "sense_map": {
+        "d_es": "alt_translation1",
+        "d_qu": "alt_translation2"
+    },
+    "metalanguages": {
+        "gxx": "Spanish",
+        "gxy": "Quichua"
+    }
+
+### …display custom fields on the Dictionaria web app?
+
+Situation:  There are some custom fields that should be displayed on the `Words`
+and `Words extra` tabs on the web app.
+
+Solution:  Use the `custom_fields` property to specify fields to be added to
+the `Words` tab and the `second_tab` property to specify fields to be added to
+the `Words extra` tab.  Note that these properties take the *labels* that are
+displayed in the table header.
+
+Example:  Add the phonetic form to the `Words` tab; add the Russian translation
+and a Comment in Russian to the `Words extra` tab.
+
+    "entry_map": {
+        "ph": "Phonetic_Form"
+    },
+    "sense_map": {
+        "gxx": "alt_translation1",
+        "nt_ru": "Comment_Russian"
+    },
+    "metalanguages": {
+        "gxx", "Russian"
+    },
+    "labels": {
+        "Comment_Russian": "Comment (Russian)"
+    },
+    "custom_fields": ["Phonetic Form"],
+    "second_tab": ["Russian", "Comment (Russian)"]
+
+Note how the different table headers come about:
+
+ 1. `Comment (Russian)` was defined explicitly in the `labels` property.
+ 2. `Russian` was defined in the `metalanguages` property.
+ 3. `Phonetic Form` was automatically generated for the `Phonetic_Form` column
+    (by replacing underscores `_` with spaces ` `).
 
 ### …specify the source for a field?
 
