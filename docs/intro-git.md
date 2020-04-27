@@ -6,16 +6,15 @@ Introduction
 ------------
 
 `git` is a distributed version control system, which allows collaborators to
-manage and keep track of changes to the project.  Dictionaria uses `git` to
-manage both the source code of its associated programs and the actual
-dictionaray data.  This document gives a brief introduction to the concepts at
-work with git.
+manage and keep track of changes to a project.  Dictionaria uses `git` to manage
+both the source code of its associated programs and the actual dictionaray data.
+This document gives a brief introduction to the concepts at work with git.
 
-All the examples here use `git`'s standard command-line interface.  Note that
-there are several [graphical tools][git-guis], as well as plug-ins that
-integrate git directly into many popular text editors/development environments.
-However, at the end of the day they're mostly just colourful buttons around the
-same core principles described in this document.
+All the examples use `git`'s standard command-line interface.  Note that there
+are several [graphical tools][git-guis], as well as plug-ins that integrate git
+directly into many popular text editors/development environments.  However, at
+the end of the day they're mostly just colourful buttons around the same core
+principles described here.
 
 [git-guis]: https://git-scm.com/downloads/guis
 
@@ -43,19 +42,19 @@ means two things:
    a project and are able to roll back and forth between the different versions.
 
 2. Different versions in parallel:  VCS's offer a mechanic called *branches*,
-   which allow multiple versions of the same project to exists next to each
-   other, each with their own history.  These branches can also merge changes
-   from other branches to keep the whole project in sync.
+   which allow multiple versions of the same project to exist next to each
+   other, each with their own history.  These branches can also merge changes from
+   other branches to keep the whole project in sync.
 
 `git` is also a *distributed* VCS.  This means that the project is not stored in
 *one* singular place; instead, every collaborator keeps an independent copy of
 the project on their computer.  And everyone *pulls* the changes to the project
 from each other – in theory, at least.
 
-In practice people instead create a central repository somewhere on-line, which
+In practice people often create a central repository somewhere on-line, which
 serves as *the* copy of the project; the one that everybody pushes their changes
 to and the one that everybody pulls from, if they want to get the most recent
-changes to the project.
+version of the project.
 
 Some bigger projects host their `git` repositories on their own website, for
 example the [Linux kernel][linux-repos] or the [GNU project][gnu-savannah].
@@ -69,7 +68,7 @@ data reside on Github.
 [github]: https://github.com
 [bitbucket]: https://bitbucket.org
 
-Note that remote `git` repositories do not need to by open to the public.  For
+Note that remote `git` repositories do not need to be open to the public.  For
 instance, while the Python code behind Dictionaria is [out in the
 open][pydictionaria] under a [free software license][apache2], the repository
 with all the unpublished data can only be accessed by project members.
@@ -81,7 +80,7 @@ with all the unpublished data can only be accessed by project members.
 Cloning a repository
 --------------------
 
-To recieve your very own copy of a project, you need to create a ‘clone’ of the
+To receive your very own copy of a project, you need to create a ‘clone’ of the
 remote repository on your computer.  To do this you can use the `clone`
 subcommand of `git`:
 
@@ -171,6 +170,7 @@ subcommand without any further arguments:
     git merge
 
 TODO staging and commiting
+TODO what to do when vi pops up
 TODO pushing
 TODO branches
 TODO merging
