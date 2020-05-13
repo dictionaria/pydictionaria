@@ -4,6 +4,7 @@ from collections import Counter, defaultdict, OrderedDict
 import re
 import copy
 import unicodedata
+from unidecode import unidecode_expect_ascii
 
 from transliterate import translit
 from clldutils.sfm import FIELD_SPLITTER_PATTERN, SFM
@@ -481,3 +482,20 @@ class ExampleExtractor(object):
     def write_examples(self, fname):
         examples = SFM(self.examples.values())
         examples.write(fname)
+
+
+def _normalise_example_value(s):
+    s = unidecode_expect_ascii(s)
+    s = ''.join(c for c in s if c.isalnum())
+    s = s.lower()
+    return s
+
+
+def find_duplicate_examples(marker, examples):
+    dups = OrderedDict()
+    for ex in examples:
+        val = _normalise_example_value(ex.get(marker) or '')
+        if val not in dups:
+            dups[val] = []
+        dups[val].append(ex)
+    return [l for l in dups.values() if len(l) > 1]

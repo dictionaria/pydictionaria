@@ -7,8 +7,9 @@ from clldutils.markup import Table
 
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
-    Stats, Rearrange, Files, ExampleExtractor, normalize, ComparisonMeanings,
-    Check, repair, Database, CheckBibrefs, EXAMPLE_MARKER_MAP
+    Stats, Rearrange, Files, find_duplicate_examples, ExampleExtractor,
+    normalize, ComparisonMeanings, Check, repair, Database, CheckBibrefs,
+    EXAMPLE_MARKER_MAP
 )
 from pydictionaria.example import Corpus, Examples, concat_multilines
 from pydictionaria.log import pprint
@@ -150,6 +151,14 @@ class Dictionary(base.Dictionary):
                     example_markers, Corpus.from_dir(self.submission.dir), log)
                 self.sfm.visit(extractor)
                 examples = Examples(extractor.examples.values())
+                for dups in find_duplicate_examples('tx', examples):
+                    print('# potential duplicate w.r.t. \\xe', file=log)
+                    print('\n# and\n'.join(map(str, dups)), file=log)
+                    print(file=log)
+                for dups in find_duplicate_examples('ft', examples):
+                    print('# potential duplicate w.r.t. \\xv', file=log)
+                    print('\n# and\n'.join(map(str, dups)), file=log)
+                    print(file=log)
 
         props = self.submission.md.properties
         logpath = self.submission.dir.joinpath('cldf.log')
