@@ -26,7 +26,7 @@ setup(
         'csvw>=1.5.4',
         'BeautifulSoup4',
         'attrs>=19.1',
-        'clldutils>=3.5',
+        'clldutils>=3.5.1',
         'pycldf',
         'pycdstar>=1.0.1',
         'cdstarcat>=1.0.0',
