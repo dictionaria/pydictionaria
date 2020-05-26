@@ -293,7 +293,7 @@ class GlossToExMapping:
 
     def add_example(self, example):
         gloss_ref = example.get(self.gloss_ref_marker, '')
-        match = re.fullmatch(r'(.*) (\d+)', gloss_ref.strip())
+        match = re.match(r'(.*) (\d+)', gloss_ref.strip())
         text_id = match.group(1) if match else gloss_ref
         segnum = match.group(2) if match else '1'
         if not text_id:

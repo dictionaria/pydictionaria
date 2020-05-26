@@ -27,6 +27,14 @@ def _extract_languages(node):
 
 
 def _extract_text_id(node, vernacular):
+    abbr_items = [
+        item.text
+        for item in node.iter('item')
+        if item.text and item.attrib.get('type') == 'title-abbreviation']
+
+    if abbr_items:
+        return abbr_items[0]
+
     title_items = [
         (item.attrib.get('lang', ''), item.text)
         for item in node.iter('item')
