@@ -146,7 +146,7 @@ project starting at the most recent.  It also contains information about *who*
 made the change and *when*.
 
 
-Keeping in sync with the remote repository
+Staying in sync with the remote repository
 ------------------------------------------
 
 As mentioned before, `git` does not pull any changes from the remote repository
@@ -177,6 +177,7 @@ tend to use `pull` almost exclusively and only really bother with `fetch` and
 that getting changes from a remote repository is really a two-step process.
 
     git pull
+
 
 TODO staging and commiting
 TODO what to do when vi pops up
