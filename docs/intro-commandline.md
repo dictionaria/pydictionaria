@@ -28,7 +28,7 @@ looking up commands or asking for help.
 
 Command-line programs aren't generally any more or less dangerous than their
 graphical counterparts.  The biggest concern might be data loss, since
-command-line programs tend to provide fewer save guards, when it comes to
+command-line programs tend to provide fewer safeguards, when it comes to
 changing or deleting files.
 
 In general, follow the following guide lines:
@@ -83,8 +83,8 @@ purpose of this tutorial, either is fine.
 
 Depending of your distribution, there is usually one or more terminal emulator
 installed.  They are usually in the `System` category of your menu and have the
-term ‘terminal’ or ‘console’ in their name (e.g. `GNOME Terminal`, `Konsole`,
-`XTerm`, etc.).
+words ‘terminal’ or ‘console’ somewhere in their name (e.g. `GNOME Terminal`,
+`Konsole`, `XTerm`, etc.).
 
 ### macOS
 
@@ -284,7 +284,6 @@ To move to a different folder, use the `cd` (‘change directory’) command and
 give it the path of the new working directory.  `cd` accepts both absolute and
 relative paths:
 
-
     C:\Users\Bob> cd Documents
     C:\Users\Bob\Documents> cd C:\Users\Bob\Desktop
     C:\Users\Bob\Desktop>
@@ -319,6 +318,9 @@ of the current folder.  To do so, run the `dir` (‘directory content’) comman
     dd/mm/yyyy  hh:mm            712.000 text-file.txt
                    2 files
                    4 dirs
+
+Note (a) that `dir` marks all directories in the list using the word `<DIR>` and
+(b) that the list also contains the special names dot `.` and double-dot `..`.
 
 ### Unix-like systems
 
@@ -392,8 +394,8 @@ themselves.  Although this difference rarely matters in practice, it is
 something to be aware of.
 
 
-What's in a `PATH`
-------------------
+What's in a `PATH`?
+-------------------
 
 This section aims to answer two questions:
 
@@ -404,9 +406,9 @@ This section aims to answer two questions:
 ### Where are the commands?
 
 Some commands are separate programs installed on your computer, others are built
-directly into the shell.  For instance, on a Unix-like program using the `bash`
-shell, the `cd` and `pwd` commands are builtin commands provided by `bash`
-itself, but `ls` is its own program.
+directly into the shell.  For instance, on a Unix-like operating system using
+the `bash` shell, the `cd` and `pwd` commands are built-in commands provided by
+`bash` itself, but `ls` is its own program.
 
 Now where does the shell look for programs to run?
 
@@ -451,7 +453,7 @@ so the shell knows where to find the program.
 
 First of all, you can look at the current value of the path variable using the
 command-line.  To do this we make use of the `echo` command.  The `echo` command
-outputs its own command-line arguments directly to the command line:
+simply outputs its own command-line arguments directly to the terminal:
 
     C:\Users\Bob> echo Hello
     Hello
@@ -486,7 +488,7 @@ of Windows you are using.
 1. Find the `System` dialog in the Control Centre
 2. Open the `Advanced system settings` dialog
 3. Go to the `Advanced` tab
-4. Click the `Environment Variables`
+4. Click on `Environment Variables`
 
 On Windows 8 or 10 you can also use the Windows Search in your start menu to
 look for something along the lines of ‘Change environment variables for you user
@@ -533,7 +535,7 @@ programs, meaning you may have to restart your terminal window.
 
 First of all, you can look at the current value of the path variable using the
 command-line.  To do this we make use of the `echo` command.  The `echo` command
-outputs its own command-line arguments directly to the command line:
+simply outputs its own command-line arguments directly to the terminal:
 
     bob@work-pc:~$ echo Hello
     Hello
@@ -692,4 +694,4 @@ command-line and there are a lot of people learning how to work on the
 command-line.  And many of them have asked questions on-line, answered questions
 on-line, written blog-posts, etc.  So whenever you're faced with a problem, no
 matter how stupid you think your question might be, don't be shy to type it into
-your search engine of choice.
+your search engine of choice.  You're unlikely to be the first.
