@@ -173,7 +173,7 @@ Since these two commands are commonly used together, there is also a shorthand:
 the `pull` subcommand.  `pull` fetches the current state of the remote
 repository and merges all changes to the current branch.  In practice people
 tend to use `pull` almost exclusively and only really bother with `fetch` and
-`merge` in some rare occasions.  However, it is still a good idea to remember
+`merge` on some rare occasions.  However, it is still a good idea to remember
 that getting changes from a remote repository is really a two-step process.
 
     git pull
