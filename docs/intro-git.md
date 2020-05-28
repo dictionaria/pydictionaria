@@ -7,7 +7,7 @@ Introduction
 
 `git` is a distributed version control system, which allows collaborators to
 manage and keep track of changes to a project.  Dictionaria uses `git` to manage
-both the source code of its associated programs and the actual dictionaray data.
+both the source code of its associated programs and the actual dictionary data.
 This document gives a brief introduction to the concepts at work with git.
 
 All the examples use `git`'s standard command-line interface.  Note that there
@@ -114,7 +114,7 @@ Note that almost every `git` command aside from `clone` is run from within the
 project folder – so, unless stated otherwise, `cd` into your project folder
 before running any of the `git` commands.
 
-If you just cloned a repository the output will most like look some thing like
+If you just cloned a repository the output will most likely look something like
 this:
 
     On branch master
@@ -168,6 +168,15 @@ actually been applied to your working copy, yet.  To do so, run the `merge`
 subcommand without any further arguments:
 
     git merge
+
+Since these two commands are commonly used together, there is also a shorthand:
+the `pull` subcommand.  `pull` fetches the current state of the remote
+repository and merges all changes to the current branch.  In practice people
+tend to use `pull` almost exclusively and only really bother with `fetch` and
+`merge` in some rare occasions.  However, it is still a good idea to remember
+that getting changes from a remote repository is really a two-step process.
+
+    git pull
 
 TODO staging and commiting
 TODO what to do when vi pops up
