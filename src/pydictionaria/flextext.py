@@ -175,13 +175,6 @@ def _parse_morph(morph):
     if mb:
         gloss['Analyzed_Word'] = mb
 
-    lemma = item_index.get_text('cf')
-    if lemma:
-        homonym = item_index.get_text('hn')
-        if homonym:
-            lemma = '%s %s' % (lemma, homonym)
-        gloss['Lexical_Entries'] = lemma
-
     for gl_item in item_index.get_items('gls'):
         lang = gl_item.attrib.get('lang', 'en')
         gloss[_column_name('Gloss', lang)] = gl_item.text or ''
