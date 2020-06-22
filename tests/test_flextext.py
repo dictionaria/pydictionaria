@@ -412,55 +412,6 @@ class GlossExtraction(unittest.TestCase):
             processed.get('Gloss_POS'),
             ['pos1.1', 'pos1.2', 'pos2.1', 'pos2.2'])
 
-    def test_lex_entries(self):
-        phrase = ET.Element('phrase')
-        words = ET.SubElement(phrase, 'words')
-
-        word1 = ET.SubElement(words, 'word')
-        morphemes1 = ET.SubElement(word1, 'morphemes')
-        morph1_1 = ET.SubElement(morphemes1, 'morph')
-        cf1_1 = ET.SubElement(morph1_1, 'item', type='cf')
-        cf1_1.text = 'lemma1.1'
-        morph1_2 = ET.SubElement(morphemes1, 'morph')
-        cf1_2 = ET.SubElement(morph1_2, 'item', type='cf')
-        cf1_2.text = 'lemma1.2'
-
-        word2 = ET.SubElement(words, 'word')
-        morphemes2 = ET.SubElement(word2, 'morphemes')
-        morph2_1 = ET.SubElement(morphemes2, 'morph')
-        cf2_1 = ET.SubElement(morph2_1, 'item', type='cf')
-        cf2_1.text = 'lemma2.1'
-        morph2_2 = ET.SubElement(morphemes2, 'morph')
-        cf2_2 = ET.SubElement(morph2_2, 'item', type='cf')
-        cf2_2.text = 'lemma2.2'
-
-        processed = f.extract_gloss(phrase)
-        self.assertEqual(
-            processed.get('Lexical_Entries'),
-            ['lemma1.1', 'lemma1.2', 'lemma2.1', 'lemma2.2'])
-
-    def test_homonyms(self):
-        phrase = ET.Element('phrase')
-        words = ET.SubElement(phrase, 'words')
-
-        word1 = ET.SubElement(words, 'word')
-        morphemes1 = ET.SubElement(word1, 'morphemes')
-        morph1_1 = ET.SubElement(morphemes1, 'morph')
-        cf1_1 = ET.SubElement(morph1_1, 'item', type='cf')
-        cf1_1.text = 'lemma1'
-        hn1_1 = ET.SubElement(morph1_1, 'item', type='hn')
-        hn1_1.text = '1'
-        morph1_2 = ET.SubElement(morphemes1, 'morph')
-        cf1_2 = ET.SubElement(morph1_2, 'item', type='cf')
-        cf1_2.text = 'lemma2'
-        hn1_2 = ET.SubElement(morph1_2, 'item', type='hn')
-        hn1_2.text = '2'
-
-        processed = f.extract_gloss(phrase)
-        self.assertEqual(
-            processed.get('Lexical_Entries'),
-            ['lemma1 1', 'lemma2 2'])
-
     def test_fallback_to_words(self):
         phrase = ET.Element('phrase')
         words = ET.SubElement(phrase, 'words')
