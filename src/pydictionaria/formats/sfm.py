@@ -117,6 +117,13 @@ class Dictionary(base.Dictionary):
         files = Files(self.submission)
         self.sfm.visit(files)
 
+        caption_marker = self.submission.md.properties.get(
+            'media_caption_marker')
+        caption_finder = sfm2cldf.CaptionFinder(
+            ['pc', 'sf', 'sfx'], caption_marker)
+        if caption_marker:
+            self.sfm.visit(caption_finder)
+
         # Process FLEx's cross-references in \lf markers
         flexref_map = ChainMap(
             self.submission.md.properties.get('flexref_map', {}),
@@ -176,7 +183,7 @@ class Dictionary(base.Dictionary):
             all_markers -= spec['sense_markers']
             all_markers -= spec['example_markers']
             all_markers -= set(EXAMPLE_MARKER_MAP.values())
-            all_markers -= {'lf', 'lv', 'le'}
+            all_markers -= {'lf', 'lv', 'le', caption_marker}
             if all_markers:
                 marker_list = ', '.join(sorted(all_markers))
                 log.warning('No CLDF column defined for markers: %s', marker_list)
@@ -333,7 +340,12 @@ class Dictionary(base.Dictionary):
                     lang_id)
                 for example in examples]
             media_rows = [
-                {'ID': fileid, 'Language_ID': lang_id, 'Filename': filename}
+                {
+                    'ID': fileid,
+                    'Language_ID': lang_id,
+                    'Filename': filename,
+                    'Description': caption_finder.captions.get(fileid)
+                }
                 for filename, fileid in sorted(media_extr.files)]
 
             # Separator in log file

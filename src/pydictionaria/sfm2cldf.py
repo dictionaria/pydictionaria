@@ -147,6 +147,7 @@ def make_spec(properties, marker_set):
         'example_columns': example_columns,
         'example_id': example_id,
         'example_sources': example_sources,
+
         'gloss_ref': gloss_ref}
 
 
@@ -435,6 +436,37 @@ class ExampleReferencer(object):
         return sense
 
 
+def _bigrams(iterable):
+    i = iter(iterable)
+    try:
+        prev = next(i)
+    except StopIteration:
+        return
+    for elem in i:
+        yield prev, elem
+        prev = elem
+
+
+class CaptionFinder:
+
+    def __init__(self, media_markers, caption_marker):
+        self.media_markers = media_markers
+        self.caption_marker = caption_marker
+        self.captions = {}
+
+    def __call__(self, entry):
+        for pair1, pair2 in _bigrams(entry):
+            marker1, content1 = pair1
+            marker2, content2 = pair2
+            if marker1 in self.media_markers and marker2 == self.caption_marker:
+                for file_id in re.split(r'\s*;\s*', content1):
+                    self.captions[file_id] = content2
+
+        # no-op on the actual entry
+        return entry
+
+
+
 class MediaExtractor(object):
 
     def __init__(self, tag, id_index, cdstar_items):
@@ -672,7 +704,8 @@ def make_cldf_dataset(
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table(
-        'media.csv', 'ID', 'Language_ID', 'Filename', primaryKey='ID')
+        'media.csv', 'ID', 'Language_ID', 'Filename', 'Description',
+        primaryKey='ID')
 
     _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
     _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)

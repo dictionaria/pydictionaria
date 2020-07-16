@@ -246,6 +246,19 @@ and `\et` respectively:
         "et_Ger": "et"
     }
 
+### `media_caption_marker`
+
+The `media_caption_marker` defines an SFM marker which contains the caption to
+media files (images, sound files, etc.).
+
+Note that the captions need to follow *directly after* their corresponding media
+file tag (`\pc`, `\sf`, etc.) to be recognised.
+
+Example:  Specifiy that the captions for media files are stored in the `\cap`
+SFM marker.
+
+    "media_caption_marker": "cap"
+
 ### `media_lookup`
 
 When looking for media files in *cdstar*, the processing script only considers
@@ -735,6 +748,48 @@ Now the entry renders as follows:
     Cyrillic: солнце
     Phonetic Form: sónce
     Inflection_Class: neuter
+
+### …add captions to my images/sound files?
+
+Situation:  There is some information that needs to be displayed alongside
+a media file (description, speaker info, copyright info, etc.).
+
+Solution:  Specify an SFM marker for the captions using the
+`media_caption_marker` property and make sure the captions follow *immediately
+after* the media file they are describing.
+
+Example:  Adding a caption to media files using the SFM marker `\cap`:
+
+    "properties": {
+        "media_caption_marker": "cap"
+    }
+
+The corresponding `db.sfm` might look something like this:
+
+    \lx Haus
+    \ps n
+    \de house
+    \pc haus.jpg
+    \cap Depiction of a traditionally built house
+    \xv Wir bauen ein Haus
+    \xe We are building a house
+    \sfx wir-bauen-ein-haus.mp3
+    \cap Speaker: Max Mustermann, recorded on 20 Feb 2020
+
+Example 2:  What if there is an existing database, which uses different caption
+markers for different file types (e.g. `\pc_caption` for images and
+`\sf_caption` for sound files)?
+
+Answer:  Pick one of the markers as the `media_caption_marker` and use the
+`marker_map` to convert the others.  The properties might look as follows:
+
+    "properties": {
+        "marker_map": {
+            "sf_caption": "pc_caption",
+            "sfx_caption": "pc_caption"
+        },
+        "media_caption_marker": "pc_caption"
+    }
 
 [md-link]: https://daringfireball.net/projects/markdown/syntax#link
 
