@@ -204,20 +204,6 @@ class Files(object):
             'sf': ['audio'],
             'sfx': ['image', 'audio'],
         }
-        for mtype, files in submission.media.items():
-            # Register files in known media sub-directories of the submission dir:
-            for p in files:
-                self.files[mtype][p.name] = p
-                # and just in case, add transliterated variants of file names:
-                try:
-                    nname = translit(p.name, 'ru', reversed=True)
-                    if nname not in self.files[mtype]:
-                        self.files[mtype][nname] = p
-                except:  # noqa: E722
-                    continue
-                self.files[mtype][p.stem + p.suffix.lower()] = p
-                self.files[mtype][p.stem + p.suffix.upper()] = p
-                self.files[mtype][p.stem] = p
 
         for checksum, spec in submission.cdstar.items.items():
             # Register files already uploaded to CDStar:
