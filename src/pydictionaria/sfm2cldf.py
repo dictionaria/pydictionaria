@@ -704,7 +704,7 @@ def make_cldf_dataset(
     dataset = pycldf.Dictionary.in_dir(folder)
     dataset.add_component('ExampleTable')
     dataset.add_table(
-        'media.csv', 'ID', 'Language_ID', 'Filename', 'Description',
+        'media.csv', 'ID', 'Language_ID', 'Filename',
         primaryKey='ID')
 
     _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)

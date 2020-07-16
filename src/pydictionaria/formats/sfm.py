@@ -301,6 +301,10 @@ class Dictionary(base.Dictionary):
                 example_crossref_cols,
                 log)
 
+            # only add Description column, if there are any descriptions
+            if caption_finder.captions:
+                dataset.add_columns('media.csv', 'http://cldf.clld.org/v1.0/terms.rdf#description')
+
             labels = ChainMap(
                 props.get('labels') or {},
                 sfm2cldf.DEFAULT_LABELS)
