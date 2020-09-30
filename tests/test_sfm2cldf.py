@@ -206,6 +206,48 @@ class LinkProcessing(unittest.TestCase):
         self.assertEqual(new_entry, expected)
 
 
+class MediaCaptionExtraction(unittest.TestCase):
+
+    def test_find_caption(self):
+        entry = sfm.Entry([
+            ('marker1', 'val1'),
+            ('pc', 'image-name'),
+            ('cap', 'caption'),
+            ('marker2', 'val2')])
+        caption_finder = s.CaptionFinder(['pc'], 'cap')
+        _ = caption_finder(entry)
+        expected = {'image-name': 'caption'}
+        self.assertEqual(caption_finder.captions, expected)
+
+    def test_find_multiple_captions(self):
+        entry = sfm.Entry([
+            ('marker1', 'val1'),
+            ('pc', 'image1-name'),
+            ('cap', 'caption1'),
+            ('marker2', 'val2'),
+            ('pc', 'image2-name'),
+            ('cap', 'caption2'),
+            ('marker3', 'val3')])
+        caption_finder = s.CaptionFinder(['pc'], 'cap')
+        _ = caption_finder(entry)
+        expected = {
+            'image1-name': 'caption1',
+            'image2-name': 'caption2'}
+        self.assertEqual(caption_finder.captions, expected)
+
+    def test_captions_need_to_be_adjacent(self):
+        entry = sfm.Entry([
+            ('marker1', 'val1'),
+            ('pc', 'image-name'),
+            ('marker2', 'val2'),
+            ('cap', 'caption'),
+            ('marker3', 'val3')])
+        caption_finder = s.CaptionFinder(['pc'], 'cap')
+        _ = caption_finder(entry)
+        expected = {}
+        self.assertEqual(caption_finder.captions, expected)
+
+
 class MapSfmToCldf(unittest.TestCase):
 
     def setUp(self):
