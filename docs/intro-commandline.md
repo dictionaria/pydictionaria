@@ -587,7 +587,7 @@ Then the value of `MY_VARIABLE` becomes the following:
     "this is not a new value anymore"
 
 This behaviour can be used to add new paths to the `PATH` variable.  Say, you
-installed firefox manually into the folder `/opt/firefox` and want to add it to
+installed Firefox manually into the folder `/opt/firefox` and want to add it to
 your `PATH`.  Then you can add the folder to the back of the list by adding the
 following line to your `~/.profile`:
 

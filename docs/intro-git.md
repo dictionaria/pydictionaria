@@ -179,8 +179,18 @@ that getting changes from a remote repository is really a two-step process.
     git pull
 
 
-TODO staging and commiting
+Telling `git` about changes to the project
+------------------------------------------
+
+
+TODO staging and committing
+ * what is the staging area
+ * adding stuff
+ * resetting the staging area
+ * commits and commit messages
+
 TODO what to do when vi pops up
+TODO diffs?
 TODO pushing
 TODO branches
 TODO merging
