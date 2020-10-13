@@ -45,7 +45,8 @@ DEFAULT_EXAMPLE_MAP = {
     'ota': 'alt_translation2',
     'ft': 'Translated_Text'}
 
-DEFAULT_LABELS = {}
+DEFAULT_LABELS = {
+    'va': 'Variant Form(s)'}
 
 DEFAULT_FLEXREF_MAP = {
     'cf': 'cf',
