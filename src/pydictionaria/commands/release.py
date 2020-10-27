@@ -206,3 +206,20 @@ def run(args):
     Dictionary.from_metadata(new_md).validate(log=args.log)
     (outdir / '.travis.yml').write_text(TRAVIS_YML, encoding='utf-8')
     (outdir / 'test.py').write_text(TEST_PY, encoding='utf-8')
+
+    zjson = {
+        "title": "dictionaria/{}: {}".format(md_readme['id'], md_readme['title']),
+        "access_right": "open",
+        "keywords": ["cldf:Dictionary", "linguistics"],
+        "creators": [{"name": a['name'] if isinstance(a, dict) else a} for a in md['authors']],
+        "communities": [
+            {"identifier": "cldf-datasets"},
+            {"identifier": "clld"},
+            {"identifier": "dictionaria"}
+        ],
+        "upload_type": "dataset",
+        "license": {
+            "id": "CC-BY-4.0"
+        }
+    }
+    jsonlib.dump(zjson, outdir / '.zenodo.json', indent=4)
