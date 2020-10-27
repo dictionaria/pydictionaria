@@ -20,6 +20,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'pybtex<0.23; python_version < "3.6"',
+        'pybtex; python_version > "3.5"',
         'requests',
         'purl',
         'python-dateutil',
@@ -35,16 +37,14 @@ setup(
         'pyconcepticon>=1.1.1',
         'colorlog',
         'termcolor',
-        'pybtex',
         'xlrd',
     ],
     extras_require={
         'dev': ['flake8'],
         'test': [
             'tox',
-            'mock',
             'pluggy>=0.12',
-            'pytest>=4.3',
+            'pytest>=5',
             'pytest-mock',
             'pytest-cov',
             'coverage>=4.2',
