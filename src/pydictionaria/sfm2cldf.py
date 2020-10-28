@@ -467,7 +467,6 @@ class CaptionFinder:
         return entry
 
 
-
 class MediaExtractor(object):
 
     def __init__(self, tag, id_index, cdstar_items):
@@ -778,7 +777,9 @@ def remove_senseless_entries(sense_rows, entry_rows, log):
         if entry.get('ID', '').strip() in referenced_entries:
             yield entry
         else:
-            log.error("\\lx %s: entry dropped since there aren't any senses referring to it", entry['Headword'])
+            log.error(
+                "\\lx %s: entry dropped since there aren't any senses referring to it",
+                entry['Headword'])
 
 
 def merge_gloss_into_example(glosses, example_row):
