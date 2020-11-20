@@ -1,4 +1,4 @@
 # pydictionaria
 
-[![Build Status](https://travis-ci.org/dictionaria/pydictionaria.svg?branch=master)](https://travis-ci.org/dictionaria/pydictionaria)
+[![Build Status](https://github.com/dictionaria/pydictionaria/workflows/tests/badge.svg)](https://github.com/dictionaria/pydictionaria/actions?query=workflow%3Atests)
 
