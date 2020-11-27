@@ -106,9 +106,13 @@ class Dictionary(base.Dictionary):
                 fp.write('\n\n')
 
     def _process(self, outdir):
-        if self.submission.module and hasattr(self.submission.module, 'process'):
-            # Run submission-specific preprocessing/normalization of SFM:
-            self.sfm.visit(self.submission.module.process)
+        if self.submission.module:
+            if hasattr(self.submission.module, 'reorganize'):
+                # Run submission-specific reorganisation of the SFM database:
+                self.sfm = self.submission.module.reorganize(self.sfm)
+            if hasattr(self.submission.module, 'process'):
+                # Run submission-specific preprocessing/normalization of SFM:
+                self.sfm.visit(self.submission.module.process)
         # Run generic normalization of SFM:
         self.sfm.visit(normalize)
         self.sfm.visit(Rearrange())
