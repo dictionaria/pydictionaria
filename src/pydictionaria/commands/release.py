@@ -11,7 +11,7 @@ from clldutils.path import copy
 
 from pydictionaria.cli_util import add_submission, get_submission
 
-TRAVIS_BASE_URL = "https://travis-ci.org/dictionaria/"
+ORG_URL = "https://github.com/dictionaria"
 README_TEMPLATE = """\
 # {title}
 
@@ -20,22 +20,45 @@ README_TEMPLATE = """\
 This repository contains the data underlying the published version of the dictionary
 at [Dictionaria]({url}) as [CLDF](https://cldf.clld.org)
 [Dictionary](cldf)
-[![Build Status](%s{id}.svg?branch=master)](%s{id})
+[![CLDF validation](%s/{id}/workflows/CLDF-validation/badge.svg)](%s/{id}/actions?query=workflow%%3ACLDF-validation)
 
 Releases of this repository are archived with and accessible through
 [ZENODO](https://zenodo.org/communities/dictionaria) and the latest release
 is published on the [Dictionaria website](https://dictionaria.clld.org).
 
 {intro}
-""" % (TRAVIS_BASE_URL, TRAVIS_BASE_URL)
+""" % (ORG_URL, ORG_URL)
 
-TRAVIS_YML = """\
-language: python
-python: "3.6"
-cache: pip
-before_cache: rm -f $HOME/.cache/pip/log/debug.log
-install: pip install pytest-cldf
-script: pytest --cldf-metadata=cldf/Dictionary-metadata.json test.py
+VALIDATION_YML = """\
+name: CLDF-validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest-cldf
+    - name: Test with pytest
+      run: |
+        pytest --cldf-metadata=cldf/Dictionary-metadata.json test.py
 """
 
 TEST_PY = """\
@@ -204,7 +227,10 @@ def run(args):
     new_md = cldf / 'Dictionary-metadata.json'
     cldf_md.write_metadata(new_md)
     Dictionary.from_metadata(new_md).validate(log=args.log)
-    (outdir / '.travis.yml').write_text(TRAVIS_YML, encoding='utf-8')
+
+    wf = outdir / '.github' / 'workflows' / 'python-package.yml'
+    wf.parent.mkdir(parents=True)
+    wf.write_text(VALIDATION_YML, encoding='utf-8')
     (outdir / 'test.py').write_text(TEST_PY, encoding='utf-8')
 
     zjson = {
