@@ -4,6 +4,7 @@ from itertools import chain
 from functools import partial
 
 from clldutils.markup import Table
+import pycldf
 
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
@@ -23,6 +24,230 @@ DEFAULT_MARKER_MAP = {
     'sc_Eng': 'sc',
     'sd_Eng': 'sd',
     'x_Eng': 'xe'}
+
+
+def load_examples(examples_path):
+    if not examples_path.exists():
+        return None
+    examples = Examples()
+    examples.read(examples_path, marker_map={'sf': 'sfx'})
+    examples.visit(concat_multilines)
+    return examples
+
+
+# TODO move into sfm2cldf
+def process_dataset(
+    sid, language_id, properties,
+    sfm, examples, media_catalog,
+    glosses_path,
+    examples_log_path, cldf_log_path, glosses_log_path
+):
+    # Run generic normalization of SFM:
+    sfm.visit(normalize)
+    sfm.visit(Rearrange())
+
+    caption_marker = properties.get('media_caption_marker')
+    caption_finder = sfm2cldf.CaptionFinder(
+        ['pc', 'sf', 'sfx'], caption_marker)
+    if caption_marker:
+        sfm.visit(caption_finder)
+
+    # Process FLEx's cross-references in \lf markers
+    flexref_map = ChainMap(
+        properties.get('flexref_map', {}),
+        sfm2cldf.DEFAULT_FLEXREF_MAP)
+    sfm.visit(partial(sfm2cldf.preprocess_flex_crossrefs, flexref_map))
+
+    if not examples:
+        with open(examples_log_path, 'w', encoding='utf8') as log:
+            # FIXME This should go into sfm2cldf.make_spec
+            example_markers = set(
+                properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
+            example_markers.add('sfx')
+            if 'gloss_ref' in properties:
+                example_markers.add(properties['gloss_ref'])
+            # FIXME I don't think `Corpus` is used anywhere to begin with...
+            extractor = ExampleExtractor(
+                example_markers, Corpus.from_dir(examples_log_path.parent), log)
+            sfm.visit(extractor)
+            examples = Examples(extractor.examples.values())
+            for dups in find_duplicate_examples('tx', examples):
+                print('# potential duplicate w.r.t. \\xe', file=log)
+                print('\n# and\n'.join(map(str, dups)), file=log)
+                print(file=log)
+            for dups in find_duplicate_examples('ft', examples):
+                print('# potential duplicate w.r.t. \\xv', file=log)
+                print('\n# and\n'.join(map(str, dups)), file=log)
+                print(file=log)
+
+    original_amount = len(examples)
+    cited = {
+        xref
+        for example in sfm
+        for xref in example.getall('xref')}
+    examples = Examples(
+        example
+        for example in examples
+        if example.id in cited)
+    if original_amount - len(examples):
+        print('pruning', original_amount - len(examples), 'examples from', original_amount)
+
+    with open(cldf_log_path, 'w', encoding='utf8') as logfile:
+        log_name = '%s.cldf' % sid
+        log = sfm2cldf.make_log(log_name, logfile)
+
+        all_markers = {
+            marker
+            for entry in chain(sfm, examples)
+            for marker, _ in entry}
+        spec = sfm2cldf.make_spec(properties, all_markers)
+
+        all_markers -= spec['entry_markers']
+        all_markers -= spec['sense_markers']
+        all_markers -= spec['example_markers']
+        all_markers -= set(EXAMPLE_MARKER_MAP.values())
+        all_markers -= {'lf', 'lv', 'le', caption_marker}
+        if all_markers:
+            marker_list = ', '.join(sorted(all_markers))
+            log.warning('No CLDF column defined for markers: %s', marker_list)
+
+            example_index = sfm2cldf.prepare_examples(
+                spec['example_id'],
+                spec['example_markers'],
+                examples)
+            examples = Examples(example_index.values())
+
+        glosses = {}
+        if glosses_path.exists():
+            gloss_logname = '%s.glosses' % sid
+            with open(glosses_log_path, 'w', encoding='utf-8') as gloss_logfile:
+                gloss_log = sfm2cldf.make_log(gloss_logname, gloss_logfile)
+                gloss_ref_marker = properties.get('gloss_ref')
+                if gloss_ref_marker:
+                    glosses = sfm2cldf.prepare_glosses(
+                        glosses_path, gloss_ref_marker, examples, gloss_log)
+                else:
+                    gloss_log.error("no 'gloss_ref' marker specified")
+                sfm2cldf.check_for_missing_glosses(
+                    gloss_ref_marker, glosses, examples, gloss_log)
+
+        sfm.visit(lambda e: sfm2cldf.validate_ps(e, log))
+        sfm.visit(sfm2cldf.merge_pos)
+
+        crossref_markers = sfm2cldf._get_crossref_markers(properties)
+
+        entry_extr = sfm2cldf.EntryExtractor(
+            spec['entry_id'],
+            spec['entry_markers'])
+        sense_extr = sfm2cldf.SenseExtractor(
+            spec['sense_sep'],
+            spec['sense_markers'],
+            crossref_markers,
+            log)
+
+        rest = [entry_extr(entry) for entry in sfm]
+        rest = [sense_extr(entry) for entry in rest if entry]
+
+        entries = entry_extr.entries
+        senses = sense_extr.senses
+
+        ex_ref = sfm2cldf.ExampleReferencer(example_index)
+        senses.visit(ex_ref)
+
+        if ex_ref.invalid_example_ids:
+            example_list = ', '.join(
+                sorted(map(repr, ex_ref.invalid_example_ids)))
+            log.warning('senses refer to non-existent examples: %s', example_list)
+
+        media_sids = properties.get('media_lookup') or sid
+        if not isinstance(media_sids, list):
+            media_sids = [media_sids]
+
+        media_id_index = {
+            entry['fname']: checksum
+            for checksum, entry in media_catalog.items()
+            if entry['sid'] in media_sids}
+        for fname in list(media_id_index.keys()):
+            media_id_index[fname.split('.')[0]] = media_id_index[fname]
+        media_extr = sfm2cldf.MediaExtractor(
+            'sf',
+            media_id_index,
+            media_catalog)
+
+        entries.visit(media_extr)
+        media_extr.tag = 'pc'
+        senses.visit(media_extr)
+        media_extr.tag = 'sfx'
+        examples.visit(media_extr)
+
+        if media_extr.orphans:
+            file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
+            log.warning('unknown media files: %s', file_list)
+
+        id_index = sfm2cldf.make_id_index(entries)
+
+        crossref_processor = sfm2cldf.CrossRefs(id_index, crossref_markers)
+        entries.visit(crossref_processor)
+        senses.visit(crossref_processor)
+        examples.visit(crossref_processor)
+
+        try:
+            link_processor = sfm2cldf.make_link_processor(
+                properties, id_index, entries)
+            if link_processor is not None:
+                entries.visit(link_processor)
+                senses.visit(link_processor)
+                examples.visit(link_processor)
+        except ValueError as e:
+            log.warning('could not process links: %s', str(e))
+
+        # XXX can I get rid of these lines?
+        entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
+        sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
+        example_crossref_cols = {
+            c for m, c in spec['example_map'].items() if m in crossref_markers}
+
+        entry_rows = [
+            sfm2cldf.sfm_entry_to_cldf_row(
+                'EntryTable',
+                spec['entry_map'],
+                spec['entry_sources'],
+                entry_crossref_cols,
+                entry,
+                language_id)
+            for entry in entries]
+        sense_rows = [
+            sfm2cldf.sfm_entry_to_cldf_row(
+                'SenseTable',
+                spec['sense_map'],
+                spec['sense_sources'],
+                sense_crossref_cols,
+                sense)
+            for sense in senses]
+        example_rows = [
+            sfm2cldf.sfm_entry_to_cldf_row(
+                'ExampleTable',
+                spec['example_map'],
+                spec['example_sources'],
+                example_crossref_cols,
+                example,
+                language_id)
+            for example in examples]
+        media_rows = [
+            {
+                'ID': fileid,
+                'Language_ID': language_id,
+                'Filename': filename,
+                'Description': caption_finder.captions.get(fileid)
+            }
+            for filename, fileid in sorted(media_extr.files)]
+
+        if glosses:
+            example_rows = [
+                sfm2cldf.merge_gloss_into_example(glosses, row)
+                for row in example_rows]
+
+        return entry_rows, sense_rows, example_rows, media_rows
 
 
 class Dictionary(base.Dictionary):
@@ -113,272 +338,49 @@ class Dictionary(base.Dictionary):
             if hasattr(self.submission.module, 'process'):
                 # Run submission-specific preprocessing/normalization of SFM:
                 self.sfm.visit(self.submission.module.process)
-        # Run generic normalization of SFM:
-        self.sfm.visit(normalize)
-        self.sfm.visit(Rearrange())
 
         # Replace media references with md5 sums of referenced files:
         files = Files(self.submission)
         self.sfm.visit(files)
 
-        caption_marker = self.submission.md.properties.get(
-            'media_caption_marker')
-        caption_finder = sfm2cldf.CaptionFinder(
-            ['pc', 'sf', 'sfx'], caption_marker)
-        if caption_marker:
-            self.sfm.visit(caption_finder)
+        examples = load_examples(self.submission.dir.joinpath('examples.sfm'))
 
-        # Process FLEx's cross-references in \lf markers
-        flexref_map = ChainMap(
-            self.submission.md.properties.get('flexref_map', {}),
-            sfm2cldf.DEFAULT_FLEXREF_MAP)
-        self.sfm.visit(partial(sfm2cldf.preprocess_flex_crossrefs, flexref_map))
+        language_id = (
+            self.submission.md.language.isocode
+            or self.submission.md.language.glottocode
+            or '')
+        cldf_log_path = self.submission.dir / 'cldf.log'
+        entry_rows, sense_rows, example_rows, media_rows = process_dataset(
+            self.submission.id, language_id, self.submission.md.properties,
+            self.sfm, examples, self.submission.cdstar.items,
+            glosses_path=self.submission.dir / 'glosses.flextext',
+            examples_log_path=self.submission.dir / 'examples.log',
+            cldf_log_path=cldf_log_path,
+            glosses_log_path=self.submission.dir / 'glosses.log')
 
-        examples_path = self.submission.dir.joinpath('examples.sfm')
-        if examples_path.exists():  # Examples are submitted as separate SFM file.
-            examples = Examples()
-            examples.read(examples_path, marker_map={'sf': 'sfx'})
-            examples.visit(concat_multilines)
-            original_amount = len(examples)
-            cited = {
-                xref
-                for example in self.sfm
-                for xref in example.getall('xref')}
-            examples = Examples(
-                example
-                for example in examples
-                if example.id in cited)
-            print('pruning', original_amount - len(examples), 'examples from', original_amount)
-        else:
-            with self.submission.dir.joinpath(
-                    'examples.log').open('w', encoding='utf8') as log:
-                # FIXME This should go into sfm2cldf.make_spec
-                example_markers = set(
-                    self.submission.md.properties.get('example_map', sfm2cldf.DEFAULT_EXAMPLE_MAP))
-                example_markers.add('sfx')
-                if 'gloss_ref' in self.submission.md.properties:
-                    example_markers.add(self.submission.md.properties['gloss_ref'])
-                extractor = ExampleExtractor(
-                    example_markers, Corpus.from_dir(self.submission.dir), log)
-                self.sfm.visit(extractor)
-                examples = Examples(extractor.examples.values())
-                for dups in find_duplicate_examples('tx', examples):
-                    print('# potential duplicate w.r.t. \\xe', file=log)
-                    print('\n# and\n'.join(map(str, dups)), file=log)
-                    print(file=log)
-                for dups in find_duplicate_examples('ft', examples):
-                    print('# potential duplicate w.r.t. \\xv', file=log)
-                    print('\n# and\n'.join(map(str, dups)), file=log)
-                    print(file=log)
+        cldf = pycldf.Dictionary.in_dir(self.submission.dir)
+        sfm2cldf.make_cldf_schema(
+            cldf, self.submission.md.properties,
+            entry_rows, sense_rows, example_rows, media_rows)
 
-        props = self.submission.md.properties
-        logpath = self.submission.dir.joinpath('cldf.log')
-        with logpath.open('w', encoding='utf8') as logfile:
-            log_name = '%s.cldf' % self.submission.id
-            log = sfm2cldf.make_log(log_name, logfile)
+        sfm2cldf.attach_column_titles(cldf, self.submission.md.properties)
 
-            all_markers = {
-                marker
-                for entry in chain(self.sfm, examples)
-                for marker, _ in entry}
-            spec = sfm2cldf.make_spec(props, all_markers)
+        # TODO find a *decoupled* way of running and logging these...
+        # entry_rows = list(
+        #     sfm2cldf.ensure_required_columns(cldf, 'EntryTable', entry_rows, log))
+        # sense_rows = list(
+        #     sfm2cldf.ensure_required_columns(cldf, 'SenseTable', sense_rows, log))
+        # example_rows = list(
+        #     sfm2cldf.ensure_required_columns(cldf, 'ExampleTable', example_rows, log))
+        # media_rows = list(
+        #     sfm2cldf.ensure_required_columns(cldf, 'media.csv', media_rows, log))
+        # entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
 
-            all_markers -= spec['entry_markers']
-            all_markers -= spec['sense_markers']
-            all_markers -= spec['example_markers']
-            all_markers -= set(EXAMPLE_MARKER_MAP.values())
-            all_markers -= {'lf', 'lv', 'le', caption_marker}
-            if all_markers:
-                marker_list = ', '.join(sorted(all_markers))
-                log.warning('No CLDF column defined for markers: %s', marker_list)
-
-            example_index = sfm2cldf.prepare_examples(
-                spec['example_id'],
-                spec['example_markers'],
-                examples)
-            examples = Examples(example_index.values())
-
-            glosses = {}
-            glosses_path = self.submission.dir.joinpath('glosses.flextext')
-            if glosses_path.exists():
-                gloss_logpath = self.submission.dir.joinpath('glosses.log')
-                gloss_logname = '%s.glosses' % self.submission.id
-                with gloss_logpath.open('w', encoding='utf-8') as gloss_logfile:
-                    gloss_log = sfm2cldf.make_log(gloss_logname, gloss_logfile)
-                    gloss_ref_marker = props.get('gloss_ref')
-                    if gloss_ref_marker:
-                        glosses = sfm2cldf.prepare_glosses(
-                            glosses_path, gloss_ref_marker, examples, gloss_log)
-                    else:
-                        gloss_log.error("md.json does not specifiy 'gloss_ref' marker")
-                    sfm2cldf.check_for_missing_glosses(
-                        gloss_ref_marker, glosses, examples, gloss_log)
-
-            self.sfm.visit(lambda e: sfm2cldf.validate_ps(e, log))
-            self.sfm.visit(sfm2cldf.merge_pos)
-
-            crossref_markers = (
-                sfm2cldf.DEFAULT_CROSS_REFERENCES
-                | set(props.get('cross_references', ()))
-                | set(flexref_map.values()))
-
-            entry_extr = sfm2cldf.EntryExtractor(
-                spec['entry_id'],
-                spec['entry_markers'])
-            sense_extr = sfm2cldf.SenseExtractor(
-                spec['sense_sep'],
-                spec['sense_markers'],
-                crossref_markers,
-                log)
-
-            rest = [entry_extr(entry) for entry in self.sfm]
-            rest = [sense_extr(entry) for entry in rest if entry]
-
-            entries = entry_extr.entries
-            senses = sense_extr.senses
-
-            ex_ref = sfm2cldf.ExampleReferencer(example_index)
-            senses.visit(ex_ref)
-
-            if ex_ref.invalid_example_ids:
-                example_list = ', '.join(
-                    sorted(map(repr, ex_ref.invalid_example_ids)))
-                log.warning('senses refer to non-existent examples: %s', example_list)
-
-            media_id_index = {
-                entry['fname']: checksum
-                for checksum, entry in self.submission.cdstar.items.items()
-                if entry['sid'] in self.submission.media_sids}
-            for fname in list(media_id_index.keys()):
-                media_id_index[fname.split('.')[0]] = media_id_index[fname]
-            media_extr = sfm2cldf.MediaExtractor(
-                'sf',
-                media_id_index,
-                self.submission.cdstar.items)
-
-            entries.visit(media_extr)
-            media_extr.tag = 'pc'
-            senses.visit(media_extr)
-            media_extr.tag = 'sfx'
-            examples.visit(media_extr)
-
-            if media_extr.orphans:
-                file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
-                log.warning('unknown media files: %s', file_list)
-
-            id_index = sfm2cldf.make_id_index(entries)
-
-            crossref_processor = sfm2cldf.CrossRefs(id_index, crossref_markers)
-            entries.visit(crossref_processor)
-            senses.visit(crossref_processor)
-            examples.visit(crossref_processor)
-
-            try:
-                link_processor = sfm2cldf.make_link_processor(
-                    props, id_index, entries)
-                if link_processor is not None:
-                    entries.visit(link_processor)
-                    senses.visit(link_processor)
-                    examples.visit(link_processor)
-            except ValueError as e:
-                log.warning('could not process links: %s', str(e))
-
-            lang_id = (
-                self.submission.md.language.isocode
-                or self.submission.md.language.glottocode
-                or '')
-
-            entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
-            sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
-            example_crossref_cols = {
-                c for m, c in spec['example_map'].items() if m in crossref_markers}
-            dataset = sfm2cldf.make_cldf_dataset(
-                outdir,
-                spec['entry_columns'],
-                spec['sense_columns'],
-                spec['example_columns'],
-                spec['entry_sources'],
-                spec['sense_sources'],
-                spec['example_sources'],
-                entry_crossref_cols,
-                sense_crossref_cols,
-                example_crossref_cols,
-                log)
-
-            # only add Description column, if there are any descriptions
-            if caption_finder.captions:
-                dataset.add_columns('media.csv', 'http://cldf.clld.org/v1.0/terms.rdf#description')
-
-            labels = ChainMap(
-                props.get('labels') or {},
-                sfm2cldf.DEFAULT_LABELS)
-            sfm2cldf.attach_column_titles(
-                dataset['EntryTable'], spec['entry_map'], labels)
-            sfm2cldf.attach_column_titles(
-                dataset['SenseTable'], spec['sense_map'], labels)
-            sfm2cldf.attach_column_titles(
-                dataset['ExampleTable'], spec['example_map'], labels)
-
-            sfm2cldf.add_gloss_columns(dataset, glosses)
-
-            entry_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row(
-                    'EntryTable',
-                    spec['entry_map'],
-                    spec['entry_sources'],
-                    entry_crossref_cols,
-                    entry,
-                    lang_id)
-                for entry in entries]
-            sense_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row(
-                    'SenseTable',
-                    spec['sense_map'],
-                    spec['sense_sources'],
-                    sense_crossref_cols,
-                    sense)
-                for sense in senses]
-            example_rows = [
-                sfm2cldf.sfm_entry_to_cldf_row(
-                    'ExampleTable',
-                    spec['example_map'],
-                    spec['example_sources'],
-                    sense_crossref_cols,
-                    example,
-                    lang_id)
-                for example in examples]
-            media_rows = [
-                {
-                    'ID': fileid,
-                    'Language_ID': lang_id,
-                    'Filename': filename,
-                    'Description': caption_finder.captions.get(fileid)
-                }
-                for filename, fileid in sorted(media_extr.files)]
-
-            # Separator in log file
-            print(file=logfile)
-
-            entry_rows = list(
-                sfm2cldf.ensure_required_columns(dataset, 'EntryTable', entry_rows, log))
-            sense_rows = list(
-                sfm2cldf.ensure_required_columns(dataset, 'SenseTable', sense_rows, log))
-            example_rows = list(
-                sfm2cldf.ensure_required_columns(dataset, 'ExampleTable', example_rows, log))
-            media_rows = list(
-                sfm2cldf.ensure_required_columns(dataset, 'media.csv', media_rows, log))
-
-            entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
-
-            if glosses:
-                example_rows = [
-                    sfm2cldf.merge_gloss_into_example(glosses, row)
-                    for row in example_rows]
-
-            kwargs = {
-                'EntryTable': entry_rows,
-                'SenseTable': sense_rows,
-                'ExampleTable': example_rows,
-                'media.csv': media_rows}
-            dataset.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
-            dataset.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))
+        kwargs = {
+            'EntryTable': entry_rows,
+            'SenseTable': sense_rows,
+            'ExampleTable': example_rows,
+            'media.csv': media_rows}
+        cldf.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
+        # TODO find a *decoupled* way of running and logging this...
+        # cldf.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))

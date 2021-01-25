@@ -1,8 +1,9 @@
 from collections import OrderedDict, ChainMap, defaultdict
-import re
-import logging
 import copy
+from itertools import chain
+import logging
 import os.path
+import re
 import sys
 
 from clldutils import sfm
@@ -150,6 +151,14 @@ def make_spec(properties, marker_set):
         'example_sources': example_sources,
 
         'gloss_ref': gloss_ref}
+
+
+def _get_crossref_markers(properties):
+    return set(chain(
+        DEFAULT_CROSS_REFERENCES,
+        properties.get('cross_references') or (),
+        DEFAULT_FLEXREF_MAP.values(),
+        properties.get('flexref_map') or ()))
 
 
 def group_by_separator(sep, sfm_pairs):
@@ -663,7 +672,7 @@ def sfm_entry_to_cldf_row(
     return row
 
 
-def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
+def _add_columns(cldf, table_name, columns, sources, cross_refs, log):
     for column in sorted(columns):
         col = column
         if column in SEPARATORS or column in cross_refs:
@@ -672,7 +681,7 @@ def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
                 'datatype': 'string',
                 'separator': SEPARATORS.get(column, DEFAULT_SEPARATOR)}
         try:
-            dataset.add_columns(table_name, col)
+            cldf.add_columns(table_name, col)
         except ValueError as error:
             msg = str(error)
             # Ignore columns that are already there
@@ -680,14 +689,14 @@ def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
                 log.error('%s: Could not add column: %s', table_name, msg)
 
         if column in cross_refs:
-            dataset[table_name].add_foreign_key(column, 'entries.csv', 'ID')
+            cldf[table_name].add_foreign_key(column, 'entries.csv', 'ID')
         if column == 'Media_IDs':
-            dataset[table_name].add_foreign_key(column, 'media.csv', 'ID')
+            cldf[table_name].add_foreign_key(column, 'media.csv', 'ID')
         if column == 'Sense_IDs':
-            dataset[table_name].add_foreign_key(column, 'senses.csv', 'ID')
+            cldf[table_name].add_foreign_key(column, 'senses.csv', 'ID')
     if sources:
         try:
-            dataset.add_columns(
+            cldf.add_columns(
                 table_name,
                 'http://cldf.clld.org/v1.0/terms.rdf#source')
         except ValueError:
@@ -695,40 +704,105 @@ def _add_columns(dataset, table_name, columns, sources, cross_refs, log):
             pass
 
 
+def make_cldf_schema(cldf, properties, entries, senses, examples, media):
+    cldf.add_component('ExampleTable')
+    cldf.add_table(
+        'media.csv',
+        'http://cldf.clld.org/v1.0/terms.rdf#id',
+        'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
+        'Filename')
+    cldf.add_component('LanguageTable')
+
+    # TODO move out of function
+    PREDEFINED = {
+        'Source': 'http://cldf.clld.org/v1.0/terms.rdf#source',
+        'Description': 'http://cldf.clld.org/v1.0/terms.rdf#description',
+        'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
+
+    # TODO move out of function
+    def amend_columns(table_name, entry_cols, crossrefs):
+        for colname in entry_cols:
+            if colname in PREDEFINED:
+                col = PREDEFINED[colname]
+            elif colname in SEPARATORS or colname in crossrefs:
+                col = {
+                    'name': colname,
+                    'datatype': 'string',
+                    'separator': SEPARATORS.get(colname, DEFAULT_SEPARATOR),
+                }
+            else:
+                col = colname
+
+            try:
+                cldf.add_columns(table_name, col)
+            except ValueError as error:
+                msg = str(error)
+                # Ignore columns that are already there
+                if not msg.startswith('Duplicate column name:'):
+                    print('%s:'.format(table_name), 'Could not add column:', msg)
+
+            if colname in crossrefs:
+                cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')
+            elif colname == 'Media_IDs':
+                cldf.add_foreign_key(table_name, colname, 'media.csv', 'ID')
+            elif colname == 'Sense_IDs':
+                cldf.add_foreign_key(table_name, colname, 'SenseTable', 'ID')
+
+    crossref_markers = _get_crossref_markers(properties)
+
+    amend_columns(
+        'EntryTable',
+        sorted({col for row in entries for col, val in row.items() if val}),
+        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
+    amend_columns(
+        'SenseTable',
+        sorted({col for row in senses for col, val in row.items() if val}),
+        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
+    amend_columns(
+        'ExampleTable',
+        sorted({col for row in examples for col, val in row.items() if val}),
+        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
+    amend_columns(
+        'media.csv',
+        sorted({col for row in media for col, val in row.items() if val}),
+        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
+
+    # NEXT add labels
+
+
 def make_cldf_dataset(
-        folder,
+        cldf,
         entry_columns, sense_columns, example_columns,
         entry_sources, sense_sources, example_sources,
         entry_crossrefs, sense_crossrefs, example_crossrefs,
         log):
-    dataset = pycldf.Dictionary.in_dir(folder)
-    dataset.add_component('ExampleTable')
-    dataset.add_table(
+    cldf.add_component('ExampleTable')
+    cldf.add_table(
         'media.csv', 'ID', 'Language_ID', 'Filename',
         primaryKey='ID')
 
-    _add_columns(dataset, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
-    _add_columns(dataset, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)
+    _add_columns(cldf, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
+    _add_columns(cldf, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)
     if example_columns:
         _add_columns(
-            dataset, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
+            cldf, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
         # Manually mark Translated_Text as required
         # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
-        # ft = dataset['ExampleTable'].tableSchema.get_column('Translated_Text')
+        # ft = cldf['ExampleTable'].tableSchema.get_column('Translated_Text')
         # if ft:
         #     ft.required = True
 
-    return dataset
+    return cldf
 
 
-def add_gloss_columns(dataset, glosses):
+def add_gloss_columns(cldf, glosses):
     gloss_columns = {
         column
         for gloss in glosses.values()
         for column in gloss['example']}
     for column in sorted(gloss_columns):
         try:
-            dataset.add_columns(
+            cldf.add_columns(
                 'ExampleTable',
                 {'name': column, 'datatype': 'string', 'separator': r'\t'})
         except ValueError:
@@ -736,7 +810,7 @@ def add_gloss_columns(dataset, glosses):
             pass
 
 
-def attach_column_titles(table, mapping, labels):
+def _add_labels_to_table(table, mapping, labels):
     label_map = {
         mapping[marker]: label
         for marker, label in labels.items()
@@ -746,10 +820,26 @@ def attach_column_titles(table, mapping, labels):
             col.titles = label_map[str(col)]
 
 
-def ensure_required_columns(dataset, table_name, rows, log):
+def attach_column_titles(cldf, properties):
+    labels = ChainMap(properties.get('labels') or {}, DEFAULT_LABELS)
+    _add_labels_to_table(
+        cldf['EntryTable'],
+        ChainMap(properties.get('entry_map') or {}, DEFAULT_ENTRY_MAP),
+        labels)
+    _add_labels_to_table(
+        cldf['SenseTable'],
+        ChainMap(properties.get('sense_map') or {}, DEFAULT_SENSE_MAP),
+        labels)
+    _add_labels_to_table(
+        cldf['ExampleTable'],
+        ChainMap(properties.get('example_map') or {}, DEFAULT_EXAMPLE_MAP),
+        labels)
+
+
+def ensure_required_columns(cldf, table_name, rows, log):
     required_cols = [
         col.name
-        for col in dataset[table_name].tableSchema.columns
+        for col in cldf[table_name].tableSchema.columns
         if col.required]
     for row in rows:
         missing_fields = [
