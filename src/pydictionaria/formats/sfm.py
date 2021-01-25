@@ -358,7 +358,7 @@ class Dictionary(base.Dictionary):
             cldf_log_path=cldf_log_path,
             glosses_log_path=self.submission.dir / 'glosses.log')
 
-        cldf = pycldf.Dictionary.in_dir(self.submission.dir)
+        cldf = pycldf.Dictionary.in_dir(self.submission.dir / 'processed')
         sfm2cldf.make_cldf_schema(
             cldf, self.submission.md.properties,
             entry_rows, sense_rows, example_rows, media_rows)
@@ -380,7 +380,14 @@ class Dictionary(base.Dictionary):
             'EntryTable': entry_rows,
             'SenseTable': sense_rows,
             'ExampleTable': example_rows,
-            'media.csv': media_rows}
+            'media.csv': media_rows,
+            'LanguageTable': [
+                {
+                    'ID': language_id,
+                    'Name': self.submission.md.language.name,
+                    'ISO639P3code': self.submission.md.language.isocode,
+                    'Glottocode': self.submission.md.language.glottocode}]}
+
         cldf.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
         # TODO find a *decoupled* way of running and logging this...
         # cldf.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))
