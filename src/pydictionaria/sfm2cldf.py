@@ -1,5 +1,6 @@
 from collections import OrderedDict, ChainMap, defaultdict
 import copy
+from functools import partial
 from itertools import chain
 import logging
 import os.path
@@ -7,9 +8,16 @@ import re
 import sys
 
 from clldutils import sfm
-import pycldf
 
 from pydictionaria import flextext
+from pydictionaria.example import Corpus, Examples, concat_multilines
+from pydictionaria.formats.sfm_lib import (
+    find_duplicate_examples,
+    normalize,
+    Rearrange,
+    ExampleExtractor,
+    EXAMPLE_MARKER_MAP,
+)
 from pydictionaria.util import split_ids
 
 DEFAULT_ENTRY_SEP = r'\lx '
@@ -904,3 +912,217 @@ def make_log(name, stream=None):
         log.addHandler(to_stream)
 
     return log
+
+
+def process_dataset(
+    sid, language_id, properties,
+    sfm, examples, media_catalog,
+    glosses_path,
+    examples_log_path, cldf_log_path, glosses_log_path
+):
+    # Run generic normalization of SFM:
+    sfm.visit(normalize)
+    sfm.visit(Rearrange())
+
+    caption_marker = properties.get('media_caption_marker')
+    caption_finder = CaptionFinder(
+        ['pc', 'sf', 'sfx'], caption_marker)
+    if caption_marker:
+        sfm.visit(caption_finder)
+
+    # Process FLEx's cross-references in \lf markers
+    flexref_map = ChainMap(
+        properties.get('flexref_map', {}),
+        DEFAULT_FLEXREF_MAP)
+    sfm.visit(partial(preprocess_flex_crossrefs, flexref_map))
+
+    if not examples:
+        with open(examples_log_path, 'w', encoding='utf8') as log:
+            # FIXME This should go into make_spec
+            example_markers = set(
+                properties.get('example_map', DEFAULT_EXAMPLE_MAP))
+            example_markers.add('sfx')
+            if 'gloss_ref' in properties:
+                example_markers.add(properties['gloss_ref'])
+            # FIXME I don't think `Corpus` is used anywhere to begin with...
+            extractor = ExampleExtractor(
+                example_markers, Corpus.from_dir(examples_log_path.parent), log)
+            sfm.visit(extractor)
+            examples = Examples(extractor.examples.values())
+            for dups in find_duplicate_examples('tx', examples):
+                print('# potential duplicate w.r.t. \\xe', file=log)
+                print('\n# and\n'.join(map(str, dups)), file=log)
+                print(file=log)
+            for dups in find_duplicate_examples('ft', examples):
+                print('# potential duplicate w.r.t. \\xv', file=log)
+                print('\n# and\n'.join(map(str, dups)), file=log)
+                print(file=log)
+
+    original_amount = len(examples)
+    cited = {
+        xref
+        for example in sfm
+        for xref in example.getall('xref')}
+    examples = Examples(
+        example
+        for example in examples
+        if example.id in cited)
+    if original_amount - len(examples):
+        print('pruning', original_amount - len(examples), 'examples from', original_amount)
+
+    with open(cldf_log_path, 'w', encoding='utf8') as logfile:
+        log_name = '%s.cldf' % sid
+        log = make_log(log_name, logfile)
+
+        all_markers = {
+            marker
+            for entry in chain(sfm, examples)
+            for marker, _ in entry}
+        spec = make_spec(properties, all_markers)
+
+        all_markers -= spec['entry_markers']
+        all_markers -= spec['sense_markers']
+        all_markers -= spec['example_markers']
+        all_markers -= set(EXAMPLE_MARKER_MAP.values())
+        all_markers -= {'lf', 'lv', 'le', caption_marker}
+        if all_markers:
+            marker_list = ', '.join(sorted(all_markers))
+            log.warning('No CLDF column defined for markers: %s', marker_list)
+
+            example_index = prepare_examples(
+                spec['example_id'],
+                spec['example_markers'],
+                examples)
+            examples = Examples(example_index.values())
+
+        glosses = {}
+        if glosses_path.exists():
+            gloss_logname = '%s.glosses' % sid
+            with open(glosses_log_path, 'w', encoding='utf-8') as gloss_logfile:
+                gloss_log = make_log(gloss_logname, gloss_logfile)
+                gloss_ref_marker = properties.get('gloss_ref')
+                if gloss_ref_marker:
+                    glosses = prepare_glosses(
+                        glosses_path, gloss_ref_marker, examples, gloss_log)
+                else:
+                    gloss_log.error("no 'gloss_ref' marker specified")
+                check_for_missing_glosses(
+                    gloss_ref_marker, glosses, examples, gloss_log)
+
+        sfm.visit(lambda e: validate_ps(e, log))
+        sfm.visit(merge_pos)
+
+        crossref_markers = _get_crossref_markers(properties)
+
+        entry_extr = EntryExtractor(
+            spec['entry_id'],
+            spec['entry_markers'])
+        sense_extr = SenseExtractor(
+            spec['sense_sep'],
+            spec['sense_markers'],
+            crossref_markers,
+            log)
+
+        rest = [entry_extr(entry) for entry in sfm]
+        rest = [sense_extr(entry) for entry in rest if entry]
+
+        entries = entry_extr.entries
+        senses = sense_extr.senses
+
+        ex_ref = ExampleReferencer(example_index)
+        senses.visit(ex_ref)
+
+        if ex_ref.invalid_example_ids:
+            example_list = ', '.join(
+                sorted(map(repr, ex_ref.invalid_example_ids)))
+            log.warning('senses refer to non-existent examples: %s', example_list)
+
+        media_sids = properties.get('media_lookup') or sid
+        if not isinstance(media_sids, list):
+            media_sids = [media_sids]
+
+        media_id_index = {
+            entry['fname']: checksum
+            for checksum, entry in media_catalog.items()
+            if entry['sid'] in media_sids}
+        for fname in list(media_id_index.keys()):
+            media_id_index[fname.split('.')[0]] = media_id_index[fname]
+        media_extr = MediaExtractor(
+            'sf',
+            media_id_index,
+            media_catalog)
+
+        entries.visit(media_extr)
+        media_extr.tag = 'pc'
+        senses.visit(media_extr)
+        media_extr.tag = 'sfx'
+        examples.visit(media_extr)
+
+        if media_extr.orphans:
+            file_list = ', '.join(sorted(map(repr, media_extr.orphans)))
+            log.warning('unknown media files: %s', file_list)
+
+        id_index = make_id_index(entries)
+
+        crossref_processor = CrossRefs(id_index, crossref_markers)
+        entries.visit(crossref_processor)
+        senses.visit(crossref_processor)
+        examples.visit(crossref_processor)
+
+        try:
+            link_processor = make_link_processor(
+                properties, id_index, entries)
+            if link_processor is not None:
+                entries.visit(link_processor)
+                senses.visit(link_processor)
+                examples.visit(link_processor)
+        except ValueError as e:
+            log.warning('could not process links: %s', str(e))
+
+        # XXX can I get rid of these lines?
+        entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
+        sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
+        example_crossref_cols = {
+            c for m, c in spec['example_map'].items() if m in crossref_markers}
+
+        entry_rows = [
+            sfm_entry_to_cldf_row(
+                'EntryTable',
+                spec['entry_map'],
+                spec['entry_sources'],
+                entry_crossref_cols,
+                entry,
+                language_id)
+            for entry in entries]
+        sense_rows = [
+            sfm_entry_to_cldf_row(
+                'SenseTable',
+                spec['sense_map'],
+                spec['sense_sources'],
+                sense_crossref_cols,
+                sense)
+            for sense in senses]
+        example_rows = [
+            sfm_entry_to_cldf_row(
+                'ExampleTable',
+                spec['example_map'],
+                spec['example_sources'],
+                example_crossref_cols,
+                example,
+                language_id)
+            for example in examples]
+        media_rows = [
+            {
+                'ID': fileid,
+                'Language_ID': language_id,
+                'Filename': filename,
+                'Description': caption_finder.captions.get(fileid)
+            }
+            for filename, fileid in sorted(media_extr.files)]
+
+        if glosses:
+            example_rows = [
+                merge_gloss_into_example(glosses, row)
+                for row in example_rows]
+
+        return entry_rows, sense_rows, example_rows, media_rows
