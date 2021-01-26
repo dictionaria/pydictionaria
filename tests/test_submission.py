@@ -21,10 +21,6 @@ def test_Submission(repos, tmpdir):
     assert s.id
 
 
-def test_Excel(repos):
-    Submission(repos.joinpath('submissions', 'sub_excel'), repos)
-
-
 def test_SFM(repos, capsys):
     s = Submission(repos.joinpath('submissions', 'sub_sfm'), repos)
     s.dictionary.search(zz='custom')
