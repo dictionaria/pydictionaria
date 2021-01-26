@@ -40,7 +40,6 @@ setup(
         'pyconcepticon>=1.1.1',
         'colorlog',
         'termcolor',
-        'xlrd',
     ],
     extras_require={
         'dev': ['flake8'],

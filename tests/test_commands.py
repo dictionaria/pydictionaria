@@ -23,8 +23,6 @@ def test_ls(capsys, _main):
 
 
 def test_process(_main, repos):
-    _main('process', 'sub_excel')
-    assert repos.joinpath('submissions', 'sub_excel', 'processed').exists()
     _main('process', 'sub_sfm_flex_ref')
 
 
