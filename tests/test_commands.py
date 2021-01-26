@@ -15,11 +15,11 @@ def test_ls(capsys, _main):
     assert 'First Author' in capsys.readouterr()[0]
 
 
-#def test_add_comparison_meanings(mocker, _main):
-#    _main('add_comparison_meanings')
-#    log = mocker.Mock()
-#    commands.add_comparison_meanings(_args(mocker, repos, 'sub_excel', log=log))
-#    assert log.warn.called
+# def test_add_comparison_meanings(mocker, _main):
+#     _main('add_comparison_meanings')
+#     log = mocker.Mock()
+#     commands.add_comparison_meanings(_args(mocker, repos, 'sub_excel', log=log))
+#     assert log.warn.called
 
 
 def test_process(_main, repos):

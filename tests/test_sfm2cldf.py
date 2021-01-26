@@ -188,7 +188,7 @@ class LinkProcessing(unittest.TestCase):
             ('linkmarker1', 'no link'),
             ('linkmarker2', 'link: OLDID1'),
             ('othermarker', 'no link')])
-        new_entry = self.link_processor(original_entry)
+        _ = self.link_processor(original_entry)
         self.assertEqual(original_entry, expected)
 
     def test_carry_over_attributes(self):

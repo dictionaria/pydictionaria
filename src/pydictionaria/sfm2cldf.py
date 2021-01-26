@@ -10,7 +10,7 @@ import sys
 from clldutils import sfm
 
 from pydictionaria import flextext
-from pydictionaria.example import Corpus, Examples, concat_multilines
+from pydictionaria.example import Corpus, Examples
 from pydictionaria.formats.sfm_lib import (
     find_duplicate_examples,
     normalize,
@@ -357,7 +357,7 @@ def check_for_missing_glosses(gloss_ref_marker, glosses, examples, log):
 
 
 def validate_ps(entry, log):
-    """Visitor filtering out entries with invalid \ps markers.
+    r"""Visitor filtering out entries with invalid \ps markers.
 
     Enforces the following rules:
      1. There must be at least one non-empty \ps marker
@@ -366,15 +366,15 @@ def validate_ps(entry, log):
     """
     ps = entry.getall('ps')
     if not ps:
-        log.error('\lx %s: entry dropped due to missing \ps marker', entry.get('lx'))
+        log.error(r'\lx %s: entry dropped due to missing \ps marker', entry.get('lx'))
         return False
     ps = [s for s in ps if s.strip()]
     if not ps:
-        log.error('\lx %s: entry dropped due to empty \ps marker', entry.get('lx'))
+        log.error(r'\lx %s: entry dropped due to empty \ps marker', entry.get('lx'))
         return False
     if len(set(ps)) > 1:
         log.error(
-            '\lx %s: entry dropped due to conflicting \ps markers: %s',
+            r'\lx %s: entry dropped due to conflicting \ps markers: %s',
             entry.get('lx'),
             ', '.join(map(repr, ps)))
         return False
@@ -382,7 +382,7 @@ def validate_ps(entry, log):
 
 
 def merge_pos(entry):
-    """Merge all unique \ps markers of an entry into one."""
+    r"""Merge all unique \ps markers of an entry into one."""
     ps = [s for s in entry.getall('ps') if s.strip()]
     if len(ps) < 2:
         return entry
@@ -747,7 +747,7 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
                 msg = str(error)
                 # Ignore columns that are already there
                 if not msg.startswith('Duplicate column name:'):
-                    print('%s:'.format(table_name), 'Could not add column:', msg)
+                    print('{}:'.format(table_name), 'Could not add column:', msg)
 
             if colname in crossrefs:
                 cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')

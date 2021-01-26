@@ -8,7 +8,7 @@ def test_Submission(repos, tmpdir):
         Metadata([], Language('name', 'gc', 'iso'), None).asdict(),
         str(tmpdir.join('md.json')))
     s = Submission(str(tmpdir), repos)
-    #self.assertEqual(Metadata.fromdict(s.md.asdict()).language.name, 'name')
+    # self.assertEqual(Metadata.fromdict(s.md.asdict()).language.name, 'name')
     assert s.module is None
     assert s.dictionary is None
     assert s.media['audio'] == []

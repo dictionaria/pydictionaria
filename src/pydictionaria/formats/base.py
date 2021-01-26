@@ -20,14 +20,14 @@ class Dictionary(object):
         return {}
 
     def stat(self):
-        raise NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @classmethod
     def match(cls, submission):
-        raise NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def check(self):
-        raise NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def process(self):
         outdir = self.submission.dir.joinpath('processed')
@@ -36,4 +36,4 @@ class Dictionary(object):
         return self._process(outdir)
 
     def _process(self, outdir):
-        raise NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover

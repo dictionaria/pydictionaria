@@ -1,18 +1,14 @@
 import sys
 from collections import ChainMap
-from itertools import chain
-from functools import partial
 
 from clldutils.markup import Table
 import pycldf
 
 from pydictionaria.formats import base
 from pydictionaria.formats.sfm_lib import (
-    Stats, Rearrange, Files, find_duplicate_examples, ExampleExtractor,
-    normalize, ComparisonMeanings, Check, repair, Database, CheckBibrefs,
-    EXAMPLE_MARKER_MAP
+    Check, CheckBibrefs, ComparisonMeanings, Database, Files, Stats, repair
 )
-from pydictionaria.example import Corpus, Examples, concat_multilines
+from pydictionaria.example import Examples, concat_multilines
 from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
@@ -64,8 +60,8 @@ class Dictionary(base.Dictionary):
         count = 0
         for entry in self.sfm:
             if all(match(entry, marker, value) for marker, value in query.items()):
-                    print(('%s\n' % entry).encode('utf8'))
-                    count += 1
+                print(('%s\n' % entry).encode('utf8'))
+                count += 1
         print('{0} matches'.format(count))
 
     def stat(self):
