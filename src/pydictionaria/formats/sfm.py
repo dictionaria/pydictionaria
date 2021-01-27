@@ -126,49 +126,51 @@ class Dictionary(base.Dictionary):
 
         examples = load_examples(self.submission.dir.joinpath('examples.sfm'))
 
-        language_id = (
-            self.submission.md.language.isocode
-            or self.submission.md.language.glottocode
-            or '')
         cldf_log_path = self.submission.dir / 'cldf.log'
-        entry_rows, sense_rows, example_rows, media_rows = sfm2cldf.process_dataset(
-            self.submission.id, language_id, self.submission.md.properties,
-            self.sfm, examples, self.submission.cdstar.items,
-            glosses_path=self.submission.dir / 'glosses.flextext',
-            examples_log_path=self.submission.dir / 'examples.log',
-            cldf_log_path=cldf_log_path,
-            glosses_log_path=self.submission.dir / 'glosses.log')
+        with cldf_log_path.open('w', encoding='utf-8') as log_file:
+            log_name = '%s.cldf' % self.submission.id
+            cldf_log = sfm2cldf.make_log(log_name, log_file)
 
-        cldf = pycldf.Dictionary.in_dir(self.submission.dir / 'processed')
-        sfm2cldf.make_cldf_schema(
-            cldf, self.submission.md.properties,
-            entry_rows, sense_rows, example_rows, media_rows)
+            language_id = (
+                self.submission.md.language.isocode
+                or self.submission.md.language.glottocode
+                or '')
+            entry_rows, sense_rows, example_rows, media_rows = sfm2cldf.process_dataset(
+                self.submission.id, language_id, self.submission.md.properties,
+                self.sfm, examples, self.submission.cdstar.items,
+                glosses_path=self.submission.dir / 'glosses.flextext',
+                examples_log_path=self.submission.dir / 'examples.log',
+                glosses_log_path=self.submission.dir / 'glosses.log',
+                cldf_log=cldf_log)
 
-        sfm2cldf.attach_column_titles(cldf, self.submission.md.properties)
+            cldf = pycldf.Dictionary.in_dir(self.submission.dir / 'processed')
+            sfm2cldf.make_cldf_schema(
+                cldf, self.submission.md.properties,
+                entry_rows, sense_rows, example_rows, media_rows)
 
-        # TODO find a *decoupled* way of running and logging these...
-        # entry_rows = list(
-        #     sfm2cldf.ensure_required_columns(cldf, 'EntryTable', entry_rows, log))
-        # sense_rows = list(
-        #     sfm2cldf.ensure_required_columns(cldf, 'SenseTable', sense_rows, log))
-        # example_rows = list(
-        #     sfm2cldf.ensure_required_columns(cldf, 'ExampleTable', example_rows, log))
-        # media_rows = list(
-        #     sfm2cldf.ensure_required_columns(cldf, 'media.csv', media_rows, log))
-        # entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, log))
+            sfm2cldf.attach_column_titles(cldf, self.submission.md.properties)
 
-        kwargs = {
-            'EntryTable': entry_rows,
-            'SenseTable': sense_rows,
-            'ExampleTable': example_rows,
-            'media.csv': media_rows,
-            'LanguageTable': [
-                {
-                    'ID': language_id,
-                    'Name': self.submission.md.language.name,
-                    'ISO639P3code': self.submission.md.language.isocode,
-                    'Glottocode': self.submission.md.language.glottocode}]}
+            entry_rows = list(
+                sfm2cldf.ensure_required_columns(cldf, 'EntryTable', entry_rows, cldf_log))
+            sense_rows = list(
+                sfm2cldf.ensure_required_columns(cldf, 'SenseTable', sense_rows, cldf_log))
+            example_rows = list(
+                sfm2cldf.ensure_required_columns(cldf, 'ExampleTable', example_rows, cldf_log))
+            media_rows = list(
+                sfm2cldf.ensure_required_columns(cldf, 'media.csv', media_rows, cldf_log))
+            entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, cldf_log))
 
-        cldf.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
-        # TODO find a *decoupled* way of running and logging this...
-        # cldf.validate(log=sfm2cldf.LogOnlyBaseNames(log, {}))
+            kwargs = {
+                'EntryTable': entry_rows,
+                'SenseTable': sense_rows,
+                'ExampleTable': example_rows,
+                'media.csv': media_rows,
+                'LanguageTable': [
+                    {
+                        'ID': language_id,
+                        'Name': self.submission.md.language.name,
+                        'ISO639P3code': self.submission.md.language.isocode,
+                        'Glottocode': self.submission.md.language.glottocode}]}
+
+            cldf.write(fname=outdir.joinpath('cldf-md.json'), **kwargs)
+            cldf.validate(log=sfm2cldf.LogOnlyBaseNames(cldf_log, {}))
