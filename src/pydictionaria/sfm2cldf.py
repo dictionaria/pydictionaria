@@ -79,6 +79,12 @@ SEPARATORS = {
     'Main_Entry': DEFAULT_SEPARATOR}
 
 
+PROPERTY_URLS = {
+    'Source': 'http://cldf.clld.org/v1.0/terms.rdf#source',
+    'Description': 'http://cldf.clld.org/v1.0/terms.rdf#description',
+    'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
+
+
 def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
     mapped_values = set(json_mapping.values())
     global_map = ChainMap(
@@ -712,6 +718,35 @@ def _add_columns(cldf, table_name, columns, sources, cross_refs, log):
             pass
 
 
+def _amend_columns(cldf, table_name, entry_cols, crossrefs):
+    for colname in entry_cols:
+        if colname in PROPERTY_URLS:
+            col = PROPERTY_URLS[colname]
+        elif colname in SEPARATORS or colname in crossrefs:
+            col = {
+                'name': colname,
+                'datatype': 'string',
+                'separator': SEPARATORS.get(colname, DEFAULT_SEPARATOR),
+            }
+        else:
+            col = colname
+
+        try:
+            cldf.add_columns(table_name, col)
+        except ValueError as error:
+            msg = str(error)
+            # Ignore columns that are already there
+            if not msg.startswith('Duplicate column name:'):
+                print('{}:'.format(table_name), 'Could not add column:', msg)
+
+        if colname in crossrefs:
+            cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')
+        elif colname == 'Media_IDs':
+            cldf.add_foreign_key(table_name, colname, 'media.csv', 'ID')
+        elif colname == 'Sense_IDs':
+            cldf.add_foreign_key(table_name, colname, 'SenseTable', 'ID')
+
+
 def make_cldf_schema(cldf, properties, entries, senses, examples, media):
     cldf.add_component('ExampleTable')
     cldf.add_table(
@@ -721,61 +756,33 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
         'Filename')
     cldf.add_component('LanguageTable')
 
-    # TODO move out of function
-    PREDEFINED = {
-        'Source': 'http://cldf.clld.org/v1.0/terms.rdf#source',
-        'Description': 'http://cldf.clld.org/v1.0/terms.rdf#description',
-        'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
-
-    # TODO move out of function
-    def amend_columns(table_name, entry_cols, crossrefs):
-        for colname in entry_cols:
-            if colname in PREDEFINED:
-                col = PREDEFINED[colname]
-            elif colname in SEPARATORS or colname in crossrefs:
-                col = {
-                    'name': colname,
-                    'datatype': 'string',
-                    'separator': SEPARATORS.get(colname, DEFAULT_SEPARATOR),
-                }
-            else:
-                col = colname
-
-            try:
-                cldf.add_columns(table_name, col)
-            except ValueError as error:
-                msg = str(error)
-                # Ignore columns that are already there
-                if not msg.startswith('Duplicate column name:'):
-                    print('{}:'.format(table_name), 'Could not add column:', msg)
-
-            if colname in crossrefs:
-                cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')
-            elif colname == 'Media_IDs':
-                cldf.add_foreign_key(table_name, colname, 'media.csv', 'ID')
-            elif colname == 'Sense_IDs':
-                cldf.add_foreign_key(table_name, colname, 'SenseTable', 'ID')
-
     crossref_markers = _get_crossref_markers(properties)
 
-    amend_columns(
+    # FIXME add defaults to properties in some reusable way
+    entry_map = ChainMap(properties.get('entry_map') or entry_map, DEFAULT_ENTRY_MAP)
+    sense_map = ChainMap(properties.get('sense_map') or entry_map, DEFAULT_SENSE_MAP)
+    example_map = ChainMap(properties.get('example_map') or entry_map, DEFAULT_EXAMPLE_MAP)
+
+    _amend_columns(
+        cldf,
         'EntryTable',
         sorted({col for row in entries for col, val in row.items() if val}),
-        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
-    amend_columns(
+        {c for m, c in entry_map.items() if m in crossref_markers})
+    _amend_columns(
+        cldf,
         'SenseTable',
         sorted({col for row in senses for col, val in row.items() if val}),
-        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
-    amend_columns(
+        {c for m, c in sense_map.items() if m in crossref_markers})
+    _amend_columns(
+        cldf,
         'ExampleTable',
         sorted({col for row in examples for col, val in row.items() if val}),
-        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
-    amend_columns(
+        {c for m, c in example_map.items() if m in crossref_markers})
+    _amend_columns(
+        cldf,
         'media.csv',
         sorted({col for row in media for col, val in row.items() if val}),
-        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
-
-    # NEXT add labels
+        ())
 
 
 def make_cldf_dataset(
