@@ -150,15 +150,12 @@ class Dictionary(base.Dictionary):
 
             sfm2cldf.attach_column_titles(cldf, self.submission.md.properties)
 
-            entry_rows = list(
-                sfm2cldf.ensure_required_columns(cldf, 'EntryTable', entry_rows, cldf_log))
-            sense_rows = list(
-                sfm2cldf.ensure_required_columns(cldf, 'SenseTable', sense_rows, cldf_log))
-            example_rows = list(
-                sfm2cldf.ensure_required_columns(cldf, 'ExampleTable', example_rows, cldf_log))
-            media_rows = list(
-                sfm2cldf.ensure_required_columns(cldf, 'media.csv', media_rows, cldf_log))
-            entry_rows = list(sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, cldf_log))
+            entry_rows = sfm2cldf.ensure_required_columns(cldf, 'EntryTable', entry_rows, cldf_log)
+            sense_rows = sfm2cldf.ensure_required_columns(cldf, 'SenseTable', sense_rows, cldf_log)
+            example_rows = sfm2cldf.ensure_required_columns(cldf, 'ExampleTable', example_rows, cldf_log)
+            media_rows = sfm2cldf.ensure_required_columns(cldf, 'media.csv', media_rows, cldf_log)
+
+            entry_rows = sfm2cldf.remove_senseless_entries(sense_rows, entry_rows, cldf_log)
 
             kwargs = {
                 'EntryTable': entry_rows,

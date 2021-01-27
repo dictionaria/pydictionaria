@@ -844,7 +844,7 @@ def attach_column_titles(cldf, properties):
         labels)
 
 
-def ensure_required_columns(cldf, table_name, rows, log):
+def _ensure_required_columns(cldf, table_name, rows, log):
     required_cols = [
         col.name
         for col in cldf[table_name].tableSchema.columns
@@ -866,7 +866,11 @@ def ensure_required_columns(cldf, table_name, rows, log):
             yield row
 
 
-def remove_senseless_entries(sense_rows, entry_rows, log):
+def ensure_required_columns(cldf, table_name, row, log):
+    return list(_ensure_required_columns(cldf, table_name, row, log))
+
+
+def _remove_senseless_entries(sense_rows, entry_rows, log):
     referenced_entries = {
         row['Entry_ID']
         for row in sense_rows
@@ -878,6 +882,10 @@ def remove_senseless_entries(sense_rows, entry_rows, log):
             log.error(
                 "\\lx %s: entry dropped since there aren't any senses referring to it",
                 entry['Headword'])
+
+
+def remove_senseless_entries(sense_rows, entry_rows, log):
+    return list(_remove_senseless_entries(sense_rows, entry_rows, log))
 
 
 def merge_gloss_into_example(glosses, example_row):
