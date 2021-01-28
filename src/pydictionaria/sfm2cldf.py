@@ -93,18 +93,42 @@ def _add_default_mapping(mapping, defaults):
         {k: v for k, v in defaults.items() if v not in values})
 
 
-def _add_property_fallbacks(properties):
-    new_properties = copy.copy(properties)
+def _add_property_fallbacks(props):
+    new_properties = copy.copy(props)
 
     new_properties['entry_map'] = _add_default_mapping(
-        properties.get('entry_map') or {},
+        props.get('entry_map') or {},
         DEFAULT_ENTRY_MAP)
     new_properties['sense_map'] = _add_default_mapping(
-        properties.get('sense_map') or {},
+        props.get('sense_map') or {},
         DEFAULT_SENSE_MAP)
     new_properties['example_map'] = _add_default_mapping(
-        properties.get('example_map') or {},
+        props.get('example_map') or {},
         DEFAULT_EXAMPLE_MAP)
+
+    new_properties['entry_sep'] = props.get('entry_sep') or DEFAULT_ENTRY_SEP
+    new_properties['entry_id'] = props.get('entry_id') or DEFAULT_ENTRY_ID
+    new_properties['sense_sep'] = props.get('sense_sep') or DEFAULT_SENSE_SEP
+    new_properties['example_id'] = (
+        props.get('example_id') or DEFAULT_EXAMPLE_ID)
+
+    new_properties['sources'] = ChainMap(
+        props.get('sources', {}),
+        DEFAULT_SOURCES)
+
+    new_properties['flexref_map'] = ChainMap(
+        props.get('flexref_map', {}),
+        DEFAULT_FLEXREF_MAP)
+
+    new_properties['link_label_marker'] = (
+        props.get('link_label_marker') or DEFAULT_LINK_LABEL_MARKER)
+    new_properties['process_links_in_markers'] = (
+        set(props.get('process_links_in_markers') or ())
+        | DEFAULT_PROCESS_LINKS_IN_MARKERS)
+
+    new_properties['labels'] = ChainMap(
+        props.get('labels') or {},
+        DEFAULT_LABELS)
 
     return new_properties
 
@@ -129,16 +153,16 @@ def _local_mapping(mapping, marker_set, source_mapping):
 def make_spec(properties, marker_set):
     properties = _add_property_fallbacks(properties)
 
-    source_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
+    source_mapping = properties['sources']
 
     entry_map, entry_markers, entry_columns, entry_sources = _local_mapping(
         properties['entry_map'],
         marker_set,
         source_mapping)
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
-    entry_sep = properties.get('entry_sep', DEFAULT_ENTRY_SEP).strip().lstrip('\\')
-    entry_id = properties.get('entry_id', DEFAULT_ENTRY_ID)
-    link_label_marker = properties.get('link_label_marker', DEFAULT_LINK_LABEL_MARKER)
+    entry_sep = properties['entry_sep'].strip().lstrip('\\')
+    entry_id = properties['entry_id']
+    link_label_marker = properties['link_label_marker']
     entry_markers.update((
         link_label_marker, entry_sep, entry_id, 'hm', 'sf', 'lc'))
     entry_columns.add('Media_IDs')
@@ -147,7 +171,7 @@ def make_spec(properties, marker_set):
         properties['sense_map'],
         marker_set,
         source_mapping)
-    sense_sep = properties.get('sense_sep', DEFAULT_SENSE_SEP)
+    sense_sep = properties['sense_sep']
     sense_markers.update((sense_sep, 'xref', 'pc'))
     sense_columns.add('Media_IDs')
 
@@ -155,7 +179,7 @@ def make_spec(properties, marker_set):
         properties['example_map'],
         marker_set,
         source_mapping)
-    example_id = properties.get('example_id', DEFAULT_EXAMPLE_ID)
+    example_id = properties['example_id']
     example_markers.update((example_id, 'sfx'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
 
@@ -638,12 +662,7 @@ def make_label_index(link_display_label, entries):
 
 
 def make_link_processor(properties, id_index, entries):
-    link_markers = (
-        set(properties.get('process_links_in_markers', ()))
-        | DEFAULT_PROCESS_LINKS_IN_MARKERS)
-    label_marker = properties.get(
-        'link_label_marker',
-        DEFAULT_LINK_LABEL_MARKER)
+    link_markers = properties['process_links_in_markers']
     link_regex = properties.get('link_regex')
 
     if not link_markers:
@@ -854,7 +873,7 @@ def _add_labels_to_table(table, mapping, labels):
 def attach_column_titles(cldf, properties):
     properties = _add_property_fallbacks(properties)
 
-    labels = ChainMap(properties.get('labels') or {}, DEFAULT_LABELS)
+    labels = properties['labels']
     _add_labels_to_table(cldf['EntryTable'], properties['entry_map'], labels)
     _add_labels_to_table(cldf['SenseTable'], properties['sense_map'], labels)
     _add_labels_to_table(cldf['ExampleTable'], properties['example_map'], labels)
@@ -964,9 +983,7 @@ def process_dataset(
         sfm.visit(caption_finder)
 
     # Process FLEx's cross-references in \lf markers
-    flexref_map = ChainMap(
-        properties.get('flexref_map', {}),
-        DEFAULT_FLEXREF_MAP)
+    flexref_map = properties['flexref_map']
     sfm.visit(partial(preprocess_flex_crossrefs, flexref_map))
 
     if not examples:
