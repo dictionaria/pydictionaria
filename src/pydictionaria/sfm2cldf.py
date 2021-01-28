@@ -14,6 +14,7 @@ from pydictionaria.example import Corpus, Examples
 from pydictionaria.formats.sfm_lib import (
     find_duplicate_examples,
     normalize,
+    Files,
     Rearrange,
     ExampleExtractor,
     EXAMPLE_MARKER_MAP,
@@ -938,6 +939,13 @@ def process_dataset(
     # Run generic normalization of SFM:
     sfm.visit(normalize)
     sfm.visit(Rearrange())
+
+    # Replace media references with md5 sums of referenced files:
+    media_sids = properties.get('media_sids') or sid
+    if not isinstance(media_sids, list):
+        media_sids = [media_sids]
+    files = Files(media_catalog, media_sids)
+    sfm.visit(files)
 
     caption_marker = properties.get('media_caption_marker')
     caption_finder = CaptionFinder(

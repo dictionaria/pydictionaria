@@ -80,7 +80,10 @@ class Dictionary(base.Dictionary):
     def check(self):
         if self.submission.module and hasattr(self.submission.module, 'process'):
             self.sfm.visit(self.submission.module.process)
-        checks = Files(self.submission, mode='check')
+        checks = Files(
+            self.submission.cdstar.items,
+            self.submission.media_sids,
+            mode='check')
         self.sfm.visit(checks)
         for entry, marker, name in checks.missing_files:
             pprint(entry, 'missing file', marker, name)
@@ -119,10 +122,6 @@ class Dictionary(base.Dictionary):
             if hasattr(self.submission.module, 'process'):
                 # Run submission-specific preprocessing/normalization of SFM:
                 self.sfm.visit(self.submission.module.process)
-
-        # Replace media references with md5 sums of referenced files:
-        files = Files(self.submission)
-        self.sfm.visit(files)
 
         examples = load_examples(self.submission.dir.joinpath('examples.sfm'))
 

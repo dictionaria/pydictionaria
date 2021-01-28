@@ -194,7 +194,7 @@ class Files(object):
     """
     SFM visitor, checking/editing media references
     """
-    def __init__(self, submission, mode='edit'):
+    def __init__(self, media_catalog, media_sids, mode='edit'):
         self.mode = mode
         self.file_sep = re.compile(',|;')
         self.missing_files = set()
@@ -205,9 +205,9 @@ class Files(object):
             'sfx': ['image', 'audio'],
         }
 
-        for checksum, spec in submission.cdstar.items.items():
+        for checksum, spec in media_catalog.items():
             # Register files already uploaded to CDStar:
-            if spec['sid'] in submission.media_sids:
+            if spec['sid'] in media_sids:
                 fname = Path(spec['fname'])
                 self.files[spec['type']][fsname(spec['fname'])] = checksum
                 self.files[spec['type']][fsname(fname.stem)] = checksum
