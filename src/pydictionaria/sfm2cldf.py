@@ -86,15 +86,34 @@ PROPERTY_URLS = {
     'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
 
 
-def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
-    mapped_values = set(json_mapping.values())
-    global_map = ChainMap(
-        json_mapping,
-        {k: v for k, v in default_mapping.items() if v not in mapped_values})
-    markers = set(global_map.keys()) & marker_set
+def _add_default_mapping(mapping, defaults):
+    values = set(mapping.values())
+    return ChainMap(
+        mapping,
+        {k: v for k, v in defaults.items() if v not in values})
+
+
+def _add_property_fallbacks(properties):
+    new_properties = copy.copy(properties)
+
+    new_properties['entry_map'] = _add_default_mapping(
+        properties.get('entry_map') or {},
+        DEFAULT_ENTRY_MAP)
+    new_properties['sense_map'] = _add_default_mapping(
+        properties.get('sense_map') or {},
+        DEFAULT_SENSE_MAP)
+    new_properties['example_map'] = _add_default_mapping(
+        properties.get('example_map') or {},
+        DEFAULT_EXAMPLE_MAP)
+
+    return new_properties
+
+
+def _local_mapping(mapping, marker_set, source_mapping):
+    markers = set(mapping.keys()) & marker_set
     mapping = {
         marker: value
-        for marker, value in global_map.items()
+        for marker, value in mapping.items()
         if marker in markers}
     columns = set(mapping.values())
 
@@ -108,11 +127,12 @@ def _local_mapping(json_mapping, default_mapping, marker_set, source_mapping):
 
 
 def make_spec(properties, marker_set):
+    properties = _add_property_fallbacks(properties)
+
     source_mapping = ChainMap(properties.get('sources', {}), DEFAULT_SOURCES)
 
     entry_map, entry_markers, entry_columns, entry_sources = _local_mapping(
-        properties.get('entry_map', {}),
-        DEFAULT_ENTRY_MAP,
+        properties['entry_map'],
         marker_set,
         source_mapping)
     # Note: entry_sep is a string like '\\TAG ' (required by clldutils)
@@ -124,8 +144,7 @@ def make_spec(properties, marker_set):
     entry_columns.add('Media_IDs')
 
     sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
-        properties.get('sense_map', {}),
-        DEFAULT_SENSE_MAP,
+        properties['sense_map'],
         marker_set,
         source_mapping)
     sense_sep = properties.get('sense_sep', DEFAULT_SENSE_SEP)
@@ -133,8 +152,7 @@ def make_spec(properties, marker_set):
     sense_columns.add('Media_IDs')
 
     example_map, example_markers, example_columns, example_sources = _local_mapping(
-        properties.get('example_map', {}),
-        DEFAULT_EXAMPLE_MAP,
+        properties['example_map'],
         marker_set,
         source_mapping)
     example_id = properties.get('example_id', DEFAULT_EXAMPLE_ID)
@@ -749,6 +767,8 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
 
 
 def make_cldf_schema(cldf, properties, entries, senses, examples, media):
+    properties = _add_property_fallbacks(properties)
+
     cldf.add_component('ExampleTable')
     cldf.add_table(
         'media.csv',
@@ -759,26 +779,21 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
 
     crossref_markers = _get_crossref_markers(properties)
 
-    # FIXME add defaults to properties in some reusable way
-    entry_map = ChainMap(properties.get('entry_map') or {}, DEFAULT_ENTRY_MAP)
-    sense_map = ChainMap(properties.get('sense_map') or {}, DEFAULT_SENSE_MAP)
-    example_map = ChainMap(properties.get('example_map') or {}, DEFAULT_EXAMPLE_MAP)
-
     _amend_columns(
         cldf,
         'EntryTable',
         sorted({col for row in entries for col, val in row.items() if val}),
-        {c for m, c in entry_map.items() if m in crossref_markers})
+        {c for m, c in properties['entry_map'].items() if m in crossref_markers})
     _amend_columns(
         cldf,
         'SenseTable',
         sorted({col for row in senses for col, val in row.items() if val}),
-        {c for m, c in sense_map.items() if m in crossref_markers})
+        {c for m, c in properties['sense_map'].items() if m in crossref_markers})
     _amend_columns(
         cldf,
         'ExampleTable',
         sorted({col for row in examples for col, val in row.items() if val}),
-        {c for m, c in example_map.items() if m in crossref_markers})
+        {c for m, c in properties['example_map'].items() if m in crossref_markers})
     _amend_columns(
         cldf,
         'media.csv',
@@ -837,19 +852,12 @@ def _add_labels_to_table(table, mapping, labels):
 
 
 def attach_column_titles(cldf, properties):
+    properties = _add_property_fallbacks(properties)
+
     labels = ChainMap(properties.get('labels') or {}, DEFAULT_LABELS)
-    _add_labels_to_table(
-        cldf['EntryTable'],
-        ChainMap(properties.get('entry_map') or {}, DEFAULT_ENTRY_MAP),
-        labels)
-    _add_labels_to_table(
-        cldf['SenseTable'],
-        ChainMap(properties.get('sense_map') or {}, DEFAULT_SENSE_MAP),
-        labels)
-    _add_labels_to_table(
-        cldf['ExampleTable'],
-        ChainMap(properties.get('example_map') or {}, DEFAULT_EXAMPLE_MAP),
-        labels)
+    _add_labels_to_table(cldf['EntryTable'], properties['entry_map'], labels)
+    _add_labels_to_table(cldf['SenseTable'], properties['sense_map'], labels)
+    _add_labels_to_table(cldf['ExampleTable'], properties['example_map'], labels)
 
 
 def _ensure_required_columns(cldf, table_name, rows, log):
@@ -936,6 +944,8 @@ def process_dataset(
     glosses_path, examples_log_path, glosses_log_path,
     cldf_log
 ):
+    properties = _add_property_fallbacks(properties)
+
     # Run generic normalization of SFM:
     sfm.visit(normalize)
     sfm.visit(Rearrange())
@@ -962,8 +972,7 @@ def process_dataset(
     if not examples:
         with open(examples_log_path, 'w', encoding='utf8') as example_log:
             # FIXME This should go into make_spec
-            example_markers = set(
-                properties.get('example_map', DEFAULT_EXAMPLE_MAP))
+            example_markers = set(properties['example_map'])
             example_markers.add('sfx')
             if 'gloss_ref' in properties:
                 example_markers.add(properties['gloss_ref'])
