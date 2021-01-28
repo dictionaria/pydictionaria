@@ -760,9 +760,9 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
     crossref_markers = _get_crossref_markers(properties)
 
     # FIXME add defaults to properties in some reusable way
-    entry_map = ChainMap(properties.get('entry_map') or entry_map, DEFAULT_ENTRY_MAP)
-    sense_map = ChainMap(properties.get('sense_map') or entry_map, DEFAULT_SENSE_MAP)
-    example_map = ChainMap(properties.get('example_map') or entry_map, DEFAULT_EXAMPLE_MAP)
+    entry_map = ChainMap(properties.get('entry_map') or {}, DEFAULT_ENTRY_MAP)
+    sense_map = ChainMap(properties.get('sense_map') or {}, DEFAULT_SENSE_MAP)
+    example_map = ChainMap(properties.get('example_map') or {}, DEFAULT_EXAMPLE_MAP)
 
     _amend_columns(
         cldf,
