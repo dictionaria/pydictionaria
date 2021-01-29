@@ -149,6 +149,8 @@ class Dictionary(base.Dictionary):
 
             sfm2cldf.attach_column_titles(cldf, self.submission.md.properties)
 
+            print(file=log_file)
+
             entry_rows = sfm2cldf.ensure_required_columns(
                 cldf, 'EntryTable', entry_rows, cldf_log)
             sense_rows = sfm2cldf.ensure_required_columns(
