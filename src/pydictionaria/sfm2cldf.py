@@ -670,7 +670,7 @@ def make_link_processor(properties, id_index, entries):
     if link_regex is None:
         raise ValueError('Missing property: link_regex')
 
-    link_labels = make_label_index(label_marker, entries)
+    link_labels = make_label_index(properties['link_label_marker'], entries)
     return LinkProcessor(id_index, link_labels, link_markers, link_regex)
 
 
