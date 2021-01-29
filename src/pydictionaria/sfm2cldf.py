@@ -970,7 +970,7 @@ def process_dataset(
     sfm.visit(Rearrange())
 
     # Replace media references with md5 sums of referenced files:
-    media_sids = properties.get('media_sids') or sid
+    media_sids = properties.get('media_lookup') or sid
     if not isinstance(media_sids, list):
         media_sids = [media_sids]
     files = Files(media_catalog, media_sids)
