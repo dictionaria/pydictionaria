@@ -199,6 +199,9 @@ def extract_gloss(phrase, log=None):
         for k in gloss:
             gloss[k].append(g.get(k, ''))
 
+    # remove empty glosses
+    gloss = {k: l for k, l in gloss.items() if any(l)}
+
     return gloss
 
 
