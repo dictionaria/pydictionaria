@@ -760,6 +760,12 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
     for colname in entry_cols:
         if colname in PROPERTY_URLS:
             col = PROPERTY_URLS[colname]
+        elif table_name == 'ExampleTable' and colname.startswith('Gloss'):
+            col = {
+                'name': colname,
+                'datatype': 'string',
+                'separator': '\t',
+            }
         elif colname in SEPARATORS or colname in crossrefs:
             col = {
                 'name': colname,
