@@ -215,7 +215,7 @@ def _get_crossref_markers(properties):
         DEFAULT_CROSS_REFERENCES,
         properties.get('cross_references') or (),
         DEFAULT_FLEXREF_MAP.values(),
-        properties.get('flexref_map') or ()))
+        (properties.get('flexref_map') or {}).values()))
 
 
 def group_by_separator(sep, sfm_pairs):
