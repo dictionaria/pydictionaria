@@ -20,6 +20,8 @@ from pydictionaria.formats.sfm_lib import (
     EXAMPLE_MARKER_MAP,
 )
 from pydictionaria.util import split_ids
+import rfc3986
+
 
 DEFAULT_ENTRY_SEP = r'\lx '
 DEFAULT_ENTRY_ID = 'lx'
@@ -799,7 +801,10 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
         'media.csv',
         'http://cldf.clld.org/v1.0/terms.rdf#id',
         'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
-        'Filename')
+        'Filename',
+        {'name': 'URL', 'datatype': 'anyURI'},
+        'mimetype',
+        {'name': 'size', 'datatype': 'integer'})
     cldf.add_component('LanguageTable')
 
     crossref_markers = _get_crossref_markers(properties)
@@ -933,6 +938,20 @@ def merge_gloss_into_example(glosses, example_row):
     if example_row['ID'] in glosses:
         return ChainMap(glosses[example_row['ID']]['example'], example_row)
     return example_row
+
+
+def add_media_metadata(media_catalog, media_row):
+    if media_row.get('ID') in media_catalog:
+        metadata = {
+            'URL': rfc3986.uri.URIReference.from_string(
+                'https://cdstar.shh.mpg.de/bitstreams/{0[objid]}/{0[original]}'.format(
+                    media_catalog[media_row['ID']])),
+            'mimetype': media_catalog[media_row['ID']]['mimetype'],
+            'size': media_catalog[media_row['ID']]['size'],
+        }
+        return ChainMap(media_row, metadata)
+    else:
+        return media_row
 
 
 class LogOnlyBaseNames(logging.LoggerAdapter):
@@ -1170,6 +1189,8 @@ def process_dataset(
             'Description': caption_finder.captions.get(fileid)
         }
         for filename, fileid in sorted(media_extr.files)]
+
+    media_rows = [add_media_metadata(media_catalog, row) for row in media_rows]
 
     if glosses:
         example_rows = [
