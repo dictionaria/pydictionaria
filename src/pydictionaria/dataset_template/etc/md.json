@@ -1,0 +1,32 @@
+{
+    "authors": [
+        "Author 1",
+        "Author 2",
+        {
+            "name": "Author 3",
+            "affiliation": "University 1"
+        },
+        {
+            "name": "Author 4",
+            "primary": false
+        }
+    ],
+    "language": {
+        "name": "insert language name here",
+        "isocode": "insert ISO 339-3 code here",
+        "glottocode": "insert glottocode here"
+    },
+    "date_published": "2020",
+    "number": 11,
+    "properties": {
+        "entry_sep": "\\lx ",
+        "marker_map": {},
+        "entry_map": {},
+        "sense_map": {},
+        "example_map": {},
+        "labels": {
+        },
+        "custom_fields": [],
+    }
+}
+

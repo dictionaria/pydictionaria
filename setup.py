@@ -40,6 +40,7 @@ setup(
         'pyconcepticon>=1.1.1',
         'colorlog',
         'termcolor',
+        'cldfbench',
     ],
     extras_require={
         'dev': ['flake8'],
@@ -54,6 +55,9 @@ setup(
     },
     entry_points={
         'console_scripts': ['dictionaria=pydictionaria.__main__:main'],
+        'cldfbench.scaffold': [
+            'dictionaria_submission=pydictionaria.scaffold:Template'
+        ],
     },
     tests_require=[],
     test_suite="pydictionaria")
