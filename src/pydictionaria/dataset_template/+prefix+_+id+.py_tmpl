@@ -1,7 +1,7 @@
 from collections import ChainMap
 import pathlib
 
-from {package} import Dataset as BaseDataset
+from {package} import CLDFSpec, Dataset as BaseDataset
 
 from pybtex.database import parse_string
 from pydictionaria.formats import sfm as formats_sfm
