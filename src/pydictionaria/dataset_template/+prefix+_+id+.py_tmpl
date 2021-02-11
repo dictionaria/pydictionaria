@@ -41,7 +41,7 @@ def authors_string(authors):
         for a in authors
         if not is_primary(a))
     if primary and secondary:
-        return '{} with {}'.format(primary, secondary)
+        return '{{}} with {{}}'.format(primary, secondary)
     else:
         return primary or secondary
 
@@ -74,14 +74,14 @@ class Dataset(BaseDataset):
         # read data
 
         md = self.etc_dir.read_json('md.json')
-        properties = md.get('properties') or {}
+        properties = md.get('properties') or {{}}
         language_name = md['language']['name']
         isocode = md['language']['isocode']
         language_id = md['language']['isocode']
         glottocode = md['language']['glottocode']
 
         marker_map = ChainMap(
-            properties.get('marker_map') or {},
+            properties.get('marker_map') or {{}},
             formats_sfm.DEFAULT_MARKER_MAP)
         entry_sep = properties.get('entry_sep') or sfm2cldf.DEFAULT_ENTRY_SEP
         sfm = SFM(
@@ -99,7 +99,7 @@ class Dataset(BaseDataset):
         if (self.etc_dir / 'cdstar.json').exists():
             media_catalog = self.etc_dir.read_json('cdstar.json')
         else:
-            media_catalog = {}
+            media_catalog = {{}}
 
         # preprocessing
 
@@ -152,12 +152,12 @@ class Dataset(BaseDataset):
         args.writer.cldf.properties['dc:creator'] = authors_string(
             md.get('authors') or ())
 
-        language = {
+        language = {{
             'ID': language_id,
             'Name': language_name,
             'ISO639P3code': isocode,
             'Glottocode': glottocode,
-        }
+        }}
         args.writer.objects['LanguageTable'] = [language]
 
         args.writer.objects['EntryTable'] = entries
