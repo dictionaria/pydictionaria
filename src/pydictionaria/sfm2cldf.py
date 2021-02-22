@@ -183,7 +183,6 @@ def make_spec(properties, marker_set):
 
     return {
         'entry_markers': entry_markers,
-        'entry_sep': entry_sep,
         'sense_markers': sense_markers,
         'example_markers': example_markers,
     }
