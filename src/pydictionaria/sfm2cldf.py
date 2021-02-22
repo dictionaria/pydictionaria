@@ -148,7 +148,7 @@ def _local_mapping(mapping, marker_set, source_mapping):
         if marker in marker_set and target in mapping}
     markers.update(sources)
 
-    return mapping, markers, sources
+    return markers, sources
 
 
 def make_spec(properties, marker_set):
@@ -156,7 +156,7 @@ def make_spec(properties, marker_set):
 
     source_mapping = properties['sources']
 
-    entry_map, entry_markers, entry_sources = _local_mapping(
+    entry_markers, entry_sources = _local_mapping(
         properties['entry_map'],
         marker_set,
         source_mapping)
@@ -167,14 +167,14 @@ def make_spec(properties, marker_set):
     entry_markers.update((
         link_label_marker, entry_sep, entry_id, 'hm', 'sf', 'lc'))
 
-    sense_map, sense_markers, sense_sources = _local_mapping(
+    sense_markers, sense_sources = _local_mapping(
         properties['sense_map'],
         marker_set,
         source_mapping)
     sense_sep = properties['sense_sep']
     sense_markers.update((sense_sep, 'xref', 'pc'))
 
-    example_map, example_markers, example_sources = _local_mapping(
+    example_markers, example_sources = _local_mapping(
         properties['example_map'],
         marker_set,
         source_mapping)
@@ -182,20 +182,14 @@ def make_spec(properties, marker_set):
     example_markers.update((example_id, 'sfx'))
 
     return {
-        'entry_map': entry_map,
         'entry_markers': entry_markers,
         'entry_sources': entry_sources,
         'entry_sep': entry_sep,
-        'entry_id': entry_id,
 
-        'sense_map': sense_map,
         'sense_markers': sense_markers,
-        'sense_sep': sense_sep,
         'sense_sources': sense_sources,
 
-        'example_map': example_map,
         'example_markers': example_markers,
-        'example_id': example_id,
         'example_sources': example_sources,
 
         }
@@ -992,7 +986,7 @@ def process_dataset(
         cldf_log.warning('No CLDF column defined for markers: %s', marker_list)
 
         example_index = prepare_examples(
-            spec['example_id'],
+            properties['example_id'],
             spec['example_markers'],
             examples)
         examples = Examples(example_index.values())
@@ -1017,10 +1011,10 @@ def process_dataset(
     crossref_markers = _get_crossref_markers(properties)
 
     entry_extr = EntryExtractor(
-        spec['entry_id'],
+        properties['entry_id'],
         spec['entry_markers'])
     sense_extr = SenseExtractor(
-        spec['sense_sep'],
+        properties['sense_sep'],
         spec['sense_markers'],
         crossref_markers,
         cldf_log)
@@ -1082,15 +1076,15 @@ def process_dataset(
         cldf_log.warning('could not process links: %s', str(e))
 
     # XXX can I get rid of these lines?
-    entry_crossref_cols = {c for m, c in spec['entry_map'].items() if m in crossref_markers}
-    sense_crossref_cols = {c for m, c in spec['sense_map'].items() if m in crossref_markers}
+    entry_crossref_cols = {c for m, c in properties['entry_map'].items() if m in crossref_markers}
+    sense_crossref_cols = {c for m, c in properties['sense_map'].items() if m in crossref_markers}
     example_crossref_cols = {
-        c for m, c in spec['example_map'].items() if m in crossref_markers}
+        c for m, c in properties['example_map'].items() if m in crossref_markers}
 
     entry_rows = [
         sfm_entry_to_cldf_row(
             'EntryTable',
-            spec['entry_map'],
+            properties['entry_map'],
             spec['entry_sources'],
             entry_crossref_cols,
             entry,
@@ -1099,7 +1093,7 @@ def process_dataset(
     sense_rows = [
         sfm_entry_to_cldf_row(
             'SenseTable',
-            spec['sense_map'],
+            properties['sense_map'],
             spec['sense_sources'],
             sense_crossref_cols,
             sense)
@@ -1107,7 +1101,7 @@ def process_dataset(
     example_rows = [
         sfm_entry_to_cldf_row(
             'ExampleTable',
-            spec['example_map'],
+            properties['example_map'],
             spec['example_sources'],
             example_crossref_cols,
             example,
