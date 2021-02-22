@@ -19,10 +19,3 @@ def test_Submission(repos, tmpdir):
     s = Submission(str(tmpdir), repos)
     assert s.md.language.name == 'newname'
     assert s.id
-
-
-def test_SFM(repos, capsys):
-    s = Submission(repos.joinpath('submissions', 'sub_sfm'), repos)
-    s.dictionary.search(zz='custom')
-    out, _ = capsys.readouterr()
-    assert "1" in out
