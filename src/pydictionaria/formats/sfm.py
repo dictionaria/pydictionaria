@@ -13,14 +13,6 @@ from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
 
-def load_examples(examples_path):
-    if not examples_path.exists():
-        return None
-    examples = Examples()
-    examples.read(examples_path, marker_map={'sf': 'sfx'})
-    examples.visit(concat_multilines)
-    return examples
-
 
 class Dictionary(base.Dictionary):
     _fname = 'db.sfm'
@@ -114,7 +106,7 @@ class Dictionary(base.Dictionary):
                 # Run submission-specific preprocessing/normalization of SFM:
                 self.sfm.visit(self.submission.module.process)
 
-        examples = load_examples(self.submission.dir.joinpath('examples.sfm'))
+        examples = sfm2cdlf.load_examples(self.submission.dir.joinpath('examples.sfm'))
 
         cldf_log_path = self.submission.dir / 'cldf.log'
         with cldf_log_path.open('w', encoding='utf-8') as log_file:

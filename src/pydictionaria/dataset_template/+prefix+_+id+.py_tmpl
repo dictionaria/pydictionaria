@@ -89,7 +89,7 @@ class Dataset(BaseDataset):
             marker_map=marker_map,
             entry_sep=entry_sep)
 
-        examples = formats_sfm.load_examples(self.raw_dir / 'examples.sfm')
+        examples = sfm2cldf.load_examples(self.raw_dir / 'examples.sfm')
 
         if (self.raw_dir / 'sources.bib').exists():
             sources = parse_string(self.raw_dir.read('sources.bib'), 'bibtex')

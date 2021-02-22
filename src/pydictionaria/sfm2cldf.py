@@ -96,6 +96,15 @@ PROPERTY_URLS = {
     'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
 
 
+def load_examples(examples_path):
+    if not examples_path.exists():
+        return None
+    examples = Examples()
+    examples.read(examples_path, marker_map={'sf': 'sfx'})
+    examples.visit(concat_multilines)
+    return examples
+
+
 def _add_default_mapping(mapping, defaults):
     values = set(mapping.values())
     return ChainMap(
