@@ -2,7 +2,15 @@ import unittest
 from unittest.mock import Mock
 
 from pydictionaria import sfm_lib
-from clldutils.sfm import Entry
+from clldutils.sfm import SFM, Entry
+
+
+def test_normalize():
+    from pydictionaria.sfm_lib import normalize
+
+    sfm = SFM([Entry([('sd', 'a__b')])])
+    sfm.visit(normalize)
+    assert sfm[0].get('sd') == 'a b'
 
 
 def test_split_join():
