@@ -141,7 +141,6 @@ def _local_mapping(mapping, marker_set, source_mapping):
         marker: value
         for marker, value in mapping.items()
         if marker in markers}
-    columns = set(mapping.values())
 
     sources = {
         marker: mapping[target]
@@ -149,7 +148,7 @@ def _local_mapping(mapping, marker_set, source_mapping):
         if marker in marker_set and target in mapping}
     markers.update(sources)
 
-    return mapping, markers, columns, sources
+    return mapping, markers, sources
 
 
 def make_spec(properties, marker_set):
@@ -157,7 +156,7 @@ def make_spec(properties, marker_set):
 
     source_mapping = properties['sources']
 
-    entry_map, entry_markers, entry_columns, entry_sources = _local_mapping(
+    entry_map, entry_markers, entry_sources = _local_mapping(
         properties['entry_map'],
         marker_set,
         source_mapping)
@@ -167,41 +166,35 @@ def make_spec(properties, marker_set):
     link_label_marker = properties['link_label_marker']
     entry_markers.update((
         link_label_marker, entry_sep, entry_id, 'hm', 'sf', 'lc'))
-    entry_columns.add('Media_IDs')
 
-    sense_map, sense_markers, sense_columns, sense_sources = _local_mapping(
+    sense_map, sense_markers, sense_sources = _local_mapping(
         properties['sense_map'],
         marker_set,
         source_mapping)
     sense_sep = properties['sense_sep']
     sense_markers.update((sense_sep, 'xref', 'pc'))
-    sense_columns.add('Media_IDs')
 
-    example_map, example_markers, example_columns, example_sources = _local_mapping(
+    example_map, example_markers, example_sources = _local_mapping(
         properties['example_map'],
         marker_set,
         source_mapping)
     example_id = properties['example_id']
     example_markers.update((example_id, 'sfx'))
-    example_columns.update(('Sense_IDs', 'Media_IDs'))
 
     return {
         'entry_map': entry_map,
         'entry_markers': entry_markers,
-        'entry_columns': entry_columns,
         'entry_sources': entry_sources,
         'entry_sep': entry_sep,
         'entry_id': entry_id,
 
         'sense_map': sense_map,
         'sense_markers': sense_markers,
-        'sense_columns': sense_columns,
         'sense_sep': sense_sep,
         'sense_sources': sense_sources,
 
         'example_map': example_map,
         'example_markers': example_markers,
-        'example_columns': example_columns,
         'example_id': example_id,
         'example_sources': example_sources,
 
