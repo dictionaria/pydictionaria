@@ -1,18 +1,18 @@
 import unittest
 from unittest.mock import Mock
 
-from pydictionaria.formats import sfm_lib
+from pydictionaria import sfm_lib
 from clldutils.sfm import Entry
 
 
 def test_split_join():
-    from pydictionaria.formats.sfm_lib import split, join
+    from pydictionaria.sfm_lib import split, join
 
     assert split(join(['a', 'b'])) == ['a', 'b']
 
 
 def test_Entry():
-    from pydictionaria.formats.sfm_lib import Entry
+    from pydictionaria.sfm_lib import Entry
 
     e = Entry.from_string("""
 \\lx lexeme
@@ -27,7 +27,7 @@ def test_Entry():
 
 
 def test_ComparisonMeanings(mocker):
-    from pydictionaria.formats.sfm_lib import Entry, ComparisonMeanings
+    from pydictionaria.sfm_lib import Entry, ComparisonMeanings
 
     class Concepticon(object):
         conceptsets = {1: mocker.Mock(id='1', gloss='gloss', definition='definition')}
@@ -45,10 +45,10 @@ def test_ComparisonMeanings(mocker):
 
 
 def test_Check(mocker):
-    from pydictionaria.formats.sfm_lib import Entry, Check
+    from pydictionaria.sfm_lib import Entry, Check
 
     error, warn = mocker.Mock(), mocker.Mock()
-    mocker.patch.multiple('pydictionaria.formats.sfm_lib', error=error, warn=warn)
+    mocker.patch.multiple('pydictionaria.sfm_lib', error=error, warn=warn)
     entries = [Entry([('lx', 'lexeme')])]
     chk = Check(entries)
     assert not error.called
@@ -56,7 +56,7 @@ def test_Check(mocker):
     assert error.called
 
     error, warn = mocker.Mock(), mocker.Mock()
-    mocker.patch.multiple('pydictionaria.formats.sfm_lib', error=error, warn=warn)
+    mocker.patch.multiple('pydictionaria.sfm_lib', error=error, warn=warn)
     Check([Entry([('lx', 'lexeme')]), Entry([('lx', 'lexeme')])])
     assert error.called
 

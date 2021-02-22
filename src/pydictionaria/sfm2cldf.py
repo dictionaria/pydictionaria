@@ -11,7 +11,7 @@ from clldutils import sfm
 
 from pydictionaria import flextext
 from pydictionaria.example import Corpus, Examples
-from pydictionaria.formats.sfm_lib import (
+from pydictionaria.sfm_lib import (
     find_duplicate_examples,
     normalize,
     Files,

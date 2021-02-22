@@ -5,8 +5,9 @@ from clldutils.misc import lazyproperty
 from clldutils.path import import_module
 import attr
 
-from pydictionaria.formats import FORMATS
 from pydictionaria.util import MediaCatalog
+
+FORMATS = []
 
 
 @attr.s

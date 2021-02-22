@@ -2,7 +2,7 @@ from clldutils.sfm import SFM, Entry
 
 
 def test_Stats():
-    from pydictionaria.formats.sfm_lib import Stats
+    from pydictionaria.sfm_lib import Stats
 
     sfm = SFM()
     sfm.append(Entry([]))
@@ -14,7 +14,7 @@ def test_Stats():
 
 
 def test_normalize():
-    from pydictionaria.formats.sfm_lib import normalize
+    from pydictionaria.sfm_lib import normalize
 
     sfm = SFM([Entry([('sd', 'a__b')])])
     sfm.visit(normalize)
