@@ -81,7 +81,7 @@ class Dataset(BaseDataset):
 
         marker_map = ChainMap(
             properties.get('marker_map') or {{}},
-            DEFAULT_MARKER_MAP)
+            sfm2cldf.DEFAULT_MARKER_MAP)
         entry_sep = properties.get('entry_sep') or sfm2cldf.DEFAULT_ENTRY_SEP
         sfm = SFM(
             self.raw_dir / 'db.sfm',

@@ -35,7 +35,13 @@ def tmp_dataset(testdata_dir, tmp_path, mocker):
     return bench_path
 
 
+def test_makecldf(tmp_dataset, mocker):
+    mocker.patch('cldfbench.__main__.BUILTIN_CATALOGS', [])
+    _main("makecldf '{}'".format(tmp_dataset / 'cldfbench_testbench.py'))
+    assert (tmp_dataset / 'cldf' / 'cldf-metadata.json').exists()
+
+
 def test_release(tmp_dataset):
-    _main('dictionaria.release {}'.format(tmp_dataset / 'cldfbench_testbench.py'))
+    _main("dictionaria.release '{}'".format(tmp_dataset / 'cldfbench_testbench.py'))
     assert (tmp_dataset / 'README.md').exists()
     assert (tmp_dataset / '.zenodo.json').exists()
