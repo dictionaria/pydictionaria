@@ -44,23 +44,6 @@ def test_ComparisonMeanings(mocker):
     assert 'gloss' in e.get('zcom2')
 
 
-def test_Check(mocker):
-    from pydictionaria.sfm_lib import Entry, Check
-
-    error, warn = mocker.Mock(), mocker.Mock()
-    mocker.patch.multiple('pydictionaria.sfm_lib', error=error, warn=warn)
-    entries = [Entry([('lx', 'lexeme')])]
-    chk = Check(entries)
-    assert not error.called
-    chk(entries[0])
-    assert error.called
-
-    error, warn = mocker.Mock(), mocker.Mock()
-    mocker.patch.multiple('pydictionaria.sfm_lib', error=error, warn=warn)
-    Check([Entry([('lx', 'lexeme')]), Entry([('lx', 'lexeme')])])
-    assert error.called
-
-
 class ExampleExtraction(unittest.TestCase):
 
     def test_separate_examples_from_entry(self):

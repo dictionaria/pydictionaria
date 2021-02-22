@@ -65,30 +65,6 @@ class Database(SFM):
             del self[i]
 
 
-class Stats(object):
-    """
-    SFM visitor collecting statistics
-    """
-    def __init__(self):
-        self.count = Counter()
-        self.total = Counter()
-        self._mult_markers = defaultdict(int)
-        self._implicit_mult_markers = set()
-
-    def __call__(self, entry):
-        if not entry.get('lx'):
-            return
-        entry_markers = entry.markers()
-        self.total.update(entry_markers)
-        for k, v in entry_markers.items():
-            self.count.update([k])
-            if v > self._mult_markers[k]:
-                self._mult_markers[k] = v
-        for k, v in entry:
-            if FIELD_SPLITTER_PATTERN.search(v):
-                self._implicit_mult_markers.add(k)
-
-
 class ComparisonMeanings(object):
     def __init__(self, concepticon, marker='zcom2'):
         self.concepticon = concepticon
@@ -135,59 +111,6 @@ def normalize(entry):
             content = re.sub(r'\s+', ' ', content.replace('_', ' ')).strip()
         new.append((marker, content))
     return new
-
-
-def repair(sfm):
-    entry_map = defaultdict(dict)
-
-    for entry in sfm:
-        lx = entry.get('lx')
-        if lx in entry_map:
-            if entry.get('hm') in entry_map[lx]:
-                # a collision!
-                hm = '{0}'.format(max(int(x or 0) for x in entry_map[lx]) + 1)
-                entry.upsert('hm', hm, 1)
-        entry_map[lx][entry.get('hm')] = entry
-
-
-class CheckBibrefs(object):
-    def __init__(self, refs):
-        self.refs = refs
-
-    def __call__(self, entry):
-        for ref in entry.getall('bibref'):
-            if ref.split('[')[0] not in self.refs:
-                error(entry, 'invalid bibkey', 'bibref', ref)
-
-
-class Check(object):
-    def __init__(self, sfm):
-        self.lexemes = set()
-        for entry in sfm:
-            try:
-                if entry.id in self.lexemes:
-                    error(entry, 'duplicate lemma')
-            except:  # noqa: E722
-                print(entry.__class__)
-                print(entry)
-            self.lexemes.add(entry.id)
-            # Check for both 'lemma 1' and 'lemma1' variants
-            self.lexemes.add(re.sub(r'\s+(\d+)$', r'\1', entry.id))
-
-    def __call__(self, entry):
-        if not entry.get('de'):
-            error(entry, 'no \\de field')
-        if len(entry.getall('de')) > 1 and len(entry.getall('de')) != len(entry.getall('sn')):
-            error(entry, 'multiple \\de but not matching \\sn')
-        if len(set(entry.getall('ps'))) > 1:
-            error(entry, 'multiple conflicting \\ps')
-        for marker, content in entry:
-            if marker in ['cf', 'mn', 'an', 'sy']:
-                for lx in split_ids(content):
-                    if lx not in self.lexemes:
-                        warn(entry, 'invalid ref', marker, lx)
-            elif marker in ['se']:
-                error(entry, 'illegal marker', marker)
 
 
 class Files(object):
