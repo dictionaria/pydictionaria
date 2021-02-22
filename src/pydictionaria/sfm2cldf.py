@@ -901,12 +901,11 @@ def make_log(name, stream=None):
     return log
 
 
-def source_mapping(sources, column_map):
+def _source_mapping(sources, column_map):
     return {
         m: column_map[t]
         for m, t in sources.items()
         if t in column_map}
-
 
 
 def process_dataset(
@@ -986,11 +985,11 @@ def process_dataset(
         marker_list = ', '.join(sorted(all_markers))
         cldf_log.warning('No CLDF column defined for markers: %s', marker_list)
 
-        example_index = prepare_examples(
-            properties['example_id'],
-            spec['example_markers'],
-            examples)
-        examples = Examples(example_index.values())
+    example_index = prepare_examples(
+        properties['example_id'],
+        spec['example_markers'],
+        examples)
+    examples = Examples(example_index.values())
 
     glosses = {}
     if glosses_path.exists():
@@ -1086,7 +1085,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'EntryTable',
             properties['entry_map'],
-            source_mapping(properties['sources'], properties['entry_map']),
+            _source_mapping(properties['sources'], properties['entry_map']),
             entry_crossref_cols,
             entry,
             language_id)
@@ -1095,7 +1094,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'SenseTable',
             properties['sense_map'],
-            source_mapping(properties['sources'], properties['sense_map']),
+            _source_mapping(properties['sources'], properties['sense_map']),
             sense_crossref_cols,
             sense)
         for sense in senses]
@@ -1103,7 +1102,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'ExampleTable',
             properties['example_map'],
-            source_mapping(properties['sources'], properties['example_map']),
+            _source_mapping(properties['sources'], properties['example_map']),
             example_crossref_cols,
             example,
             language_id)
