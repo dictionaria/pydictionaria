@@ -54,7 +54,7 @@ setup(
         ],
     },
     entry_points={
-        'cldfbench.commands': ['dictionaria=pydictionaria.cldfbench_commands'],
+        'cldfbench.commands': ['dictionaria=pydictionaria.commands'],
         'cldfbench.scaffold': [
             'dictionaria_submission=pydictionaria.scaffold:Template'
         ],
