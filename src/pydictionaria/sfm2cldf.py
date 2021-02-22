@@ -28,6 +28,14 @@ DEFAULT_ENTRY_ID = 'lx'
 DEFAULT_SENSE_SEP = 'sn'
 DEFAULT_EXAMPLE_ID = 'ref'
 
+DEFAULT_MARKER_MAP = {
+    'd_Eng': 'de',
+    'g_Eng': 'ge',
+    'ps_Eng': 'ps',
+    'sc_Eng': 'sc',
+    'sd_Eng': 'sd',
+    'x_Eng': 'xe'}
+
 DEFAULT_ENTRY_MAP = {
     'lx': 'Headword',
     'ps': 'Part_Of_Speech',

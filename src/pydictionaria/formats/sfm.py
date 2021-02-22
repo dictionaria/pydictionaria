@@ -13,15 +13,6 @@ from pydictionaria.log import pprint
 
 from pydictionaria import sfm2cldf
 
-DEFAULT_MARKER_MAP = {
-    'd_Eng': 'de',
-    'g_Eng': 'ge',
-    'ps_Eng': 'ps',
-    'sc_Eng': 'sc',
-    'sd_Eng': 'sd',
-    'x_Eng': 'xe'}
-
-
 def load_examples(examples_path):
     if not examples_path.exists():
         return None
@@ -44,7 +35,7 @@ class Dictionary(base.Dictionary):
             kw[key] = submission.md.properties.get(key, default)
         kw['marker_map'] = ChainMap(
             submission.md.properties.get('marker_map', {}),
-            DEFAULT_MARKER_MAP)
+            sfm2cldf.DEFAULT_MARKER_MAP)
         self.sfm = Database(submission.dir.joinpath(self._fname), **kw)
 
     @classmethod
