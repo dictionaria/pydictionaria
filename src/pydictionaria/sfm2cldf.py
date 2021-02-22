@@ -185,10 +185,6 @@ def make_spec(properties, marker_set):
     example_markers.update((example_id, 'sfx'))
     example_columns.update(('Sense_IDs', 'Media_IDs'))
 
-    gloss_ref = properties.get('gloss_ref')
-    if gloss_ref:
-        example_markers.add(gloss_ref)
-
     return {
         'entry_map': entry_map,
         'entry_markers': entry_markers,
@@ -209,7 +205,7 @@ def make_spec(properties, marker_set):
         'example_id': example_id,
         'example_sources': example_sources,
 
-        'gloss_ref': gloss_ref}
+        }
 
 
 def _get_crossref_markers(properties):
@@ -726,38 +722,6 @@ def sfm_entry_to_cldf_row(
     return row
 
 
-def _add_columns(cldf, table_name, columns, sources, cross_refs, log):
-    for column in sorted(columns):
-        col = column
-        if column in SEPARATORS or column in cross_refs:
-            col = {
-                'name': column,
-                'datatype': 'string',
-                'separator': SEPARATORS.get(column, DEFAULT_SEPARATOR)}
-        try:
-            cldf.add_columns(table_name, col)
-        except ValueError as error:
-            msg = str(error)
-            # Ignore columns that are already there
-            if not msg.startswith('Duplicate column name:'):
-                log.error('%s: Could not add column: %s', table_name, msg)
-
-        if column in cross_refs:
-            cldf[table_name].add_foreign_key(column, 'entries.csv', 'ID')
-        if column == 'Media_IDs':
-            cldf[table_name].add_foreign_key(column, 'media.csv', 'ID')
-        if column == 'Sense_IDs':
-            cldf[table_name].add_foreign_key(column, 'senses.csv', 'ID')
-    if sources:
-        try:
-            cldf.add_columns(
-                table_name,
-                'http://cldf.clld.org/v1.0/terms.rdf#source')
-        except ValueError:
-            # ValueError means the column is already there
-            pass
-
-
 def _amend_columns(cldf, table_name, entry_cols, crossrefs):
     for colname in entry_cols:
         if colname in PROPERTY_URLS:
@@ -829,31 +793,6 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
         'media.csv',
         sorted({col for row in media for col, val in row.items() if val}),
         ())
-
-
-def make_cldf_dataset(
-        cldf,
-        entry_columns, sense_columns, example_columns,
-        entry_sources, sense_sources, example_sources,
-        entry_crossrefs, sense_crossrefs, example_crossrefs,
-        log):
-    cldf.add_component('ExampleTable')
-    cldf.add_table(
-        'media.csv', 'ID', 'Language_ID', 'Filename',
-        primaryKey='ID')
-
-    _add_columns(cldf, 'EntryTable', entry_columns, entry_sources, entry_crossrefs, log)
-    _add_columns(cldf, 'SenseTable', sense_columns, sense_sources, sense_crossrefs, log)
-    if example_columns:
-        _add_columns(
-            cldf, 'ExampleTable', example_columns, example_sources, example_crossrefs, log)
-        # Manually mark Translated_Text as required
-        # Turns out, e.g. for Daakaka, that this shouldn't be required after all ...
-        # ft = cldf['ExampleTable'].tableSchema.get_column('Translated_Text')
-        # if ft:
-        #     ft.required = True
-
-    return cldf
 
 
 def add_gloss_columns(cldf, glosses):
