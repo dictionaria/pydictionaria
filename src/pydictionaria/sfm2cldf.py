@@ -183,16 +183,10 @@ def make_spec(properties, marker_set):
 
     return {
         'entry_markers': entry_markers,
-        'entry_sources': entry_sources,
         'entry_sep': entry_sep,
-
         'sense_markers': sense_markers,
-        'sense_sources': sense_sources,
-
         'example_markers': example_markers,
-        'example_sources': example_sources,
-
-        }
+    }
 
 
 def _get_crossref_markers(properties):
@@ -908,6 +902,14 @@ def make_log(name, stream=None):
     return log
 
 
+def source_mapping(sources, column_map):
+    return {
+        m: column_map[t]
+        for m, t in sources.items()
+        if t in column_map}
+
+
+
 def process_dataset(
     sid, language_id, properties,
     sfm, examples, media_catalog,
@@ -1085,7 +1087,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'EntryTable',
             properties['entry_map'],
-            spec['entry_sources'],
+            source_mapping(properties['sources'], properties['entry_map']),
             entry_crossref_cols,
             entry,
             language_id)
@@ -1094,7 +1096,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'SenseTable',
             properties['sense_map'],
-            spec['sense_sources'],
+            source_mapping(properties['sources'], properties['sense_map']),
             sense_crossref_cols,
             sense)
         for sense in senses]
@@ -1102,7 +1104,7 @@ def process_dataset(
         sfm_entry_to_cldf_row(
             'ExampleTable',
             properties['example_map'],
-            spec['example_sources'],
+            source_mapping(properties['sources'], properties['example_map']),
             example_crossref_cols,
             example,
             language_id)
