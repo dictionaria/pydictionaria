@@ -10,7 +10,7 @@ import sys
 from clldutils import sfm
 
 from pydictionaria import flextext
-from pydictionaria.example import Corpus, Examples
+from pydictionaria.example import Corpus, Examples, concat_multilines
 from pydictionaria.sfm_lib import (
     find_duplicate_examples,
     normalize,

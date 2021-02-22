@@ -5,7 +5,6 @@ import shutil
 
 import pytest
 
-import pydictionaria
 from cldfbench.__main__ import main
 
 

@@ -1,6 +1,6 @@
 # coding: utf8
 from __future__ import unicode_literals, print_function, division
-from collections import Counter, defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict
 import re
 import copy
 import unicodedata
@@ -15,7 +15,6 @@ from clldutils.text import split_text
 
 from pydictionaria.util import split_ids
 from pydictionaria.example import Example, concat_multilines
-from pydictionaria.log import warn, error
 
 
 def split(s):
