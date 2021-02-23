@@ -26,22 +26,55 @@ def testdata_dir():
 
 
 @pytest.fixture
-def tmp_dataset(testdata_dir, tmp_path, mocker):
+def tmp_dataset(tmp_path, mocker):
     mocker.patch('sys.stdin', StringIO(MOCK_STDIN))
     _main("new --template dictionaria_submission --out '{}'".format(tmp_path))
     bench_path = tmp_path / 'testbench'
-    shutil.copy(testdata_dir / 'intro.md', bench_path / 'raw' / 'intro.md')
-    shutil.copy(testdata_dir / 'db.sfm', bench_path / 'raw' / 'db.sfm')
     return bench_path
 
 
-def test_makecldf(tmp_dataset, mocker):
+@pytest.fixture
+def sfm_dataset(testdata_dir, tmp_dataset):
+    shutil.copy(testdata_dir / 'sub_sfm' / 'db.sfm', tmp_dataset / 'raw' / 'db.sfm')
+    shutil.copy(testdata_dir / 'sub_sfm' / 'md.json', tmp_dataset / 'etc' / 'md.json')
+    return tmp_dataset
+
+
+@pytest.fixture
+def sfm_dataset_with_examples(testdata_dir, tmp_dataset):
+    shutil.copy(testdata_dir / 'sub_sfm_with_examples' / 'db.sfm', tmp_dataset / 'raw' / 'db.sfm')
+    shutil.copy(testdata_dir / 'sub_sfm_with_examples' / 'examples.sfm', tmp_dataset / 'raw' / 'examples.sfm')
+    shutil.copy(testdata_dir / 'sub_sfm_with_examples' / 'intro.md', tmp_dataset / 'raw' / 'intro.md')
+    shutil.copy(testdata_dir / 'sub_sfm_with_examples' / 'md.json', tmp_dataset / 'etc' / 'md.json')
+    return tmp_dataset
+
+
+@pytest.fixture
+def sfm_dataset_flex_ref(testdata_dir, tmp_dataset):
+    shutil.copy(testdata_dir / 'sub_sfm_flex_ref' / 'db.sfm', tmp_dataset / 'raw' / 'db.sfm')
+    shutil.copy(testdata_dir / 'sub_sfm_flex_ref' / 'md.json', tmp_dataset / 'etc' / 'md.json')
+    return tmp_dataset
+
+
+def test_makecldf(sfm_dataset, mocker):
     mocker.patch('cldfbench.__main__.BUILTIN_CATALOGS', [])
-    _main("makecldf '{}'".format(tmp_dataset / 'cldfbench_testbench.py'))
-    assert (tmp_dataset / 'cldf' / 'cldf-metadata.json').exists()
+    _main("makecldf '{}'".format(sfm_dataset / 'cldfbench_testbench.py'))
+    assert (sfm_dataset / 'cldf' / 'cldf-metadata.json').exists()
 
 
-def test_release(tmp_dataset):
-    _main("dictionaria.release '{}'".format(tmp_dataset / 'cldfbench_testbench.py'))
-    assert (tmp_dataset / 'README.md').exists()
-    assert (tmp_dataset / '.zenodo.json').exists()
+def test_makecldf_with_examples(sfm_dataset_with_examples, mocker):
+    mocker.patch('cldfbench.__main__.BUILTIN_CATALOGS', [])
+    _main("makecldf '{}'".format(sfm_dataset_with_examples / 'cldfbench_testbench.py'))
+    assert (sfm_dataset_with_examples / 'cldf' / 'cldf-metadata.json').exists()
+
+
+def test_makecldf_with_examples(sfm_dataset_flex_ref, mocker):
+    mocker.patch('cldfbench.__main__.BUILTIN_CATALOGS', [])
+    _main("makecldf '{}'".format(sfm_dataset_flex_ref / 'cldfbench_testbench.py'))
+    assert (sfm_dataset_flex_ref / 'cldf' / 'cldf-metadata.json').exists()
+
+
+def test_release(sfm_dataset_with_examples):
+    _main("dictionaria.release '{}'".format(sfm_dataset_with_examples / 'cldfbench_testbench.py'))
+    assert (sfm_dataset_with_examples / 'README.md').exists()
+    assert (sfm_dataset_with_examples / '.zenodo.json').exists()

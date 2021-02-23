@@ -1,0 +1,23 @@
+{
+    "authors": [
+        {
+            "name": "First Author",
+            "affiliation": "affil"
+        }
+    ],
+    "language": {
+        "name": "Daakaka",
+        "isocode": "bpa",
+        "glottocode": "daka1243"
+    },
+    "date_published": null,
+    "properties": {
+        "entry_id": "lx",
+        "entry_map": {
+            "zz": "Custom"
+        },
+        "sense_map": {
+            "yy": "Custom"
+        }
+    }
+}
