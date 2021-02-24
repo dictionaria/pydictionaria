@@ -197,6 +197,8 @@ def make_spec(properties, marker_set):
         source_mapping)
     example_id = properties['example_id']
     example_markers.update((example_id, 'sfx'))
+    if 'gloss_ref' in properties:
+        example_markers.add(properties['gloss_ref'])
 
     return {
         'entry_markers': entry_markers,
