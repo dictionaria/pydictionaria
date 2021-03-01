@@ -9,10 +9,10 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     author='Robert Forkel',
     author_email='forkel@shh.mpg.de',
@@ -23,9 +23,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'pybtex<0.23; python_version < "3.6"',
-        'pybtex; python_version > "3.5"',
+        'pybtex',
         'requests',
+        'html5lib>=1.1',
         'purl',
         'python-dateutil',
         'csvw>=1.5.4',
