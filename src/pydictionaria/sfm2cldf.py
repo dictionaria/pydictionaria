@@ -718,6 +718,9 @@ def sfm_entry_to_cldf_row(
         if col in row:
             row[col] = [eid.strip() for eid in row[col].split(';') if eid.strip()]
 
+    if row.get('Source') and isinstance(row.get('Source'), str):
+        row['Source'] = [src.strip() for src in row['Source'].split(';') if src.strip()]
+
     return row
 
 
