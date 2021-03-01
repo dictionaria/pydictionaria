@@ -68,7 +68,7 @@ def test_makecldf_with_examples(sfm_dataset_with_examples, mocker):
     assert (sfm_dataset_with_examples / 'cldf' / 'cldf-metadata.json').exists()
 
 
-def test_makecldf_with_examples(sfm_dataset_flex_ref, mocker):
+def test_makecldf_with_flex_ref(sfm_dataset_flex_ref, mocker):
     mocker.patch('cldfbench.__main__.BUILTIN_CATALOGS', [])
     _main("makecldf '{}'".format(sfm_dataset_flex_ref / 'cldfbench_testbench.py'))
     assert (sfm_dataset_flex_ref / 'cldf' / 'cldf-metadata.json').exists()
