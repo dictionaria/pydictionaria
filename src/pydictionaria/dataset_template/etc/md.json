@@ -16,8 +16,6 @@
         "isocode": "insert ISO 339-3 code here",
         "glottocode": "insert glottocode here"
     },
-    "date_published": "2020",
-    "number": 11,
     "properties": {
         "entry_sep": "\\lx ",
         "marker_map": {},
