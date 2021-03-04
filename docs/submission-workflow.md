@@ -7,27 +7,129 @@ Workflow
 
 The editorial workflow to process dictionaries from submission to publication is
 a series of automated or manual steps.  The automated steps are implemented as
-sub-commands of the `dictionaria` command line interface.
+sub-commands of the `cldfbench` command-line program.
+
+### Quick note for Windows users
+
+On Windows, the Python binary is called `py` instead of `python3`, so make sure
+to change any commands down below accordingly.
+
+### Prerequisites
+
+For the Dictionaria workflow you first need the [CLDFbench][cldfbench] program.
+This can be installed through `pip`:
+
+    python3 -m pip install cldfbench
+
+In addition, you need the CLDFbench template for creating Dictionaria
+submissions, which is maintained in the [pydictionaria][pydictionaria] package:
+
+    python3 -m pip install pydictionaria
+
+It is also recommended to place each CLDF bench into its own so-called *Virtual
+Environment*.  This means that all python packages used for processing a CLDF
+bench will be installed locally in the CLDF bench's folder.  This has two major
+advantages:
+
+ 1. You avoid unnecessary clutter in your system-wide Python installation
+ 2. You avoid problems with CLDF benches or other Python projects that require
+    conflicting versions of the same package
+
+For that you need the `virtualenv` program.  If your Python installation does
+not ship with a version of `virtualenv`, you can also install it using `pip`:
+
+    python3 -m pip install virtualenv
+
+[cldfbench]: https://github.com/cldf/cldfbench
+[pydictionaria]: https://github.com/dictionaria/pydictionaria
 
 ### Initialising a new submission
 
-Command:
+    python3 -m cldfbench new --template=dictionaria
 
-    dictionaria new <submission-id>
+The creation process will ask you a few questions:
 
-This command creates a directory `submissions/<submission-id>` populated with
-a skeletal `md.json`.
+ - `id`: A unique id for the dictionary, also used as the folder name for the
+   new submission – usually the name of the language in all lower case
+ - `title`: A title for the dictionary (when left blank the title will be
+   ‘&lt;Language&gt; dictionary’)
+ - `license`: Usually `CC-BY-4.0`
+ - `url`: URL of the dictionary; will be overwritten upon the dictionary's
+   release
+ - `citation`: How to cite the dictionary; you can leave this blank for now
+   – this only becomes relevant when you know that the citation will actually be
+
+### Creating the virtual environment
+
+To create a new virtual environment for a CLDF bench, `cd` into the folder of
+the CLDF bench and run the following command.
+
+    python3 -m virtualenv ENV
+
+This will create the folder `ENV` and fill it with a separate Python
+installation for your CLDF bench.  You can also give the folder any other name
+by changing the command above accordingly.  The name itself is arbitrary but
+it is common convention to call it `ENV`, `env`, `VENV`, `venv`, or something
+similar.
+
+The rest of this document will assume the folder is named `ENV` (in all-caps).
+
+### Activating the virtual environment
+
+In order to ‘dive into’ the virtual environment, you have to *activate* it.
+This is done by `cd`-ing into the folder of the CLDF bench and running the
+following command.
+
+On Windows, using the classic `cmd.exe` shell (recommended):
+
+    ENV\Scripts\activate.bat
+
+On Windows, using Powershell (might fail depending on system settings):
+
+    ENV\Scripts\activate.ps1
+
+On Unix-like operating systems (using `bash`, `zsh`, etc):
+
+    . ENV/bin/activate
+
+Note that a virtual environment is only activated *for the current shell*.  This
+means this command only affects the terminal you are currently working in.  This
+also means that you have to re-run the command every time you close and re-open
+your terminal window.
+
+After running this, the `python3`/`py` command will run the version from the
+virtual environment instead of the system-wide installation and any package you
+install with `pip` will be installed into the `ENV` folder.
+
+### Installing the CLDF bench into the virtual environment
+
+From a technical perspective, a CLDF bench is just a special kind of Python
+package.  And because of that it can be installed like any other package.
+
+The following command installs the CLDF bench into your virtual environment
+(make sure the virtual environment is activated first).
+
+    python3 -m pip install -e .[test]
+
+Quick explanation:
+
+ * The `-e` option installs the CLDF bench in *editable mode*.  Without it you
+   would have to rerun this command every time you change something in the
+   CLDF bench.
+ * The command uses `.` instead of a package name to signify that `pip` should
+   install ‘whatever Python package is located in the current folder’
+ * The `[test]` after the `.` tells pip to install additional packages that you
+   can use to check the validity of the CLDF dictionary
 
 ### Adding submitted content to the new directory.
 
-Put the files for the submission directly into the `submissions/<submission-id>`
-folder.  For dictionaries in Toolbox's SFM format `dictionaria` expects the
-following file names:
+Put any files provided by the author of the dictionary into the `raw/` folder
+within your CLDF bench.  For dictionaries in Toolbox's SFM format Dictionaria
+expects the following file names:
 
  - `db.sfm` – Main SFM database containing the dictionary itself
  - `examples.sfm` – (Optional) SFM database containing examples
  - `glosses.flextext` – (Optional) Flextext containing glossed examples
-
 
 ### Editing the `md.json` metadata file
 
@@ -37,9 +139,6 @@ metadata:
 
  - `authors` – List of all authors of the dictionary
  - `language` – Name, glottocode, and iso639-3 code of the language
- - `date_published` – year of publication, e.g. "2019"
- - `number` – A unique number for the dictionary; to be assigned by the managing
-   editor
  - `properties` – A selection of properties needed to correctly process the
    idiosyncrasies of the dictionary (such as the definition of custom fields or
    the handling of cross-references).  See `md-json-properties.md` for
@@ -48,14 +147,12 @@ metadata:
 Example:  `md.json` for a fictitious German dictionary.
 
     {
-        "authors": "Erika Mustermann, Max Mustermann",
+        "authors": ["Erika Mustermann", "Max Mustermann"],
         "language": {
             "name": "German",
             "glottocode": "stan1295",
             "isocode": "deu"
         },
-        "date_published": "2019",
-        "number": {},
         "properties": {}
     }
 
@@ -63,9 +160,9 @@ Example:  `md.json` for a fictitious German dictionary.
 
 ### Writing the `intro.md`
 
-The file `submissions/<submission-id>/intro.md` contains an introductory text to
-be displayed on Dictionaria.  The file is written in the [Markdown format][md].
-See section 'Writing in markdown' below for details.
+The file `raw/intro.md` contains an introductory text to be displayed on
+Dictionaria.  The file is written in the [Markdown format][md].  See section
+'Writing in markdown' below for details.
 
 A few notes on the introduction itself:
 
@@ -85,28 +182,25 @@ A few notes on the introduction itself:
 
 TODO what and how?
 
-### Validate the input files
-
-Command:
-
-    dictionaria check <submission-id>
-
-This command outputs warnings about invalid data in the input files.
-
 ### Processing a submission
 
-Command:
+To process a submission, first activate the virtual environment (see above) and
+run the following command:
 
-    dictionaria process <submission-id>
+    python3 -m cldfbench makecldf cldfbench_*.py
 
-This command creates a directory `submissions/<submission-id>/processed`.  The
+This command creates a new [CLDF](cldf) dataset in the `cldf/` folder.  The
 files in this directory will be read when importing the dictionary into
 Dictionaria.
+
+*Beware:*
+Do not manually add or edit any files in the `cldf/` folder.  Any changes you
+make will be overwritten completely the next time you run `makecldf`.
 
 The actions performed when processing are input format dependent, but in all
 cases
 
- - the input will be converted into the [Cross Linguistic Data Formats](cldf)
+ - the input will be converted into CLDF
  - references to media files are switched from local filesystem paths to md5
    checksums of the file contents
 
@@ -114,7 +208,7 @@ cases
 
 ### Publishing a submission
 
-    dictionaria release <submission-id> <...>
+    python3 -m cldfbench dictionaria.release cldfbench_*.py
 
 TODO
 
@@ -207,16 +301,3 @@ Rule of thumb:
 
 [md]: https://daringfireball.net/projects/markdown
 [md-syntax]: https://daringfireball.net/projects/markdown/syntax
-
-
-The `dictionaria` command-line interface TODO
-----------------------------------------
-
-The `dictionaria` command is organised in a number of subcommands.  For a list
-of all options and subcommands run the following command:
-
-    dictionaria --help
-
-For a short description of a specific subcommand run:
-
-    dictionaria help <subcommand>
