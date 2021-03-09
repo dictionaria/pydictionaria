@@ -9,22 +9,58 @@ The editorial workflow to process dictionaries from submission to publication is
 a series of automated or manual steps.  The automated steps are implemented as
 sub-commands of the `cldfbench` command-line program.
 
-### Quick note for Windows users
+### Python installation and its `PATH`
 
-On Windows, the command for running Python is called `py` instead of `python3`,
-so make sure to change any commands down below accordingly.
+To work with CLDF benches, you need have [Python][python] installed.  Make sure
+that packages installed through `pip` are added to your `PATH` (see the
+[docs/intro-commandline.md](docs/intro-commandline.md) file for details on the
+`PATH` variable).
+
+On Linux, Python packages are installed to `$HOME/.local/bin`.
+
+On Windows, the path you need is
+`%USERPROFILE%\AppData\Local\Python\Python<VERSION>\Scripts`, where `<VERSION>`
+needs to be replaced with Python's major and minor version, without the period.
+
+TODO macos?
+
+For example, if you are using Python 3.8 (or 3.8.1, 3.8.2, etc.), the folder is
+called:
+
+    %USERPROFILE%\AppData\Local\Python\Python38\Scripts
+
+However, if you are using Python 3.9 (or 3.9.1, 3.9.2, etc.), the folder is
+called:
+
+    %USERPROFILE%\AppData\Local\Python\Python39\Scripts
+
+TODO macos?
+
+If you still get ‘command not found’ errors after setting the path and
+restarting your terminals, then you can always fall back to adding python
+explicitly to the command.
+
+For instance, if you want to run `pip install pydictionaria` this way on
+Unix-like operating systems, you can prepend `python3 -m ` to your command, like
+so:
+
+    python3 -m pip install pydictionaria
+
+On Windows, add `py -m ` instead:
+
+    py -m pip install pydictionaria
 
 ### Prerequisites
 
-For the Dictionaria workflow you first need the [CLDFbench][cldfbench] program.
-This can be installed through `pip`:
+For the Dictionaria workflow you need the [CLDFbench][cldfbench] program.  This
+can be installed through `pip`:
 
-    python3 -m pip install cldfbench
+    pip install cldfbench
 
 In addition, you need the CLDFbench template for creating Dictionaria
 submissions, which is maintained in the [pydictionaria][pydictionaria] package:
 
-    python3 -m pip install pydictionaria
+    pip install pydictionaria
 
 It is also recommended to place each CLDF bench into its own so-called *Virtual
 Environment*.  This means that all python packages used for processing a CLDF
@@ -42,14 +78,15 @@ advantages:
 For that you need the `virtualenv` program.  If your Python installation does
 not ship with a version of `virtualenv`, you can also install it using `pip`:
 
-    python3 -m pip install virtualenv
+    pip install virtualenv
 
+[python]: https://python.org
 [cldfbench]: https://github.com/cldf/cldfbench
 [pydictionaria]: https://github.com/dictionaria/pydictionaria
 
 ### Initialising a new submission
 
-    python3 -m cldfbench new --template=dictionaria
+    cldfbench new --template=dictionaria
 
 The creation process will ask you a few questions:
 
@@ -68,7 +105,7 @@ The creation process will ask you a few questions:
 To create a new virtual environment for a CLDF bench, `cd` into the folder of
 the CLDF bench and run the following command.
 
-    python3 -m virtualenv ENV
+    virtualenv ENV
 
 This will create the folder `ENV` and fill it with a separate Python
 installation for your CLDF bench.  By the way, the folder name is completely
@@ -108,9 +145,9 @@ means this command only affects the terminal you are currently working in.  This
 also means that you have to re-run the command every time you close and re-open
 your terminal window.
 
-After running this, the `python3`/`py` command will run the version from the
-virtual environment instead of the system-wide installation and any package you
-install with `pip` will be installed into the `ENV` folder.
+After running this, Python will run the version from the virtual environment
+instead of the system-wide installation and any package you install with `pip`
+will be installed into the `ENV` folder.
 
 ### Installing the CLDF bench into the virtual environment
 
@@ -120,7 +157,7 @@ package.  And because of that it can be installed like any other package.
 The following command installs the CLDF bench into your virtual environment
 (make sure the virtual environment is activated first).
 
-    python3 -m pip install -e .[test]
+    pip install -e .[test]
 
 Quick explanation:
 
@@ -198,7 +235,7 @@ TODO what and how?
 To process a submission, first activate the virtual environment (see above) and
 run the following command:
 
-    python3 -m cldfbench makecldf cldfbench_*.py
+    cldfbench makecldf cldfbench_*.py
 
 This command creates a new [CLDF](cldf) dataset in the `cldf/` folder.  The
 files in this directory will be read when importing the dictionary into
@@ -219,7 +256,7 @@ cases
 
 ### Publishing a submission
 
-    python3 -m cldfbench dictionaria.release cldfbench_*.py
+    cldfbench dictionaria.release cldfbench_*.py
 
 TODO
 
