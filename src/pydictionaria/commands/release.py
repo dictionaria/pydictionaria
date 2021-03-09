@@ -121,15 +121,16 @@ def release(dataset, args):
         igt_to_table(intro, div)
 
     md = jsonlib.load(dataset.etc_dir / 'md.json')
+    metadata_json = dataset.dir / 'metadata.json'
+    cb_metadata = jsonlib.load(metadata_json)
 
     id_ = dataset.id
     url = 'https://dictionaria.clld.org/contributions/' + dataset.id
     title = (
         md['properties'].get('title')
+        or cb_metadata.get('title')
         or md['language']['name'] + ' dictionary')
 
-    metadata_json = dataset.dir / 'metadata.json'
-    cb_metadata = jsonlib.load(metadata_json)
     cb_metadata['id'] = id_
     cb_metadata['title'] = title
     cb_metadata['license'] = LICENSE
