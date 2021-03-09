@@ -11,8 +11,8 @@ sub-commands of the `cldfbench` command-line program.
 
 ### Quick note for Windows users
 
-On Windows, the Python binary is called `py` instead of `python3`, so make sure
-to change any commands down below accordingly.
+On Windows, the command for running Python is called `py` instead of `python3`,
+so make sure to change any commands down below accordingly.
 
 ### Prerequisites
 
@@ -34,6 +34,10 @@ advantages:
  1. You avoid unnecessary clutter in your system-wide Python installation
  2. You avoid problems with CLDF benches or other Python projects that require
     conflicting versions of the same package
+ 3. If something happens to mess up your Python installation, it will only break
+    the one inside the virtual environment.  This doesn't happen all that often,
+    but when it does, it is nice to be able to just delete the environment and
+    start over.
 
 For that you need the `virtualenv` program.  If your Python installation does
 not ship with a version of `virtualenv`, you can also install it using `pip`:
@@ -67,12 +71,19 @@ the CLDF bench and run the following command.
     python3 -m virtualenv ENV
 
 This will create the folder `ENV` and fill it with a separate Python
-installation for your CLDF bench.  You can also give the folder any other name
-by changing the command above accordingly.  The name itself is arbitrary but
-it is common convention to call it `ENV`, `env`, `VENV`, `venv`, or something
-similar.
+installation for your CLDF bench.  By the way, the folder name is completely
+arbitrary.  You can also give the folder any other name by changing the command
+above accordingly.  However, it is common convention to call it `ENV`, `env`,
+`VENV`, `venv`, or something along those lines.
 
 The rest of this document will assume the folder is named `ENV` (in all-caps).
+
+*Note:*
+Internally the virtual environment uses absolute paths to find python packages
+within it.  This means you have to delete and recreate the virtual environment
+every time, you move the CLDF bench to a different location.
+
+To delete a virtual environment, all you need to do is delete its `ENV` folder.
 
 ### Activating the virtual environment
 
