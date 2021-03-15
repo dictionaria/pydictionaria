@@ -28,7 +28,7 @@ def testdata_dir():
 @pytest.fixture
 def tmp_dataset(tmp_path, mocker):
     mocker.patch('sys.stdin', StringIO(MOCK_STDIN))
-    _main("new --template dictionaria_submission --out '{}'".format(tmp_path))
+    _main("new --template dictionaria --out '{}'".format(tmp_path))
     bench_path = tmp_path / 'testbench'
     return bench_path
 
