@@ -162,6 +162,8 @@ def release(dataset, args):
             "id": LICENSE
         }
     }
+    if cb_metadata.get('citation'):
+        zenodo_md['description'] = cb_metadata['citation']
     jsonlib.dump(zenodo_md, dataset.dir / '.zenodo.json', indent=4)
 
 
