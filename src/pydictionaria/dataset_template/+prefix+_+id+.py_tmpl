@@ -26,25 +26,6 @@ def preprocess(entry):
     return entry
 
 
-def authors_string(authors):
-    """Return formatted string of all authors."""
-    def is_primary(a):
-        return not isinstance(a, dict) or a.get('primary', True)
-
-    primary = ' and '.join(
-        a['name'] if isinstance(a, dict) else a
-        for a in authors
-        if is_primary(a))
-    secondary = ' and '.join(
-        a['name']
-        for a in authors
-        if not is_primary(a))
-    if primary and secondary:
-        return '{{}} with {{}}'.format(primary, secondary)
-    else:
-        return primary or secondary
-
-
 class Dataset(BaseDataset):
     dir = pathlib.Path(__file__).parent
     id = "{id}"
@@ -148,7 +129,7 @@ class Dataset(BaseDataset):
 
         if sources:
             args.writer.cldf.add_sources(sources)
-        args.writer.cldf.properties['dc:creator'] = authors_string(
+        args.writer.cldf.properties['dc:creator'] = sfm2cldf.format_authors(
             md.get('authors') or ())
 
         language = {{

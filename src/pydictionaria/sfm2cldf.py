@@ -881,6 +881,25 @@ def merge_gloss_into_example(glosses, example_row):
     return example_row
 
 
+def _author_is_primary(a):
+    return not isinstance(a, dict) or a.get('primary', True)
+
+
+def format_authors(authors):
+    primary = ' and '.join(
+        a['name'] if isinstance(a, dict) else a
+        for a in authors
+        if _author_is_primary(a))
+    secondary = ' and '.join(
+        a['name']
+        for a in authors
+        if not _author_is_primary(a))
+    if primary and secondary:
+        return '{} with {}'.format(primary, secondary)
+    else:
+        return primary or secondary
+
+
 def add_media_metadata(media_catalog, media_row):
     if media_row.get('ID') in media_catalog:
         metadata = {
