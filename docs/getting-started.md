@@ -156,6 +156,22 @@ You can update `pydictionaria` to the latest version using `pip`.
     pip install --upgrade pydictionaria
 
 
+Setting up the CLDF Catalog
+---------------------------
+
+To run `makecldf` `cldfbench` requires a copy of the data from the
+[Glottolog][glottolog] to be present on your machine.  `cldfbench` will try to
+find the Glottolog on your computer using the CLDF Catalog.
+
+For instructions on how to download the dataset and set up the catalog, refer
+to [this tutorial provided by the DLCE][cat-doc].
+
+[glottolog]: https://glottolog.org/
+[cat-doc]: https://github.com/dlce-eva/dlce-eva/blob/main/doc/catalogs.md
+
+TODO: Concepticon too?
+
+
 Installing `virtualenv`
 -----------------------
 
