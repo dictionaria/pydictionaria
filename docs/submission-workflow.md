@@ -2,87 +2,19 @@ How to Prepare a Submission
 ===========================
 
 
+Prerequisites
+-------------
+
+For instructions on how to get your system set up for using CLDF benches, refer
+to the file `getting-started.md`.
+
+
 Workflow
 --------
 
 The editorial workflow to process dictionaries from submission to publication is
 a series of automated or manual steps.  The automated steps are implemented as
 sub-commands of the `cldfbench` command-line program.
-
-### Python installation and its `PATH`
-
-To work with CLDF benches, you need have [Python][python] installed.  Make sure
-that packages installed through `pip` are added to your `PATH` (see the
-[docs/intro-commandline.md](docs/intro-commandline.md) file for details on the
-`PATH` variable).
-
-On Linux, Python packages are installed to `$HOME/.local/bin`.
-
-On Windows, the path you need is
-`%USERPROFILE%\AppData\Local\Python\Python<VERSION>\Scripts`, where `<VERSION>`
-needs to be replaced with Python's major and minor version, without the period.
-
-TODO macos?
-
-For example, if you are using Python 3.8 (or 3.8.1, 3.8.2, etc.), the folder is
-called:
-
-    %USERPROFILE%\AppData\Local\Python\Python38\Scripts
-
-However, if you are using Python 3.9 (or 3.9.1, 3.9.2, etc.), the folder is
-called:
-
-    %USERPROFILE%\AppData\Local\Python\Python39\Scripts
-
-TODO macos?
-
-If you still get ‘command not found’ errors after setting the path and
-restarting your terminals, then you can always fall back to adding python
-explicitly to the command.
-
-For instance, if you want to run `pip install pydictionaria` this way on
-Unix-like operating systems, you can prepend `python3 -m ` to your command, like
-so:
-
-    python3 -m pip install pydictionaria
-
-On Windows, add `py -m ` instead:
-
-    py -m pip install pydictionaria
-
-### Prerequisites
-
-For the Dictionaria workflow you need the [CLDFbench][cldfbench] program.  This
-can be installed through `pip`:
-
-    pip install cldfbench
-
-In addition, you need the CLDFbench template for creating Dictionaria
-submissions, which is maintained in the [pydictionaria][pydictionaria] package:
-
-    pip install pydictionaria
-
-It is also recommended to place each CLDF bench into its own so-called *Virtual
-Environment*.  This means that all python packages used for processing a CLDF
-bench will be installed locally in the CLDF bench's folder.  This has two major
-advantages:
-
- 1. You avoid unnecessary clutter in your system-wide Python installation
- 2. You avoid problems with CLDF benches or other Python projects that require
-    conflicting versions of the same package
- 3. If something happens to mess up your Python installation, it will only break
-    the one inside the virtual environment.  This doesn't happen all that often,
-    but when it does, it is nice to be able to just delete the environment and
-    start over.
-
-For that you need the `virtualenv` program.  If your Python installation does
-not ship with a version of `virtualenv`, you can also install it using `pip`:
-
-    pip install virtualenv
-
-[python]: https://python.org
-[cldfbench]: https://github.com/cldf/cldfbench
-[pydictionaria]: https://github.com/dictionaria/pydictionaria
 
 ### Initialising a new submission
 
