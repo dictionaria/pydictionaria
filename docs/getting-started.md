@@ -94,29 +94,17 @@ containing the version number.
 Installing `pydictionaria`
 --------------------------
 
-### Clone the repository
+The latest release of pydictionaria can be installed using `pip`:
 
-Clone the [pydictionaria repository][repo] to a folder of your choice.
-
-[repo]: https://github.com/dictionaria/pydictionaria
-
-### Install `pydictionaria`
-
-To install `pydictionaria`, `cd` into the folder containing the git repository.
-
-    py setup.py install
-
-on Windows, or
-
-    python3 setup.py install
-
-on Unix-like systems.
+    pip install pydictionaria
 
 ### Test your installation
 
 Run the following command:
 
-    dictionaria -h
+    cldfbench -h
+
+This shows the help page for `cldfbench`.  If `pydictionaria` was installed
 
 If the installation is successful, this should show a message detailing all the
 options supported by `pydictionaria`.
@@ -137,15 +125,9 @@ This error message occurs, when the installation process tries to install
 changes to your system.
 
 You can tell the installation to install `pydictionaria` locally for your user
-account by adding the `--user` option to the end of the command-line, i.e.:
+account by adding the `--user` option to the command-line, i.e.:
 
-    py setup.py install --user
-
-for Windows, and
-
-    python3 setup.py install --user
-
-for Unix-like operating systems.
+    pip install --user pydictionaria
 
 Note that there is no real reason for `pydictionaria` to be installed
 system-wide (also, installing random programs from the internet with admin
@@ -159,9 +141,33 @@ On Unix-like operating systems, you can usually prepend `sudo` to a command to
 grant 'super user' privileges to it.  For security reasons, `sudo` will ask you
 for your user password before running the actual command.
 
-    sudo python3 setup.py install
+    sudo pip install pydictionaria
 
-### Running `dictionaria` shows the message `command not found`, even though the installation finished successfully
+### `pydictionaria`'s installation failed: `Could not find a version that satisfies the requirement […]`
+
+The most likely explanation for this is, that `pip` is running on an older
+version of Python.  The tools surrounding CLDF all require at least Python 3.6.
+Run `py --version` or `python3 --version` 
+
+Some systems have Python 2 and Python 3 installed alongside each other.  More
+and more operating systems set Python 3 as the default installation, but
+occasionally you'll find that `pip` runs on Python 2 instead.  If that is the
+case, you can run the Python 3 version of `pip` explicitly and install
+`pydictionaria` as follows.
+
+On Windows:
+
+    py -3 -m pip install pydictionaria
+
+On Unix-like operating systems:
+
+    pip3 install pydictionaria
+
+Or:
+
+    python3 -m pip install pydictionaria
+
+### Running `cldfbench` shows the message `command not found`, even though the installation finished successfully
 
 If your shell is unable to find `dictionaria`, it might mean that you need to add
 its installation folder to your `PATH` (read the file `intro-commandline.md` if
