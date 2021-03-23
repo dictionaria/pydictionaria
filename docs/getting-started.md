@@ -180,7 +180,6 @@ not ship with a version of `virtualenv`, you can also install it using `pip`:
 [pydictionaria]: https://github.com/dictionaria/pydictionaria
 
 
-
 Troubleshooting
 ---------------
 
