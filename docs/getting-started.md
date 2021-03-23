@@ -21,13 +21,11 @@ users of Microsoft Windows, since Notepad is… lacking in a few areas.
 Here is a quick selection of popular free and open source text editors:
 
  - [Notepad++][notepadpp] by Don Ho (Windows only)
- - [Visual Studio Code][vscode] by Microsoft
  - [Atom][atom] by Github
  - [Vim][vim] by Bram Moolenaar
  - [GNU Emacs][emacs] by the Free Software Foundation
 
 [notepadpp]: https://notepad-plus-plus.org
-[vscode]: https://code.visualstudio.com
 [atom]: https://atom.io
 [vim]: https://www.vim.org
 [emacs]: https://www.gnu.org/software/emacs
