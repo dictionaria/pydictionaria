@@ -35,11 +35,8 @@ setup(
         'pycldf',
         'pycdstar>=1.0.1',
         'cdstarcat>=1.0.0',
-        'tqdm',
-        'transliterate==1.7.6',
+        'transliterate>=1.7.6',
         'pyconcepticon>=1.1.1',
-        'colorlog',
-        'termcolor',
         'cldfbench',
     ],
     extras_require={
