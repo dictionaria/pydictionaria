@@ -186,6 +186,12 @@ cases
 
 [cldf]: https://cldf.clld.org
 
+### Generating the CLDF readme in `cldf/README.md`
+
+    cldfbench cldfreadme cldfbench_*.py
+
+TODO
+
 ### Publishing a submission
 
     cldfbench dictionaria.release cldfbench_*.py
