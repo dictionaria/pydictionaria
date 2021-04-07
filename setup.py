@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pydictionaria',
-    version='2.0',
+    version='2.0.dev0',
     description='',
     long_description='',
     classifiers=[
