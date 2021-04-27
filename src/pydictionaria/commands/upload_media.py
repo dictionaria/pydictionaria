@@ -20,6 +20,11 @@ def register(parser):
         default=pathlib.Path('upload'),
         help='directory containing the media files',
         type=PathType(type='dir'))
+    parser.add_argument(
+        '--cdstar-catalog',
+        default=os.environ.get('CDSTAR_CATALOG'),
+        help='CDSTAR catalog',
+        type=PathType(type='file'))
     for kw in ['URL', 'USER', 'PWD']:
         parser.add_argument(
             '--cdstar-{0}'.format(kw.lower()),
@@ -31,7 +36,7 @@ def register(parser):
 def _upload(args, dataset, dir, cdstar_json):
     with MediaCatalog(cdstar_json.parent) as mcat:
         with Catalog(
-            cdstar_json,
+            args.cdstar_catalog,
             cdstar_url=args.cdstar_url,
             cdstar_user=args.cdstar_user,
             cdstar_pwd=args.cdstar_pwd
@@ -53,6 +58,8 @@ def upload(dataset, args):
         dir = args.media_dir / mtype
         if dir.exists():
             _upload(args, dataset, dir, cdstar_json)
+
+    args.log.info(args.cdstar_catalog)
 
 
 def run(args):
