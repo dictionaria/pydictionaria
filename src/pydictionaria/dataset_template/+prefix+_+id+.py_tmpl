@@ -120,7 +120,7 @@ class Dataset(BaseDataset):
             examples = sfm2cldf.ensure_required_columns(
                 args.writer.cldf, 'ExampleTable', examples, cldf_log)
             media = sfm2cldf.ensure_required_columns(
-                args.writer.cldf, 'media.csv', media, cldf_log)
+                args.writer.cldf, 'MediaTable', media, cldf_log)
 
             entries = sfm2cldf.remove_senseless_entries(
                 senses, entries, cldf_log)
@@ -143,4 +143,4 @@ class Dataset(BaseDataset):
         args.writer.objects['EntryTable'] = entries
         args.writer.objects['SenseTable'] = senses
         args.writer.objects['ExampleTable'] = examples
-        args.writer.objects['media.csv'] = media
+        args.writer.objects['MediaTable'] = media

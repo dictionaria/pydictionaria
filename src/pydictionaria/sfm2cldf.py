@@ -734,6 +734,12 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
                 'datatype': 'string',
                 'separator': '\t',
             }
+        elif table_name == 'Media_IDs':
+            col = {
+                'name': 'Media_IDs',
+                'propertyUrl': 'http://cldf.clld.org/v1.0/terms.rdf#mediaReference',
+                'separator': DEFAULT_SEPARATOR,
+            }
         elif colname in SEPARATORS or colname in crossrefs:
             col = {
                 'name': colname,
@@ -754,7 +760,7 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
         if colname in crossrefs:
             cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')
         elif colname == 'Media_IDs':
-            cldf.add_foreign_key(table_name, colname, 'media.csv', 'ID')
+            cldf.add_foreign_key(table_name, colname, 'MediaTable', 'ID')
         elif colname == 'Sense_IDs':
             cldf.add_foreign_key(table_name, colname, 'SenseTable', 'ID')
 
@@ -763,13 +769,9 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
     properties = _add_property_fallbacks(properties)
 
     cldf.add_component('ExampleTable')
-    cldf.add_table(
-        'media.csv',
-        'http://cldf.clld.org/v1.0/terms.rdf#id',
+    cldf.add_component(
+        'MediaTable',
         'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
-        'Filename',
-        {'name': 'URL', 'datatype': 'anyURI'},
-        'mimetype',
         {'name': 'size', 'datatype': 'integer'})
     cldf.add_component('LanguageTable')
 
@@ -792,7 +794,7 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
         {c for m, c in properties['example_map'].items() if m in crossref_markers})
     _amend_columns(
         cldf,
-        'media.csv',
+        'MediaTable',
         sorted({col for row in media for col, val in row.items() if val}),
         ())
 
@@ -903,10 +905,10 @@ def format_authors(authors):
 def add_media_metadata(media_catalog, media_row):
     if media_row.get('ID') in media_catalog:
         metadata = {
-            'URL': rfc3986.uri.URIReference.from_string(
+            'Download_URL': rfc3986.uri.URIReference.from_string(
                 'https://cdstar.shh.mpg.de/bitstreams/{0[objid]}/{0[original]}'.format(
                     media_catalog[media_row['ID']])),
-            'mimetype': media_catalog[media_row['ID']]['mimetype'],
+            'Media_Type': media_catalog[media_row['ID']]['mimetype'],
             'size': media_catalog[media_row['ID']]['size'],
         }
         return ChainMap(media_row, metadata)
@@ -1152,7 +1154,7 @@ def process_dataset(
         {
             'ID': fileid,
             'Language_ID': language_id,
-            'Filename': filename,
+            'Name': filename,
             'Description': caption_finder.captions.get(fileid)
         }
         for filename, fileid in sorted(media_extr.files)]

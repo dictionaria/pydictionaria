@@ -32,7 +32,8 @@ setup(
         'BeautifulSoup4',
         'attrs>=19.1',
         'clldutils>=3.5.1',
-        'pycldf',
+        # for MediaTable support
+        'pycldf>=1.20',
         'pycdstar>=1.0.1',
         'cdstarcat>=1.0.0',
         'transliterate>=1.7.6',
