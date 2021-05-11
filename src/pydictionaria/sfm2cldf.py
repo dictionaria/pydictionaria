@@ -93,7 +93,8 @@ SEPARATORS = {
 PROPERTY_URLS = {
     'Source': 'http://cldf.clld.org/v1.0/terms.rdf#source',
     'Description': 'http://cldf.clld.org/v1.0/terms.rdf#description',
-    'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment'}
+    'Comment': 'http://cldf.clld.org/v1.0/terms.rdf#comment',
+    'Concepticon_ID': 'http://cldf.clld.org/v1.0/terms.rdf#concepticonReference'}
 
 
 def load_examples(examples_path):
