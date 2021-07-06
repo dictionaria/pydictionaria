@@ -769,12 +769,15 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
 def make_cldf_schema(cldf, properties, entries, senses, examples, media):
     properties = _add_property_fallbacks(properties)
 
-    cldf.add_component('ExampleTable')
-    cldf.add_component(
-        'MediaTable',
-        'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
-        {'name': 'size', 'datatype': 'integer'})
-    cldf.add_component('LanguageTable')
+    if not cldf.get('ExampleTable'):
+        cldf.add_component('ExampleTable')
+    if not cldf.get('MediaTable'):
+        cldf.add_component(
+            'MediaTable',
+            'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
+            {'name': 'size', 'datatype': 'integer'})
+    if not cldf.get('LanguageTable'):
+        cldf.add_component('LanguageTable')
 
     crossref_markers = _get_crossref_markers(properties)
 
