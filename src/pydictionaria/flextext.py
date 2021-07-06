@@ -51,6 +51,7 @@ def _extract_text_id(node, vernacular):
 
 
 def separate_examples(document, log=None):
+    """Iterate over examples contained in flextext XML document."""
     if not document.find('interlinear-text'):
         if log:
             log.warn('XML data does not contain any interlinear texts.')
@@ -187,6 +188,7 @@ def _parse_morph(morph):
 
 
 def extract_gloss(phrase, log=None):
+    """Extract IGT from example."""
     if not phrase.find('words'):
         if log:
             log.warn("No words in phrase '{}'".format(phrase.attrib.get('guid', '???')))
@@ -206,9 +208,10 @@ def extract_gloss(phrase, log=None):
 
 
 def merge_glosses(glosses):
-    """Merge sequence of glosses into a single gloss.
+    """Merge sequence of `glosses` into a single gloss.
 
-    Note: This loops over the glosses twice, so an iterator is not enough.
+    Note: Since this loops over the `glosses` twice, they need to be
+    a *sequence*, not an iterator.
     """
     all_keys = {
         key
@@ -224,6 +227,7 @@ def merge_glosses(glosses):
 
 
 def parse_flextext(file_name, log=None):
+    """Iterate over glossed examples contained in a flextext file."""
     gloss_db = ET.parse(file_name)
     for example in separate_examples(gloss_db.getroot(), log):
         example['example'] = merge_glosses(
