@@ -98,6 +98,7 @@ PROPERTY_URLS = {
 
 
 def load_examples(examples_path):
+    """Load examples from a separate SFM file."""
     if not examples_path.exists():
         return None
     examples = Examples()
@@ -249,17 +250,29 @@ def split_by_pred(pred, iterable, constructor=list):
 
 
 class IDGenerator(object):
+    """Generator for sequential.
+
+    This generates IDs by incrementing an integer number and adding a prefix
+    to it, e.g. LX000001, LX000002, etc.
+    """
 
     def __init__(self, prefix=''):
+        """Create generator for generates sequential IDs with an added `prefix`."""
         self.prefix = prefix
         self._last_id = 0
 
     def next_id(self):
+        """Return next ID in the sequence."""
         self._last_id += 1
         return '{}{:06d}'.format(self.prefix, self._last_id)
 
 
 def prepare_examples(example_id, example_markers, database):
+    """Add IDs to examples.
+
+    :returns: a dictionary, which maps the original example IDs to the adapted
+    examples.
+    """
     id_gen = IDGenerator('XV')
     example_index = OrderedDict()
 
@@ -290,13 +303,13 @@ def _preprocess_flex_link(link):
 def preprocess_flex_crossrefs(flex_refs, entry):
     r"""Pre-process FLEx's cross references.
 
-    This turns
+    This turns::
 
         \lf marker_name
         \lv content
         \le ...
 
-    into
+    into::
 
         \marker_name content
     """
@@ -313,7 +326,15 @@ def preprocess_flex_crossrefs(flex_refs, entry):
 
 
 class EntryExtractor(object):
+    """Visitor for extracting Entry information from an SFM entry."""
+
     def __init__(self, entry_id, entry_markers):
+        """Create an entry extractor.
+
+        :arg entry_id: marker, which contains the entry's original ID
+        :arg entry_markers: collection of markers, which make up an entry (as
+            opposed to a sense or an example)
+        """
         self.entry_id = entry_id
         self.entry_markers = entry_markers
         self._idgen = IDGenerator('LX')
@@ -322,6 +343,10 @@ class EntryExtractor(object):
         self.entries = sfm.SFM()
 
     def __call__(self, entry):
+        """Extract entry markers from `entry`.
+
+        :returns: a modified version `entry` without any entry markers.
+        """
         new_entry, rest = split_by_pred(
             lambda pair: pair[0] in self.entry_markers,
             entry,
@@ -381,6 +406,10 @@ class GlossToExMapping:
 
 
 def prepare_glosses(glosses_path, gloss_ref_marker, examples, log):
+    """Map glosses from flextext file to examples.
+
+    :returns: a dictionary, which maps example ids to glosses.
+    """
     glosses = {}
     mapping = GlossToExMapping(gloss_ref_marker)
     mapping.add_examples(examples)
@@ -445,8 +474,16 @@ def merge_pos(entry):
 
 
 class SenseExtractor(object):
+    """Visitor for extracting Sense information from an SFM entry."""
 
     def __init__(self, sense_sep, sense_markers, crossref_markers, log):
+        """Create an entry extractor.
+
+        :arg sense_sep: marker, which separates senses from each other.
+        :arg sense_markers: collection of markers, which make up a sense.
+        :arg crossref_markers: collection of markers, which refer to other
+            entries
+        """
         self.sense_sep = sense_sep
         self.sense_markers = sense_markers
         self.log = log
@@ -456,6 +493,10 @@ class SenseExtractor(object):
         self.senses = sfm.SFM()
 
     def __call__(self, entry):
+        """Extract sense markers from `entry`.
+
+        :returns: a modified version `entry` without any sense markers.
+        """
         extracted_markers, rest = split_by_pred(
             lambda pair: pair[0] in self.sense_markers,
             entry)
@@ -483,12 +524,22 @@ class SenseExtractor(object):
 
 
 class ExampleReferencer(object):
+    """Visitor, which links examples to the senses they illustrate."""
 
     def __init__(self, example_index):
+        """Create an example referencer.
+
+        :arg example_index: dictionary, which maps the original example IDs to
+           to the examples themselves.
+        """
         self.example_index = example_index
         self.invalid_example_ids = set()
 
     def __call__(self, sense):
+        """Add references to `sense` to the examples.
+
+        :returns: the `sense` (unchanged)
+        """
         # FIXME Hardcoded SFM marker: xref
         for example_ref in sense.getall('xref'):
             if example_ref in self.example_index:
@@ -513,13 +564,27 @@ def _bigrams(iterable):
 
 
 class CaptionFinder:
+    """Visitor, which links captions to media files.
+
+    It looks for SFM markers containing file names and checks if the adjacent
+    marker contains a caption.
+    """
 
     def __init__(self, media_markers, caption_marker):
+        """Create a caption finder.
+
+        :args media_markers: markers, which contain media file names.
+        :args caption_marker: marker, which contains the caption.
+        """
         self.media_markers = media_markers
         self.caption_marker = caption_marker
         self.captions = {}
 
     def __call__(self, entry):
+        """Extract captions for media files.
+
+        :returns: `entry` (unchanged)
+        """
         for pair1, pair2 in _bigrams(entry):
             marker1, content1 = pair1
             marker2, content2 = pair2
@@ -532,8 +597,15 @@ class CaptionFinder:
 
 
 class MediaExtractor(object):
+    """Visitor, which turns media file names into CDSTAR IDs."""
 
     def __init__(self, tag, id_index, cdstar_items):
+        """Create media extractor.
+
+        :arg tag: marker, which contains the media file name.
+        :arg id_index: dictionary ``filename`` -> ``checksum``
+        :arg cdstar_items: dictionary ``checksum`` -> ``media item``
+        """
         self.tag = tag
         self.id_index = id_index
         self.cdstar_items = cdstar_items
@@ -542,6 +614,12 @@ class MediaExtractor(object):
         self.files = set()
 
     def __call__(self, entry):
+        """Add CDSTAR IDs to `entry.media_ids`.
+
+        :returns: `entry`
+
+        .. warning:: `entry` is mutated in-place.
+        """
         for values in entry.getall(self.tag):
             for value in re.split(r'\s*;\s*', values):
                 if not value.strip():
@@ -560,7 +638,6 @@ class MediaExtractor(object):
                 self.files.add((filename, fileid))
                 entry.media_ids.append(fileid)
 
-        # Note: no-op on the actual entry
         return entry
 
 
@@ -581,6 +658,10 @@ def _lc_hm_pair(entry, space=True):
 
 
 def make_id_index(entries):
+    r"""Map original IDs for entries to new IDs.
+
+    This includes variants wuch as '<\lx> <\hm>' or '<\lx><\hm>'
+    """
     id_index = {
         entry.original_id: entry.id
         for entry in entries}
@@ -604,8 +685,15 @@ def make_id_index(entries):
 
 
 class CrossRefs:
+    """Visitor, which points cross references to new entry IDs."""
 
     def __init__(self, id_index, crossref_markers):
+        """Create crossref processor.
+
+        :arg id_index: dictionary ``old entry id`` -> ``new entry id``
+        :arg crossref_markers: collection of markers, which contain cross
+            references.
+        """
         self._index = id_index
         self.markers = crossref_markers
 
@@ -617,6 +705,10 @@ class CrossRefs:
         return tag, ' ; '.join(refs)
 
     def __call__(self, entry):
+        """Swap references to old IDs out for references to new IDs.
+
+        :returns: a copy of `entry` with fixed cross references.
+        """
         # Preserve both the type and any potential attributes of the entry
         new_entry = copy.copy(entry)
         new_entry.clear()
@@ -625,8 +717,19 @@ class CrossRefs:
 
 
 class LinkProcessor:
+    """Visitor, which points *in-line references* to new entry IDs.
+
+    This creates markdown-style links (like ``[human-readable label](ID)``).
+    """
 
     def __init__(self, id_index, label_index, link_markers, link_regex):
+        """Create link processor.
+
+        :arg id_index: dictionary ``old entry id`` -> ``new entry id``
+        :arg label_index: dictionary ``new entry id`` -> ``human-readable label``
+        :arg link_regex: regular expression for finding in-line cross
+            references.
+        """
         self._ids = id_index
         self._labels = label_index
         self.markers = link_markers
@@ -646,6 +749,10 @@ class LinkProcessor:
             return tag, value
 
     def __call__(self, entry):
+        """Swap in-line links for markdown-style links.
+
+        :returns: a modified copy of `entry`
+        """
         # Preserve both the type and any potential attributes of the entry
         new_entry = copy.copy(entry)
         new_entry.clear()
@@ -654,12 +761,18 @@ class LinkProcessor:
 
 
 def make_label_index(link_display_label, entries):
+    """Map entry IDs to human-readable labels.
+
+    :arg link_display_label: Marker, which contains the label.
+    :arg entries: Collection of entries.
+    """
     return {
         entry.id: entry.get(link_display_label, entry.id)
         for entry in entries}
 
 
 def make_link_processor(properties, id_index, entries):
+    """Factory function for `LinkProcessor`'s."""
     link_markers = properties['process_links_in_markers']
     link_regex = properties.get('link_regex')
 
@@ -679,7 +792,19 @@ def _single_spaces(s):
 
 
 def sfm_entry_to_cldf_row(
-        table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None):
+    table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None
+):
+    """Convert SFM entry into a CLDF row.
+
+    :arg table_name: Name of the CLDF table/component.
+    :arg mapping: dictionary ``SFM marker`` -> ``CLDF column name``
+    :arg source_refs: markers, which contain a row's ``Source``
+    :arg cross_ref_columns: CLDF column names, which denote cross references.
+    :arg entry: SFM entry
+    :arg language_id: value for the ``Language_ID`` column
+
+    :returns: dictionary ``CLDF column name`` -> ``value``
+    """
     # XXX What if the same tag appears multiple times?
     #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
@@ -767,6 +892,15 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
 
 
 def make_cldf_schema(cldf, properties, entries, senses, examples, media):
+    """Add Dictionaria's tables and columns to a CLDF dataset.
+
+    :arg cldf: CLDF dataset
+    :arg properties: ``md.json`` properties
+    :arg entries: collection of CLDF rows for the entries
+    :arg senses: collection of CLDF rows for the senses
+    :arg examples: collection of CLDF rows for the examples
+    :arg media: collection of CLDF rows for media files
+    """
     properties = _add_property_fallbacks(properties)
 
     if not cldf.get('ExampleTable'):
@@ -804,6 +938,11 @@ def make_cldf_schema(cldf, properties, entries, senses, examples, media):
 
 
 def add_gloss_columns(cldf, glosses):
+    """Add columns for glosses to the ``ExampleTable``.
+
+    :arg cldf: CLDF dataset
+    :arg glosses: dictionary `example id` -> `gloss`
+    """
     gloss_columns = {
         column
         for gloss in glosses.values()
@@ -829,6 +968,7 @@ def _add_labels_to_table(table, mapping, labels):
 
 
 def attach_column_titles(cldf, properties):
+    """Add custom column titles to CLDF dataset."""
     properties = _add_property_fallbacks(properties)
 
     labels = properties['labels']
@@ -859,8 +999,17 @@ def _ensure_required_columns(cldf, table_name, rows, log):
             yield row
 
 
-def ensure_required_columns(cldf, table_name, row, log):
-    return list(_ensure_required_columns(cldf, table_name, row, log))
+def ensure_required_columns(cldf, table_name, rows, log):
+    """Drop all rows that lack required column values.
+
+    :arg cldf: CLDF dataset
+    :arg table_name: CLDF table name
+    :arg rows: collection of CLDF rows
+    :arg log: log for error messages
+
+    :returns: list of wellformed rows.
+    """
+    return list(_ensure_required_columns(cldf, table_name, rows, log))
 
 
 def _remove_senseless_entries(sense_rows, entry_rows, log):
@@ -878,10 +1027,23 @@ def _remove_senseless_entries(sense_rows, entry_rows, log):
 
 
 def remove_senseless_entries(sense_rows, entry_rows, log):
+    """Drop entries that do not have any senses.
+
+    :arg sense_rows: collection of senses
+    :arg entry_rows: collection of entries
+    :arg log: log for error messages
+
+    :returns: list of wellformed entries.
+    """
     return list(_remove_senseless_entries(sense_rows, entry_rows, log))
 
 
 def merge_gloss_into_example(glosses, example_row):
+    """Add IGT to an example.
+
+    :arg glosses: dictionary `example id` -> `gloss`
+    :arg example_row: CLDF example.
+    """
     if example_row['ID'] in glosses:
         return ChainMap(glosses[example_row['ID']]['example'], example_row)
     return example_row
@@ -892,6 +1054,10 @@ def _author_is_primary(a):
 
 
 def format_authors(authors):
+    """Return human-readable string of `authors`.
+
+    Takes the form ``Primary Author and Primary Author with Secondary Author``.
+    """
     primary = ' and '.join(
         a['name'] if isinstance(a, dict) else a
         for a in authors
@@ -907,6 +1073,11 @@ def format_authors(authors):
 
 
 def add_media_metadata(media_catalog, media_row):
+    """Add metadata to media file.
+
+    :arg media_catalog: CDstar catalog.
+    :arg media_row: Media item.
+    """
     if media_row.get('ID') in media_catalog:
         metadata = {
             'Download_URL': rfc3986.uri.URIReference.from_string(
@@ -921,7 +1092,10 @@ def add_media_metadata(media_catalog, media_row):
 
 
 class LogOnlyBaseNames(logging.LoggerAdapter):
+
     def process(self, msg, kwargs):
+        """Reduce path names for CLDF tables to basename for more
+        machine-independent error messages."""
         msg = re.sub(
             r'^.*?\.csv(?=:)',
             lambda m: os.path.basename(m.group()),
@@ -930,6 +1104,7 @@ class LogOnlyBaseNames(logging.LoggerAdapter):
 
 
 def make_log(name, stream=None):
+    """Factory function for an error log."""
     log = logging.getLogger(name)
     log.propagate = False
     log.setLevel(logging.INFO)
@@ -961,9 +1136,30 @@ def process_dataset(
     glosses_path, examples_log_path, glosses_log_path,
     cldf_log
 ):
+    """Turn an SFM database into CLDF data.
+
+    :arg sid: submission id
+    :arg language_id: ID of the dictionary language
+    :arg properties: properties from the ``md.json`` metadata file
+    :arg sfm: SFM database (see `pydictionaria.sfm_lib.Database`)
+    :arg examples: SFM examples (see `pydictionaria.sfm_lib.Database`)
+    :arg media_catalog: CDSTAR media catalog.
+    :arg glosses_path: Path to ``flextext`` glosses.
+    :arg examples_log_path: Path where errors regarding example extraction are
+      logged.
+    :arg glosses_log_path: Path where error regarding gloss extraction are
+      logged.
+    :arg cldf_log: Logger object
+
+    :returns: a tuple containing:
+      * a list of EntryTable rows
+      * a list of SenseTable rows
+      * a list of ExampleTable rows
+      * a list of MediaTable rows
+    """
     properties = _add_property_fallbacks(properties)
 
-    # Run generic normalization of SFM:
+    # Run generic normalization of sFM:
     sfm.visit(normalize)
     sfm.visit(Rearrange())
 
