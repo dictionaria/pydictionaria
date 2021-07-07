@@ -188,9 +188,13 @@ cases
 
 ### Generating the CLDF readme in `cldf/README.md`
 
-    cldfbench cldfreadme cldfbench_*.py
+`cldfbench` can generate a readme file in the `cldf/` folder, which contains
+a human-readable version of the metadata in markdown format.  This will also
+show up nicely rendered if you look at the `cldf/` folder on Github.
 
-TODO
+The generate the `cldf/README.md` file, run:
+
+    cldfbench cldfreadme cldfbench_*.py
 
 ### Publishing a submission
 
