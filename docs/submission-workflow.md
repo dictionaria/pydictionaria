@@ -196,12 +196,25 @@ The generate the `cldf/README.md` file, run:
 
     cldfbench cldfreadme cldfbench_*.py
 
-### Publishing a submission
+### Preparing a submission for publication
+
+The `dictionaria.release` subcommand prepares the submission for submission,
+doing the following:
+
+ - Generates the README.md for the entire project, which will also include the
+   contents of the `intro.md`
+ - Fills in some of the missing fields of the `metadata.json` (not to be
+   confused with `etc/md.json`)
+ - Creates the `.zenodo.json` file, which contains metadata, used by Zenodo
+
+To start thie process, run:
 
     cldfbench dictionaria.release cldfbench_*.py
 
-TODO
 
+### Creating a new release on Github
+
+TODO
 
 Common traps when editing JSON files
 ------------------------------------
