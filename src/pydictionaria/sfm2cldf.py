@@ -54,7 +54,7 @@ DEFAULT_SENSE_MAP = {
     'sd': 'Semantic_Domain',
     'sy': 'Synonym',
     'an': 'Antonym',
-    'zcom1': 'Concepticon_ID'}
+    'zcom1': 'Comparison_Meaning'}
 
 DEFAULT_EXAMPLE_MAP = {
     'rf': 'Corpus_Reference',
@@ -1072,6 +1072,18 @@ def format_authors(authors):
         return primary or secondary
 
 
+def extract_concepticon_id(sense_row):
+    if sense_row.get('Concepticon_ID'):
+        return sense_row
+
+    comp_meaning = sense_row.get('Comparison_Meaning') or ''
+    match = re.fullmatch(r'\w+ \[(\d+)\]', comp_meaning)
+    if match:
+        return ChainMap(sense_row, {'Concepticon_ID': match.group(1)})
+    else:
+        return sense_row
+
+
 def add_media_metadata(media_catalog, media_row):
     """Add metadata to media file.
 
@@ -1359,6 +1371,7 @@ def process_dataset(
         }
         for filename, fileid in sorted(media_extr.files)]
 
+    sense_rows = list(map(extract_concepticon_id, sense_rows))
     media_rows = [add_media_metadata(media_catalog, row) for row in media_rows]
 
     if glosses:
