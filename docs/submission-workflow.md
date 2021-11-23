@@ -215,17 +215,17 @@ To start this process, run:
 
  - Regenerate the dataset:
 
-    cldfbench makecldf cldfbench_*.py
+   `cldfbench makecldf cldfbench_*.py`
 
  - [Load the dictionary into the local webapp][rebuild-db] and look it over
 
  - Test the validity of the CLDF data:
 
-    pytest
+   `pytest`
 
  - Prepare for release:
 
-    cldfbench dictionaria.release cldfbench_*.py
+   `cldfbench dictionaria.release cldfbench_*.py`
 
  - Manually double-check the `.zenodo.json` and `metadata.json` files and add
    missing information (is the citation there etc.)
