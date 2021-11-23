@@ -198,7 +198,7 @@ The generate the `cldf/README.md` file, run:
 
 ### Preparing a submission for publication
 
-The `dictionaria.release` subcommand prepares the submission for submission,
+The `dictionaria.release` subcommand prepares the submission for publication,
 doing the following:
 
  - Generates the README.md for the entire project, which will also include the
@@ -207,14 +207,39 @@ doing the following:
    confused with `etc/md.json`)
  - Creates the `.zenodo.json` file, which contains metadata, used by Zenodo
 
-To start thie process, run:
+To start this process, run:
 
     cldfbench dictionaria.release cldfbench_*.py
 
+### Publication workflow
 
-### Creating a new release on Github
+ - Regenerate the dataset:
 
-TODO
+    cldfbench makecldf cldfbench_*.py
+
+ - [Load the dictionary into the local webapp][rebuild-db] and look it over
+
+ - Test the validity of the CLDF data:
+
+    pytest
+
+ - Prepare for release:
+
+    cldfbench dictionaria.release cldfbench_*.py
+
+ - Manually double-check the `.zenodo.json` and `metadata.json` files and add
+   missing information (is the citation there etc.)
+
+ - Create a new release on Github
+
+ - Mark the dictionary as `published` in the `dictionaria-intern` repo
+
+ - [Load published datasets into webapp db][rebuild-db]
+
+ - Deploy
+
+[rebuild-db]: https://github.com/dictionaria/dictionaria/blob/master/README.md
+
 
 Common traps when editing JSON files
 ------------------------------------
