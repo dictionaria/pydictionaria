@@ -362,9 +362,30 @@ Example:  Define that `\et_bibref` contains the source for the etymology.
         "et_bibref": "et"
     }
 
+### `title`
+
+The `title` property specifies a custom title for the dictionary.
+sense starts (default: "&lt;Language&gt; dictionary").
+
+Example:  Set the title to "A dictionary for the Martian language.".
+
+    "title": "A comprehensive dictionary for the Martian language."
+
 
 How do I…
 ---------
+
+### …give my dictionary a custom name?
+
+Situation:  By default the dictionary is called "&lt;Language&gt; dictionary".
+
+Solution:  Use the `title` property to customise the name of the dictionary.
+
+Example:
+
+    "properties": {
+        "title": A comprehensive dictionary for the Martian language"
+    }
 
 ### …fix standard markers with the wrong name?
 
