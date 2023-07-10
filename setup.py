@@ -24,7 +24,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'pybtex',
-        'requests',
         'html5lib>=1.1',
         'purl',
         'python-dateutil',

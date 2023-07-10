@@ -1,18 +1,10 @@
-import sys
 import re
 from collections import OrderedDict
 
 from clldutils import jsonlib
 from clldutils.path import Path
-import requests
-from requests.packages.urllib3.exceptions import (
-    InsecurePlatformWarning, SNIMissingWarning,
-)
-requests.packages.urllib3.disable_warnings(InsecurePlatformWarning)
-requests.packages.urllib3.disable_warnings(SNIMissingWarning)
 
 
-PY3 = sys.version_info[0] == 3
 ID_SEP_PATTERN = re.compile(r',|;')
 
 
