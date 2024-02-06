@@ -860,7 +860,7 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
                 'datatype': 'string',
                 'separator': '\t',
             }
-        elif table_name == 'Media_IDs':
+        elif colname == 'Media_IDs':
             col = {
                 'name': 'Media_IDs',
                 'propertyUrl': 'http://cldf.clld.org/v1.0/terms.rdf#mediaReference',
