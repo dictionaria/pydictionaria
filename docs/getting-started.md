@@ -71,7 +71,7 @@ In most (if not all) distributions, you can use the package managers to install
 Python from the official software repositories.  However do make sure that you
 have Python 3 installed.  `pydictionaria` will *not* work with Python 2.  Look
 for package names with explicit version numbers such as `python3` or
-`python3.7`, since versionless names like `python` might point to Python 2 on
+`python3.8`, since versionless names like `python` might point to Python 2 on
 some distributions.
 
 Note that Python 2 and 3 can coexist on the same system, meaning it is not
@@ -224,11 +224,40 @@ for your user password before running the actual command.
 
     sudo pip install pydictionaria
 
+### `pydictionaria`'s installation failed: `error: externally-managed-environemnt`
+
+Several GNU/Linux distributions (Ubuntu and Debian for instance) opted to
+disable installing python package using the `--user` flag by default.  This was
+done for two reasons:
+
+ 1. To encourage people to use virtual environments instead of destabilising the
+    state of their operating system by installing python packages from pip next
+    to packages from the Linux distro's package repositories.
+
+ 2. To prevent users from accidentally installing development packages into the
+    user environment because they carelessly forgot to activate their virtual
+    environment before running `pip install` (The author of this document
+    vehemently denies any rumours stating that this happened to him at a regular
+    basis and he had to scour through his `~/.local` folder every time trying to
+    clean up the mess).
+
+The clean solution would be to keep your python packages inside of virtual
+environments.  Some people use additional programs like [workon][workon] or
+[pipx][pipx] to make this approach more manageable.
+
+[workon]: https://virtualenvwrapper.readthedocs.io/en/latest/
+[pipx]: https://pipx.pypa.io/stable/
+
+There are also ways to override this behaviour and install packages directly
+into your user account but since this is actively discouraged I won't go into
+detail here and leave the research as an exercise to the reader.
+
 ### `pydictionaria`'s installation failed: `Could not find a version that satisfies the requirement […]`
 
 The most likely explanation for this is, that `pip` is running on an older
-version of Python.  The tools surrounding CLDF all require at least Python 3.6.
-Run `py --version` or `python3 --version` 
+version of Python.  The tools surrounding CLDF all require at least Python 3.8.
+Run `py --version` or `python3 --version` (depending on your operating system)
+to verify the current version of your Python installation.
 
 Some systems have Python 2 and Python 3 installed alongside each other.  More
 and more operating systems set Python 3 as the default installation, but
