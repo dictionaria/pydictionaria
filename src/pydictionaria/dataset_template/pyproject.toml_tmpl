@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{prefix}_{id}"
+dependencies = [
+    "cldfbench[glottolog]",
+    "pydictionaria",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = ["pytest-cldf"]
+
+[project.entry-points."cldfbench.dataset"]
+{id} = "{prefix}_{id}:Dataset"
+
+[tool.setuptools]
+py-modules = ["{prefix}_{id}"]
+include-package-data = true
+
+[tool.pytest.ini_options]
+testpaths = ["test.py"]
+addopts = "--cldf-metadata=cldf/cldf-metadata.json"
