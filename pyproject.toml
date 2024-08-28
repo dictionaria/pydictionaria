@@ -1,0 +1,72 @@
+[project]
+name = "pydictionaria"
+version = "2.2.1.dev0"
+requires-python = ">= 3.8"
+dependencies = [
+    "pybtex",
+    "html5lib>=1.1",
+    "purl",
+    "python-dateutil",
+    "csvw>=1.5.4",
+    "BeautifulSoup4",
+    "attrs>=19.1",
+    "clldutils>=3.5.1",
+    # for MediaTable support
+    "pycldf>=1.20",
+    "pycdstar>=1.0.1",
+    "cdstarcat>=1.0.0",
+    "transliterate>=1.7.6",
+    "pyconcepticon>=1.1.1",
+    "cldfbench",
+]
+authors = [
+    { name="Robert Forkel", email="robert_forkel@eva.mpg.de" },
+    { name="Johannes Englisch", email="johannes_englisch@eva.mpg.de" },
+]
+description = "Package for curating dictionaries for the Dictionaria project"
+readme = "README.md"
+keywords = ["data", "linguistics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+]
+
+[project.urls]
+Repository = "https://github.com/dictionaria/pydictionaria"
+Issues = "https://github.com/dictionaria/pydictionaria/issues"
+
+[project.optional-dependencies]
+dev = [ "flake8" ]
+test = [
+    "tox",
+    "pluggy>=0.12",
+    "pytest>=6",
+    "pytest-mock",
+    "pytest-cov",
+    "coverage>=4.2",
+]
+
+[project.entry-points."cldfbench.commands"]
+dictionaria = "pydictionaria.commands"
+
+[project.entry-points."cldfbench.scaffold"]
+dictionaria = "pydictionaria.scaffold:Template"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::UserWarning"]
+addopts = ["--cov=pydictionaria", "--cov-report", "term-missing"]
+
+[tool.coverage.run]
+source = ["pydictionaria", "tests"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
