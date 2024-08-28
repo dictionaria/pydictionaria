@@ -57,6 +57,12 @@ dictionaria = "pydictionaria.commands"
 [project.entry-points."cldfbench.scaffold"]
 dictionaria = "pydictionaria.scaffold:Template"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"pydictionaria.dataset_template" = ["**/*"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
