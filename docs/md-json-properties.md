@@ -29,6 +29,18 @@ cross-references:
 
     "cross_references": ["my_ref", "my_other_ref"]
 
+### `custom_example_fields`
+
+The `custom_example_fields` property contains a list of up to two columns, which
+will be displayed in the `Examples` tab on the Dictionaria webapp.
+
+Note that the *Analyzed Word* and *Gloss* columns will be *disabled* to make
+room for these columns.
+
+Example:  Add the original orthography to the Examples tab:
+
+    "custom_example_fields": ["Orthography"]
+
 ### `custom_fields`
 
 The `custom_fields` property contains a list of columns, which will be displayed
@@ -493,6 +505,30 @@ Note how the different table headers come about:
  2. `Russian` was defined in the `metalanguages` property.
  3. `Phonetic Form` was automatically generated for the `Phonetic_Form` column
     (by replacing underscores `_` with spaces ` `).
+
+### …show custom fields in the example tab?
+
+Situation:  The examples don't contain any glosses, so some other information
+should be shown instead in their place.
+
+Solution:  Use the `custom_example_fields` to specify the columns that are shown
+in the example table.  Note that these properties take the *labels* that are
+displayed in the table header.
+
+Example:  Show the original orthography of the examples, as well as their
+Russian translation in place of the *Analyzed Word* and *Gloss* columns:
+
+    "example_map": {
+        "gxx": "alt_translation1",
+        "ort": "Orthography"
+    },
+    "metalanguages": {
+        "gxx", "Russian"
+    },
+    "labels": {
+        "Orthography": "Original Orthography",
+    },
+    "custom_example_fields": ["Original Orthography", "Russian"]
 
 ### …specify the source for a field?
 
