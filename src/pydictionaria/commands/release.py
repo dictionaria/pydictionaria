@@ -96,7 +96,7 @@ def igt_to_table(soup, div):
     div.replace_with(table)
 
 
-# FIXME Put this somewhere, where the benches can find it, too?
+# FIXME(johannes): Put this somewhere, where the benches can find it, too?
 def format_authors(authors):
     res, in_with = [], False
     for i, a in enumerate(authors):
@@ -113,7 +113,7 @@ def format_authors(authors):
     return ' '.join(res)
 
 
-def release(dataset, args):
+def release(dataset, _args):
     intro = BeautifulSoup(
         (dataset.raw_dir / 'intro.md').read_text(encoding='utf-8'),
         'html.parser')
@@ -140,7 +140,7 @@ def release(dataset, args):
     readme_kwargs = {
         'id': id_,
         'url': url,
-        'intro': '{0}'.format(intro),
+        'intro': str(intro),
         'title': title,
         'authors': format_authors(md['authors']),
     }
@@ -148,19 +148,19 @@ def release(dataset, args):
         README_TEMPLATE.format(**readme_kwargs), encoding='utf-8')
 
     zenodo_md = {
-        "title": "dictionaria/{}: {}".format(id_, title),
+        "title": f"dictionaria/{id_}: {title}",
         "access_right": "open",
         "keywords": ["cldf:Dictionary", "linguistics"],
         "creators": [{"name": a['name'] if isinstance(a, dict) else a} for a in md['authors']],
         "communities": [
             {"identifier": "cldf-datasets"},
             {"identifier": "clld"},
-            {"identifier": "dictionaria"}
+            {"identifier": "dictionaria"},
         ],
         "upload_type": "dataset",
         "license": {
-            "id": LICENSE
-        }
+            "id": LICENSE,
+        },
     }
     if cb_metadata.get('citation'):
         zenodo_md['description'] = cb_metadata['citation']

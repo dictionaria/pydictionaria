@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from hashlib import md5
 
 from clldutils.sfm import Entry, SFM
@@ -9,18 +8,18 @@ MULTILINE_MARKERS = {'tx', 'mb', 'gl'}
 
 
 class Example(Entry):
-    markers = OrderedDict([
-        ('ref', 'id'),
-        ('lemma', None),
-        ('rf', 'corpus_ref'),
-        ('tx', 'text'),
-        ('mb', 'morphemes'),
-        ('gl', 'gloss'),
-        ('ft', 'translation'),
-        ('ot', 'alt_translation'),
-        ('ota', 'alt_translation2'),
-        ('sfx', 'soundfile'),
-    ])
+    markers = {
+        'ref': 'id',
+        'lemma': None,
+        'rf': 'corpus_ref',
+        'tx': 'text',
+        'mb': 'morphemes',
+        'gl': 'gloss',
+        'ft': 'translation',
+        'ot': 'alt_translation',
+        'ota': 'alt_translation2',
+        'sfx': 'soundfile',
+    }
     name_to_marker = {v: k for k, v in markers.items()}
 
     @staticmethod
@@ -32,6 +31,8 @@ class Example(Entry):
         if morphemes_or_gloss:
             return '\t'.join(
                 [p for p in morphemes_or_gloss.split() if not p.startswith('#')])
+        else:
+            return None
 
     @property
     def id(self):
@@ -50,7 +51,7 @@ class Example(Entry):
                 if key == 'lemma':
                     if not value or not v:
                         continue
-                    value = ' ; '.join([v, value])
+                    value = f'{v} ; {value}'
                 self[i] = (key, value)
                 break
         else:
@@ -58,7 +59,10 @@ class Example(Entry):
 
     @property
     def lemmas(self):
-        return [l.strip() for l in (self.get('lemma') or '').split(';') if l.strip()]
+        return [
+            lemma.strip()
+            for lemma in (self.get('lemma') or '').split(';')
+            if lemma.strip()]
 
     @property
     def corpus_ref(self):
@@ -101,9 +105,9 @@ class Example(Entry):
             else:
                 value = ' '.join(value.split())
             if value:
-                value = ' %s' % value
-            lines.append('%s%s' % (key, value))
-        return '\n'.join('\\' + l for l in lines)
+                value = f' {value}'
+            lines.append(f'{key}{value}')
+        return '\n'.join(f'\\{line}' for line in lines)
 
 
 def concat_multilines(example):
@@ -133,7 +137,7 @@ class Examples(SFM):
         return self._map.get(item)
 
 
-class Corpus(object):
+class Corpus:
     """
     ELAN corpus exported using the Toolbox exporter
 
@@ -162,7 +166,7 @@ class Corpus(object):
             # found, we try 'Abc.034' as well.
             try:
                 prefix, number = key.split('.', 1)
-                res = self.examples.get('%s.%03d' % (prefix, int(number)))
+                res = self.examples.get(f'{prefix}.{int(number):03d}')
             except ValueError:
                 pass
         return res

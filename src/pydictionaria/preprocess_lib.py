@@ -1,6 +1,3 @@
-from collections import OrderedDict
-
-
 def _split_senses(entry):
     senses = []
     next_sense = entry.__class__()
@@ -67,17 +64,17 @@ def merge_markers(entry, old_markers, new_marker, format_fn=merge_caption):
     """
     # Note: this assumes that the markers are adjacent to each other
     new_entry = entry.__class__()
-    current = OrderedDict()
+    current = {}
     for marker, value in entry:
         if marker in old_markers:
             if marker in current:
                 new_entry.append((new_marker, format_fn(current)))
-                current = OrderedDict()
+                current = {}
             current[marker] = value
         else:
             if current:
                 new_entry.append((new_marker, format_fn(current)))
-                current = OrderedDict()
+                current = {}
             new_entry.append((marker, value))
     if current:
         new_entry.append((new_marker, format_fn(current)))

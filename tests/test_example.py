@@ -61,7 +61,7 @@ def test_Corpus(tmpdir):
     c = Corpus.from_dir(Path(str(tmpdir)))
     example = c.get('Iar_02RG.2')
     assert isinstance(example, Example)
-    assert '%s' % example == NORM_EXAMPLE
+    assert str(example) == NORM_EXAMPLE
     assert example.id == 'Iar_02RG.002'
     example.set('lemma', 'x')
     example.set('lemma', 'y')

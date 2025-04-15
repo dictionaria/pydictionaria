@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import defaultdict
 import xml.etree.ElementTree as ET
 
 
@@ -92,7 +92,7 @@ def separate_examples(document, log=None):
                         paragraph.attrib.get('guid', '???')))
                 continue
 
-            examples = OrderedDict()
+            examples = defaultdict(list)
             for phrase in phrases.iter('phrase'):
                 segnum = get_item(phrase, 'segnum')
                 if not segnum:
@@ -102,8 +102,6 @@ def separate_examples(document, log=None):
                     continue
 
                 prefix = segnum.split('.')[0] or segnum
-                if prefix not in examples:
-                    examples[prefix] = []
                 examples[prefix].append(phrase)
 
             for segnum, phrases in examples.items():
@@ -150,17 +148,14 @@ def _find_morphemes(phrase):
     for word in phrase.find('words').iter('word'):
         morphemes = word.find('morphemes')
         if morphemes:
-            for morph in morphemes.iter('morph'):
-                yield morph
+            yield from morphemes.iter('morph')
         else:
             yield word
 
 
 def _column_name(name, lang):
-    lang_suffix = ''
-    if lang != 'en':
-        lang_suffix = '_{}{}'.format(lang[0].upper(), lang[1:])
-    return '{}{}'.format(name, lang_suffix)
+    lang_suffix = f'_{lang[0].upper()}{lang[1:]}' if lang != 'en' else ''
+    return f'{name}{lang_suffix}'
 
 
 def _parse_morph(morph):
@@ -198,13 +193,10 @@ def extract_gloss(phrase, log=None):
 
     gloss = {k: [] for g in morph_glosses for k in g}
     for g in morph_glosses:
-        for k in gloss:
-            gloss[k].append(g.get(k, ''))
+        for k, ls in gloss.items():
+            ls.append(g.get(k, ''))
 
-    # remove empty glosses
-    gloss = {k: l for k, l in gloss.items() if any(l)}
-
-    return gloss
+    return {k: ls for k, ls in gloss.items() if any(ls)}
 
 
 def merge_glosses(glosses):

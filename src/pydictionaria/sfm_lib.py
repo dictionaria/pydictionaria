@@ -1,6 +1,4 @@
-# coding: utf8
-from __future__ import unicode_literals, print_function, division
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import re
 import copy
 import unicodedata
@@ -21,8 +19,8 @@ def split(s):
     return split_text(s, separators=FIELD_SPLITTER_PATTERN, strip=True)
 
 
-def join(l):
-    return ' ; '.join(l)
+def join(ls):
+    return ' ; '.join(ls)
 
 
 def fsname(n):
@@ -32,7 +30,7 @@ def fsname(n):
 class Entry(BaseEntry):
     @property
     def id(self):
-        return '{0} {1}'.format(self.get('lx') or '', self.get('hm') or '').strip()
+        return '{} {}'.format(self.get('lx') or '', self.get('hm') or '').strip()
 
     def upsert(self, marker, content, index=-1):
         for i, (k, _) in enumerate(self):
@@ -64,7 +62,7 @@ class Database(SFM):
             del self[i]
 
 
-class ComparisonMeanings(object):
+class ComparisonMeanings:
     def __init__(self, concepticon, marker='zcom2'):
         self.concepticon = concepticon
         self.marker = marker
@@ -93,7 +91,8 @@ class ComparisonMeanings(object):
                 try:
                     matches = [
                         '{0.gloss} [{0.id}] "{0.definition}"'.format(
-                            self.concepticon.conceptsets[m]) for m in sorted(matches)]
+                            self.concepticon.conceptsets[m])
+                        for m in sorted(matches)]
                     entry.append((self.marker, ' ; '.join(matches)))
                 except KeyError:
                     print(matches)
@@ -112,7 +111,7 @@ def normalize(entry):
     return new
 
 
-class Files(object):
+class Files:
     """
     SFM visitor, checking/editing media references
     """
@@ -186,7 +185,7 @@ def move_marker(entry, m, before):
         entry.insert(insert, (m, content))
 
 
-class Rearrange(object):
+class Rearrange:
     """
     SFM visitor rearranging the order of markers within an entry.
     """
@@ -297,8 +296,8 @@ class ExampleExtractionStateMachine:
 
     def log_error(self, message):
         self.log.write(
-            '# incomplete example in lx: %s - %s:\n%s\n\n'
-            % (self.entry.get('lx'), message, self.example))
+            '# incomplete example in lx: {} - {}:\n{}\n\n'.format(
+                self.entry.get('lx'), message, self.example))
 
     def drop_example(self):
         self.example = Example()
@@ -321,7 +320,7 @@ class ExampleExtractionStateMachine:
         self._entry_buffer.clear()
 
 
-class ExampleExtractor(object):
+class ExampleExtractor:
     """
     SFM visitor to extract examples
     """
@@ -332,7 +331,7 @@ class ExampleExtractor(object):
         :param log:
         """
         self.example_markers = example_markers
-        self.examples = OrderedDict()
+        self.examples = {}
         self.corpus = corpus
         self.log = log
 
@@ -349,17 +348,15 @@ class ExampleExtractor(object):
         for prop in 'rf tx mb gl ft ot'.split():
             p1 = merged_ex.get(prop)
             p2 = ex2.get(prop)
-            if p1:
-                if p2:
-                    try:
-                        assert slug(p1) == slug(p2)
-                    except AssertionError:
-                        self.log.write(
-                            '# cannot merge \\%s:\n%s\n# and\n%s\n\n' % (prop, ex1, ex2))
-                        raise
-            else:
-                if p2:
-                    merged_ex.set(prop, p2)
+            if p1 and p2:
+                try:
+                    assert slug(p1) == slug(p2)
+                except AssertionError:
+                    self.log.write(
+                        f'# cannot merge \\{prop}:\n{ex1}\n# and\n{ex2}\n\n')
+                    raise
+            elif p2:
+                merged_ex.set(prop, p2)
         merged_ex.set(
             'lemma',
             ' ; '.join(sorted(set(ex2.lemmas) - set(merged_ex.lemmas))))
@@ -382,7 +379,7 @@ class ExampleExtractor(object):
                 break
             except AssertionError:
                 count += 1
-                example.set('ref', '%s---%s' % (orig, count))
+                example.set('ref', f'{orig}---{count}')
 
         self.examples[example.id] = example
         return example.id
@@ -400,10 +397,8 @@ def _normalise_example_value(s):
 
 
 def find_duplicate_examples(marker, examples):
-    dups = OrderedDict()
+    dups = defaultdict(list)
     for ex in examples:
         val = _normalise_example_value(ex.get(marker) or '')
-        if val not in dups:
-            dups[val] = []
         dups[val].append(ex)
-    return [l for l in dups.values() if len(l) > 1]
+    return [ls for ls in dups.values() if len(ls) > 1]

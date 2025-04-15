@@ -17,7 +17,7 @@ Citation"""
 
 
 def _main(cmd, **kw):
-    main(['--no-config'] + shlex.split(cmd), **kw)
+    main(['--no-config', *shlex.split(cmd)], **kw)
 
 
 @pytest.fixture
@@ -28,9 +28,8 @@ def testdata_dir():
 @pytest.fixture
 def tmp_dataset(tmp_path, mocker):
     mocker.patch('sys.stdin', StringIO(MOCK_STDIN))
-    _main("new --template dictionaria --out '{}'".format(tmp_path))
-    bench_path = tmp_path / 'testbench'
-    return bench_path
+    _main(f"new --template dictionaria --out '{tmp_path}'")
+    return tmp_path / 'testbench'
 
 
 @pytest.fixture

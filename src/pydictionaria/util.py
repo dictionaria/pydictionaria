@@ -1,5 +1,4 @@
 import re
-from collections import OrderedDict
 
 from clldutils import jsonlib
 from clldutils.path import Path
@@ -9,16 +8,16 @@ ID_SEP_PATTERN = re.compile(r',|;')
 
 
 def split_ids(s, sep=ID_SEP_PATTERN):
-    return sorted(set(id_.strip() for id_ in sep.split(s) if id_.strip()))
+    return sorted({id_.strip() for id_ in sep.split(s) if id_.strip()})
 
 
-class MediaCatalog(object):
+class MediaCatalog:
     def __init__(self, repos):
         self.path = Path(repos).joinpath('cdstar.json')
         if self.path.exists():
-            self.items = jsonlib.load(self.path, object_pairs_hook=OrderedDict)
+            self.items = jsonlib.load(self.path)
         else:
-            self.items = OrderedDict()
+            self.items = {}
 
     def __contains__(self, item):
         return item in self.items
@@ -35,11 +34,11 @@ class MediaCatalog(object):
         :return:
         """
         bitstreams = {bs.id.split('.')[0]: bs for bs in obj.bitstreams}
-        res = OrderedDict([('objid', obj.id)])
+        res = {'objid': obj.id}
         thumbnail = bitstreams.pop('thumbnail', None)
         web = bitstreams.pop('web', None)
         assert len(bitstreams) == 1
-        original = list(bitstreams.values())[0]
+        original = next(iter(bitstreams.values()))
         res['mimetype'] = original.mimetype
         res['original'] = original.id
         res['size'] = original.size

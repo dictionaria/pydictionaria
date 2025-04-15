@@ -1,4 +1,4 @@
-from collections import OrderedDict, ChainMap, defaultdict
+from collections import ChainMap, defaultdict
 import copy
 from functools import partial
 from itertools import chain
@@ -249,7 +249,7 @@ def split_by_pred(pred, iterable, constructor=list):
     return pred_true, pred_false
 
 
-class IDGenerator(object):
+class IDGenerator:
     """Generator for sequential.
 
     This generates IDs by incrementing an integer number and adding a prefix
@@ -264,7 +264,7 @@ class IDGenerator(object):
     def next_id(self):
         """Return next ID in the sequence."""
         self._last_id += 1
-        return '{}{:06d}'.format(self.prefix, self._last_id)
+        return f'{self.prefix}{self._last_id:06d}'
 
 
 def prepare_examples(example_id, example_markers, database):
@@ -274,7 +274,7 @@ def prepare_examples(example_id, example_markers, database):
     examples.
     """
     id_gen = IDGenerator('XV')
-    example_index = OrderedDict()
+    example_index = {}
 
     for old_example in database:
         new_example = sfm.Entry(
@@ -296,7 +296,7 @@ def _preprocess_flex_link(link):
         return link
     lemma, hm, sense_nr = m.groups()
     if hm:
-        return '{} {}'.format(lemma, hm)
+        return f'{lemma} {hm}'
     return lemma
 
 
@@ -325,7 +325,7 @@ def preprocess_flex_crossrefs(flex_refs, entry):
     return new_entry
 
 
-class EntryExtractor(object):
+class EntryExtractor:
     """Visitor for extracting Entry information from an SFM entry."""
 
     def __init__(self, entry_id, entry_markers):
@@ -356,16 +356,14 @@ class EntryExtractor(object):
 
         original_id = entry.get(self.entry_id, '')
         entry_id = re.sub(r'\s+', '_', original_id.strip())
-        if entry_id and self.entry_id == 'lx':
-            hm_nr = entry.get('hm')
-            if hm_nr:
-                entry_id = '{}_{}'.format(entry_id, hm_nr)
+        if entry_id and self.entry_id == 'lx' and (hm_nr := entry.get('hm')):
+            entry_id = f'{entry_id}_{hm_nr}'
 
         if entry_id in self._idset or not re.fullmatch(r'[a-zA-Z0-9_\-]+', entry_id):
             entry_id = self._idgen.next_id()
         self._idset.add(entry_id)
 
-        # XXX Adding attributes to existing types feels very fragile...
+        # XXX(johannes): Adding attributes to existing types feels very fragile...
         new_entry.id = entry_id
         new_entry.original_id = original_id
         new_entry.media_ids = []
@@ -473,7 +471,7 @@ def merge_pos(entry):
     return new_entry
 
 
-class SenseExtractor(object):
+class SenseExtractor:
     """Visitor for extracting Sense information from an SFM entry."""
 
     def __init__(self, sense_sep, sense_markers, crossref_markers, log):
@@ -506,7 +504,7 @@ class SenseExtractor(object):
             # Drop everything before the first \sn marker
             if len(groups) > 1 and group[0][0] != self.sense_sep:
                 msg = ', '.join(sorted({
-                    '\\%s' % m
+                    f'\\{m}'
                     for m, _ in group
                     if m not in self.crossrefs}))
                 if msg:
@@ -523,7 +521,7 @@ class SenseExtractor(object):
         return rest
 
 
-class ExampleReferencer(object):
+class ExampleReferencer:
     """Visitor, which links examples to the senses they illustrate."""
 
     def __init__(self, example_index):
@@ -540,7 +538,7 @@ class ExampleReferencer(object):
 
         :returns: the `sense` (unchanged)
         """
-        # FIXME Hardcoded SFM marker: xref
+        # FIXME(johannes): Hardcoded SFM marker: xref
         for example_ref in sense.getall('xref'):
             if example_ref in self.example_index:
                 example = self.example_index[example_ref]
@@ -596,7 +594,7 @@ class CaptionFinder:
         return entry
 
 
-class MediaExtractor(object):
+class MediaExtractor:
     """Visitor, which turns media file names into CDSTAR IDs."""
 
     def __init__(self, tag, id_index, cdstar_items):
@@ -666,19 +664,19 @@ def make_id_index(entries):
         entry.original_id: entry.id
         for entry in entries}
     id_index.update(
-        (_lx_hm_pair(entry, True), entry.id)
+        (_lx_hm_pair(entry, space=True), entry.id)
         for entry in entries
         if entry.get('lx', '').strip())
     id_index.update(
-        (_lx_hm_pair(entry, False), entry.id)
+        (_lx_hm_pair(entry, space=False), entry.id)
         for entry in entries
         if entry.get('lx', '').strip())
     id_index.update(
-        (_lc_hm_pair(entry, True), entry.id)
+        (_lc_hm_pair(entry, space=True), entry.id)
         for entry in entries
         if entry.get('lc', '').strip())
     id_index.update(
-        (_lc_hm_pair(entry, False), entry.id)
+        (_lc_hm_pair(entry, space=False), entry.id)
         for entry in entries
         if entry.get('lc', '').strip())
     return id_index
@@ -740,7 +738,7 @@ class LinkProcessor:
         if not ref or ref not in self._ids:
             return ref
         id_ = self._ids[ref]
-        return '[{}]({})'.format(self._labels.get(id_, id_), id_)
+        return f'[{self._labels.get(id_, id_)}]({id_})'
 
     def _process_tag(self, tag, value):
         if tag in self.markers:
@@ -792,7 +790,7 @@ def _single_spaces(s):
 
 
 def sfm_entry_to_cldf_row(
-    table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None
+    table_name, mapping, source_refs, cross_ref_columns, entry, language_id=None,
 ):
     """Convert SFM entry into a CLDF row.
 
@@ -805,7 +803,7 @@ def sfm_entry_to_cldf_row(
 
     :returns: dictionary ``CLDF column name`` -> ``value``
     """
-    # XXX What if the same tag appears multiple times?
+    # XXX(johannes): What if the same tag appears multiple times?
     #  * Option 1: Overwrite old value for tag
     #  * Option 2: Ignore new value if tag is already there
     #  * Option 3: Collect values into semicolon-separated list (happening now)
@@ -814,7 +812,7 @@ def sfm_entry_to_cldf_row(
     for tag, value in entry:
         if tag in source_refs:
             sources.extend(
-                '{}[{}]'.format(s.strip(), source_refs[tag])
+                f'{s.strip()}[{source_refs[tag]}]'
                 for s in value.split(';'))
         key = mapping.get(tag)
         if key and value:
@@ -881,7 +879,7 @@ def _amend_columns(cldf, table_name, entry_cols, crossrefs):
             msg = str(error)
             # Ignore columns that are already there
             if not msg.startswith('Duplicate column name:'):
-                print('{}:'.format(table_name), 'Could not add column:', msg)
+                print(f'{table_name}: Could not add column: {msg}')
 
         if colname in crossrefs:
             cldf.add_foreign_key(table_name, colname, 'EntryTable', 'ID')
@@ -990,7 +988,7 @@ def _ensure_required_columns(cldf, table_name, rows, log):
         if missing_fields:
             field_list = ','.join(missing_fields)
             row_repr = '\n'.join(
-                '{}: {}'.format(k, repr(v))
+                f'{k}: {repr(v)}'
                 for k, v in sorted(row.items()))
             log.error(
                 '%s: row dropped due to missing required fields (%s):\n%s\n',
@@ -1067,7 +1065,7 @@ def format_authors(authors):
         for a in authors
         if not _author_is_primary(a))
     if primary and secondary:
-        return '{} with {}'.format(primary, secondary)
+        return f'{primary} with {secondary}'
     else:
         return primary or secondary
 
@@ -1146,7 +1144,7 @@ def process_dataset(
     sid, language_id, properties,
     sfm, examples, media_catalog,
     glosses_path, examples_log_path, glosses_log_path,
-    cldf_log
+    cldf_log,
 ):
     """Turn an SFM database into CLDF data.
 
@@ -1194,12 +1192,12 @@ def process_dataset(
 
     if not examples:
         with open(examples_log_path, 'w', encoding='utf8') as example_log:
-            # FIXME This should go into make_spec
+            # FIXME(johannes): This should go into make_spec
             example_markers = set(properties['example_map'])
             example_markers.add('sfx')
             if 'gloss_ref' in properties:
                 example_markers.add(properties['gloss_ref'])
-            # FIXME I don't think `Corpus` is used anywhere to begin with...
+            # FIXME(johannes): I don't think `Corpus` is used anywhere to begin with...
             extractor = ExampleExtractor(
                 example_markers, Corpus.from_dir(examples_log_path.parent), example_log)
             sfm.visit(extractor)
@@ -1248,7 +1246,7 @@ def process_dataset(
 
     glosses = {}
     if glosses_path.exists():
-        gloss_logname = '%s.glosses' % sid
+        gloss_logname = f'{sid}.glosses'
         with open(glosses_log_path, 'w', encoding='utf-8') as gloss_logfile:
             gloss_log = make_log(gloss_logname, gloss_logfile)
             gloss_ref_marker = properties.get('gloss_ref')
@@ -1330,7 +1328,7 @@ def process_dataset(
     except ValueError as e:
         cldf_log.warning('could not process links: %s', str(e))
 
-    # XXX can I get rid of these lines?
+    # XXX(johannes): can I get rid of these lines?
     entry_crossref_cols = {c for m, c in properties['entry_map'].items() if m in crossref_markers}
     sense_crossref_cols = {c for m, c in properties['sense_map'].items() if m in crossref_markers}
     example_crossref_cols = {
@@ -1367,7 +1365,7 @@ def process_dataset(
             'ID': fileid,
             'Language_ID': language_id,
             'Name': filename,
-            'Description': caption_finder.captions.get(fileid)
+            'Description': caption_finder.captions.get(fileid),
         }
         for filename, fileid in sorted(media_extr.files)]
 

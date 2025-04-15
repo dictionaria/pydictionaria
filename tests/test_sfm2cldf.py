@@ -1,6 +1,6 @@
 import unittest
 import pydictionaria.sfm2cldf as s
-import clldutils.sfm as sfm
+from clldutils import sfm
 
 
 class SplitMarkersWithSeparators(unittest.TestCase):

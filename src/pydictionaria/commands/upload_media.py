@@ -4,6 +4,7 @@ Updload media files of a submission to CDSTAR.
 
 import os
 import pathlib
+from contextlib import ExitStack
 
 from cdstarcat.catalog import Catalog
 from cldfbench.cli_util import with_dataset, add_dataset_spec
@@ -27,37 +28,39 @@ def register(parser):
         type=PathType(type='file'))
     for kw in ['URL', 'USER', 'PWD']:
         parser.add_argument(
-            '--cdstar-{0}'.format(kw.lower()),
-            help='CDSTAR service {0}'.format(kw.lower()),
-            default=os.environ.get('CDSTAR_{0}'.format(kw)),
+            f'--cdstar-{kw.lower()}',
+            help=f'CDSTAR service {kw.lower()}',
+            default=os.environ.get(f'CDSTAR_{kw}'),
         )
 
 
-def _upload(args, dataset, dir, cdstar_json):
-    with MediaCatalog(cdstar_json.parent) as mcat:
-        with Catalog(
+def _upload(args, dataset, file_dir, cdstar_json):
+    with ExitStack() as stack:
+        mcat = MediaCatalog(cdstar_json.parent)
+        stack.enter_context(mcat)
+        cat = Catalog(
             args.cdstar_catalog,
             cdstar_url=args.cdstar_url,
             cdstar_user=args.cdstar_user,
-            cdstar_pwd=args.cdstar_pwd
-        ) as cat:
-            for fname in dir.iterdir():
-                if fname.is_file() and md5(fname) not in mcat.items:
-                    md = {
-                        'collection': 'dictionaria',
-                        'path': '%s' % fname.relative_to(dataset.dir),
-                        'dictionary': dataset.id,
-                    }
-                    _, _, obj = list(cat.create(fname, md, filter_=lambda f: True))[0]
-                    mcat.add(obj, sid=dataset.id, type=fname.parent.name, fname=fname.name)
+            cdstar_pwd=args.cdstar_pwd)
+        stack.enter_context(cat)
+        for fname in file_dir.iterdir():
+            if fname.is_file() and md5(fname) not in mcat.items:
+                md = {
+                    'collection': 'dictionaria',
+                    'path': str(fname.relative_to(dataset.file_dir)),
+                    'dictionary': dataset.id,
+                }
+                _, _, obj = next(cat.create(fname, md, filter_=lambda _: True))
+                mcat.add(obj, sid=dataset.id, type=fname.parent.name, fname=fname.name)
 
 
 def upload(dataset, args):
     cdstar_json = dataset.etc_dir / 'cdstar.json'
     for mtype in ['audio', 'image', 'docs']:
-        dir = args.media_dir / mtype
-        if dir.exists():
-            _upload(args, dataset, dir, cdstar_json)
+        type_dir = args.media_dir / mtype
+        if type_dir.exists():
+            _upload(args, dataset, type_dir, cdstar_json)
 
     args.log.info(args.cdstar_catalog)
 

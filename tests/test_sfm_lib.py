@@ -40,7 +40,7 @@ def test_ComparisonMeanings(mocker):
     class Concepticon(object):
         conceptsets = {1: mocker.Mock(id='1', gloss='gloss', definition='definition')}
 
-        def lookup(self, *args, **kw):
+        def lookup(self, *_args, **_kw):
             return [[(None, 1)]]
 
     cm = ComparisonMeanings(Concepticon())
