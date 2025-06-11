@@ -162,6 +162,8 @@ class Files:
             e.append((marker, content))
         if self.mode == 'edit':
             return e
+        else:
+            return None
 
 
 def move_marker(entry, m, before):
@@ -345,7 +347,7 @@ class ExampleExtractor:
 
     def merge(self, ex1, ex2):
         merged_ex = copy.copy(ex1)
-        for prop in 'rf tx mb gl ft ot'.split():
+        for prop in ['rf', 'tx', 'mb', 'gl', 'ft', 'ot']:
             p1 = merged_ex.get(prop)
             p2 = ex2.get(prop)
             if p1 and p2:

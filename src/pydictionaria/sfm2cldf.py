@@ -267,7 +267,7 @@ class IDGenerator:
         return f'{self.prefix}{self._last_id:06d}'
 
 
-def prepare_examples(example_id, example_markers, database):
+def prepare_examples(example_markers, database):
     """Add IDs to examples.
 
     :returns: a dictionary, which maps the original example IDs to the adapted
@@ -988,7 +988,7 @@ def _ensure_required_columns(cldf, table_name, rows, log):
         if missing_fields:
             field_list = ','.join(missing_fields)
             row_repr = '\n'.join(
-                f'{k}: {repr(v)}'
+                f'{k}: {v!r}'
                 for k, v in sorted(row.items()))
             log.error(
                 '%s: row dropped due to missing required fields (%s):\n%s\n',
@@ -1238,10 +1238,7 @@ def process_dataset(
         marker_list = ', '.join(sorted(all_markers))
         cldf_log.warning('No CLDF column defined for markers: %s', marker_list)
 
-    example_index = prepare_examples(
-        properties['example_id'],
-        spec['example_markers'],
-        examples)
+    example_index = prepare_examples(spec['example_markers'], examples)
     examples = Examples(example_index.values())
 
     glosses = {}
