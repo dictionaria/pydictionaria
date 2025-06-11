@@ -3,7 +3,7 @@ import pathlib
 
 from {package} import CLDFSpec, Dataset as BaseDataset
 
-from pybtex.database import parse_string
+from simplepybtex.database import parse_string
 from pydictionaria.sfm_lib import Database as SFM
 from pydictionaria import sfm2cldf
 
