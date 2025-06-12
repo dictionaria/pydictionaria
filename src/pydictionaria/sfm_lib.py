@@ -322,6 +322,10 @@ class ExampleExtractionStateMachine:
         self._entry_buffer.clear()
 
 
+class ExampleError(ValueError):
+    pass
+
+
 class ExampleExtractor:
     """
     SFM visitor to extract examples
@@ -351,12 +355,9 @@ class ExampleExtractor:
             p1 = merged_ex.get(prop)
             p2 = ex2.get(prop)
             if p1 and p2:
-                try:
-                    assert slug(p1) == slug(p2)
-                except AssertionError:
-                    self.log.write(
+                if slug(p1) != slug(p2):
+                    raise ExampleError(
                         f'# cannot merge \\{prop}:\n{ex1}\n# and\n{ex2}\n\n')
-                    raise
             elif p2:
                 merged_ex.set(prop, p2)
         merged_ex.set(
@@ -370,8 +371,8 @@ class ExampleExtractor:
             if from_corpus:
                 try:
                     example = self.merge(example, from_corpus)
-                except AssertionError:
-                    pass
+                except ExampleError as err:
+                    self.log.write(err)
 
         orig = example.id
         count = 0
@@ -379,7 +380,8 @@ class ExampleExtractor:
             try:
                 example = self.merge(self.examples[example.id], example)
                 break
-            except AssertionError:
+            except ExampleError:
+                self.log.write(err)
                 count += 1
                 example.set('ref', f'{orig}---{count}')
 
