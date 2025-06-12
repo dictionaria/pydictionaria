@@ -13,7 +13,7 @@ flake8 src
 ```
 
 - Update the version number, by removing the trailing `.dev0` in:
-  - `setup.py`
+  - `pyproject.toml`
   - `src/pydictionaria/__init__.py`
 
 - Create the release commit:
