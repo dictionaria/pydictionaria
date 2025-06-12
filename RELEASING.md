@@ -48,8 +48,8 @@ git push --tags
 ```
 
 - Increment version number and append `.dev0` to the version number for the new development cycle:
+  - `pyproject.toml`
   - `src/pydictionaria/__init__.py`
-  - `setup.py`
 
 - Commit/push the version change:
 ```shell
