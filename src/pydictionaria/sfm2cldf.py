@@ -786,7 +786,7 @@ def make_link_processor(properties, id_index, entries):
 def _single_spaces(s):
     s = s.strip().replace('\n', ' ')
     s = re.sub(' +', ' ', s)
-    return s
+    return s  # noqa: RET504
 
 
 def sfm_entry_to_cldf_row(

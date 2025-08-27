@@ -12,21 +12,21 @@ LICENSE = "CC-BY-4.0"
 
 ORG_URL = "https://github.com/dictionaria"
 README_TEMPLATE = """\
-# {title}
+# {{title}}
 
-> by {authors}
+> by {{authors}}
 
 This repository contains the data underlying the published version of the dictionary
-at [Dictionaria]({url}) as [CLDF](https://cldf.clld.org)
+at [Dictionaria]({{url}}) as [CLDF](https://cldf.clld.org)
 [Dictionary](cldf)
-[![CLDF validation](%s/{id}/workflows/CLDF-validation/badge.svg)](%s/{id}/actions?query=workflow%%3ACLDF-validation)
+[![CLDF validation]({0}/{{id}}/workflows/CLDF-validation/badge.svg)]({0}/{{id}}/actions?query=workflow%%3ACLDF-validation)
 
 Releases of this repository are archived with and accessible through
 [ZENODO](https://zenodo.org/communities/dictionaria) and the latest release
 is published on the [Dictionaria website](https://dictionaria.clld.org).
 
-{intro}
-""" % (ORG_URL, ORG_URL)
+{{intro}}
+""".format(ORG_URL)
 
 
 def register(parser):

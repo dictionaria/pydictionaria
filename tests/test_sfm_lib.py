@@ -6,23 +6,17 @@ from clldutils.sfm import SFM, Entry
 
 
 def test_normalize():
-    from pydictionaria.sfm_lib import normalize
-
     sfm = SFM([Entry([('sd', 'a__b')])])
-    sfm.visit(normalize)
+    sfm.visit(sfm_lib.normalize)
     assert sfm[0].get('sd') == 'a b'
 
 
 def test_split_join():
-    from pydictionaria.sfm_lib import split, join
-
-    assert split(join(['a', 'b'])) == ['a', 'b']
+    assert sfm_lib.split(sfm_lib.join(['a', 'b'])) == ['a', 'b']
 
 
-def test_Entry():
-    from pydictionaria.sfm_lib import Entry
-
-    e = Entry.from_string("""
+def test_entry_obj():
+    e = sfm_lib.Entry.from_string("""
 \\lx lexeme
 \\hm 1
 \\marker value
@@ -34,20 +28,18 @@ def test_Entry():
     assert e.get('new_marker') == 'value'
 
 
-def test_ComparisonMeanings(mocker):
-    from pydictionaria.sfm_lib import Entry, ComparisonMeanings
-
-    class Concepticon(object):
+def test_comparisonmeanings_obj(mocker):
+    class Concepticon:
         conceptsets = {1: mocker.Mock(id='1', gloss='gloss', definition='definition')}
 
         def lookup(self, *_args, **_kw):
             return [[(None, 1)]]
 
-    cm = ComparisonMeanings(Concepticon())
-    e = Entry([('lx', 'lexeme'), ('de', 'meaning')])
+    cm = sfm_lib.ComparisonMeanings(Concepticon())
+    e = sfm_lib.Entry([('lx', 'lexeme'), ('de', 'meaning')])
     cm(e)
     assert 'gloss' in e.get('zcom2')
-    e = Entry([('lx', 'lexeme'), ('ge', 'gl.oss')])
+    e = sfm_lib.Entry([('lx', 'lexeme'), ('ge', 'gl.oss')])
     cm(e)
     assert 'gloss' in e.get('zcom2')
 

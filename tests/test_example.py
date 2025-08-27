@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pydictionaria.example import Corpus, Examples, Example, concat_multilines
+
 
 EAF_SFM = """
 \\_sh v3.0  400  Text
@@ -31,9 +33,7 @@ NORM_EXAMPLE = """\
 \\sfx"""
 
 
-def test_Example():
-    from pydictionaria.example import Example
-
+def test_example_obj():
     ex = Example.from_string(NORM_EXAMPLE)
     assert ex.gloss == '1SG.PRON\tART2.SG\tname-\t-1SG.PRON	ART1\tRuth\tIarabee'
     assert ex.translation == 'My name is Ruth Iarabee.'
@@ -42,18 +42,14 @@ def test_Example():
     assert ex.alt_translation2 is None
 
 
-def test_Examples():
-    from pydictionaria.example import Examples, Example, concat_multilines
-
+def test_examples_obj():
     ex = Examples([Example.from_string(NORM_EXAMPLE + '\n\\mb more morphemes')])
     ex.visit(concat_multilines)
     assert ex[0].morphemes.split('\t') == \
         ['Enaa', 'a', 'hena', '-naa', 'e', 'Ruth', 'Iarabee', 'more', 'morphemes']
 
 
-def test_Corpus(tmpdir):
-    from pydictionaria.example import Corpus, Example
-
+def test_corpus_obj(tmpdir):
     c = Corpus.from_dir(Path(str(tmpdir)))
     assert c.get('key') is None
 

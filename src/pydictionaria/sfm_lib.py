@@ -33,7 +33,7 @@ class Entry(BaseEntry):
         return '{} {}'.format(self.get('lx') or '', self.get('hm') or '').strip()
 
     def upsert(self, marker, content, index=-1):
-        for i, (k, _) in enumerate(self):
+        for i, (k, _) in enumerate(self):  # noqa: B007
             if k == marker:
                 break
         else:
@@ -380,7 +380,7 @@ class ExampleExtractor:
             try:
                 example = self.merge(self.examples[example.id], example)
                 break
-            except ExampleError:
+            except ExampleError as err:
                 self.log.write(err)
                 count += 1
                 example.set('ref', f'{orig}---{count}')
@@ -397,7 +397,7 @@ def _normalise_example_value(s):
     s = unidecode_expect_ascii(s)
     s = ''.join(c for c in s if c.isalnum())
     s = s.lower()
-    return s
+    return s  # noqa: RET504
 
 
 def find_duplicate_examples(marker, examples):

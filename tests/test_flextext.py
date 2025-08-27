@@ -57,8 +57,8 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -80,8 +80,8 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -108,8 +108,8 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
 
         par1 = ET.SubElement(pars, 'paragraph')
@@ -144,8 +144,8 @@ class ExampleSeparation(unittest.TestCase):
         title1 = ET.SubElement(text1, 'item', type='title')
         title1.text = 'ID_1'
         languages = ET.SubElement(text1, 'languages')
-        lang1_1 = ET.SubElement(languages, 'language', lang='lang1.1', vernacular='true')
-        lang1_2 = ET.SubElement(languages, 'language', lang='lang1.2')
+        _lang1_1 = ET.SubElement(languages, 'language', lang='lang1.1', vernacular='true')
+        _lang1_2 = ET.SubElement(languages, 'language', lang='lang1.2')
         pars = ET.SubElement(text1, 'paragraphs')
         par1 = ET.SubElement(pars, 'paragraph')
         phrases1 = ET.SubElement(par1, 'phrases')
@@ -157,8 +157,8 @@ class ExampleSeparation(unittest.TestCase):
         title2 = ET.SubElement(text2, 'item', type='title')
         title2.text = 'ID_2'
         languages2 = ET.SubElement(text2, 'languages')
-        lang2_1 = ET.SubElement(languages2, 'language', lang='lang2.1', vernacular='true')
-        lang2_2 = ET.SubElement(languages2, 'language', lang='lang2.2')
+        _lang2_1 = ET.SubElement(languages2, 'language', lang='lang2.1', vernacular='true')
+        _lang2_2 = ET.SubElement(languages2, 'language', lang='lang2.2')
         pars2 = ET.SubElement(text2, 'paragraphs')
         par2 = ET.SubElement(pars2, 'paragraph')
         phrases2 = ET.SubElement(par2, 'phrases')
@@ -185,10 +185,10 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
-        par = ET.SubElement(pars, 'paragraph')
+        _par = ET.SubElement(pars, 'paragraph')
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
@@ -199,15 +199,15 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
 
     def test_missing_texts(self):
         doc = ET.Element('document')
-        not_text = ET.SubElement(doc, 'not-an-interlinear-text')
+        _not_text = ET.SubElement(doc, 'not-an-interlinear-text')
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
@@ -216,8 +216,8 @@ class ExampleSeparation(unittest.TestCase):
         doc = ET.Element('document')
         text = ET.SubElement(doc, 'interlinear-text')
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -234,8 +234,8 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -267,12 +267,12 @@ class ExampleSeparation(unittest.TestCase):
         title = ET.SubElement(text, 'item', type='title')
         title.text = 'ID_1'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
-        phrase = ET.SubElement(phrases, 'phrase')
+        _phrase = ET.SubElement(phrases, 'phrase')
 
         examples = list(f.separate_examples(doc))
         self.assertEqual(examples, [])
@@ -285,8 +285,8 @@ class ExampleSeparation(unittest.TestCase):
         title2 = ET.SubElement(text, 'item', type='title', lang='lang1')
         title2.text = 'ID_2'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -310,9 +310,9 @@ class ExampleSeparation(unittest.TestCase):
         title2 = ET.SubElement(text, 'item', type='title', lang='lang2')
         title2.text = 'ID_2'
         languages = ET.SubElement(text, 'languages')
-        lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
-        lang2 = ET.SubElement(languages, 'language', lang='lang2')
-        lang3 = ET.SubElement(languages, 'language', lang='lang3')
+        _lang1 = ET.SubElement(languages, 'language', lang='lang1', vernacular='true')
+        _lang2 = ET.SubElement(languages, 'language', lang='lang2')
+        _lang3 = ET.SubElement(languages, 'language', lang='lang3')
         pars = ET.SubElement(text, 'paragraphs')
         par = ET.SubElement(pars, 'paragraph')
         phrases = ET.SubElement(par, 'phrases')
@@ -511,7 +511,7 @@ class GlossExtraction(unittest.TestCase):
         gls1_1 = ET.SubElement(morph1_1, 'item', type='gls')
         gls1_1.text = 'gloss1.1'
         morph1_2 = ET.SubElement(morphemes1, 'morph')
-        gls1_2 = ET.SubElement(morph1_2, 'item', type='gls')
+        _gls1_2 = ET.SubElement(morph1_2, 'item', type='gls')
 
         word2 = ET.SubElement(words, 'word')
         morphemes2 = ET.SubElement(word2, 'morphemes')
