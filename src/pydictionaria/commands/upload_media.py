@@ -48,7 +48,7 @@ def _upload(args, dataset, file_dir, cdstar_json):
             if fname.is_file() and md5(fname) not in mcat.items:
                 md = {
                     'collection': 'dictionaria',
-                    'path': str(fname.relative_to(dataset.file_dir)),
+                    'path': str(fname.relative_to(file_dir)),
                     'dictionary': dataset.id,
                 }
                 _, _, obj = next(cat.create(fname, md, filter_=lambda _: True))
