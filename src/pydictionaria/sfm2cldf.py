@@ -167,7 +167,7 @@ def _local_mapping(mapping, marker_set, source_mapping):
         if marker in marker_set and target in mapping}
     markers.update(sources)
 
-    return markers, sources
+    return markers
 
 
 def make_spec(properties, marker_set):
@@ -175,7 +175,7 @@ def make_spec(properties, marker_set):
 
     source_mapping = properties['sources']
 
-    entry_markers, entry_sources = _local_mapping(
+    entry_markers = _local_mapping(
         properties['entry_map'],
         marker_set,
         source_mapping)
@@ -186,14 +186,14 @@ def make_spec(properties, marker_set):
     entry_markers.update((
         link_label_marker, entry_sep, entry_id, 'hm', 'sf', 'lc'))
 
-    sense_markers, sense_sources = _local_mapping(
+    sense_markers = _local_mapping(
         properties['sense_map'],
         marker_set,
         source_mapping)
     sense_sep = properties['sense_sep']
     sense_markers.update((sense_sep, 'xref', 'pc'))
 
-    example_markers, example_sources = _local_mapping(
+    example_markers = _local_mapping(
         properties['example_map'],
         marker_set,
         source_mapping)
@@ -294,7 +294,7 @@ def _preprocess_flex_link(link):
     m = re.fullmatch(r'(.*?)(\d*)\s*(\d*)', link)
     if not m:
         return link
-    lemma, hm, sense_nr = m.groups()
+    lemma, hm, _sense_nr = m.groups()
     if hm:
         return f'{lemma} {hm}'
     return lemma
@@ -786,7 +786,7 @@ def make_link_processor(properties, id_index, entries):
 def _single_spaces(s):
     s = s.strip().replace('\n', ' ')
     s = re.sub(' +', ' ', s)
-    return s  # noqa: RET504
+    return s
 
 
 def sfm_entry_to_cldf_row(

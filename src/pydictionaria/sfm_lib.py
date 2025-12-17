@@ -397,7 +397,7 @@ def _normalise_example_value(s):
     s = unidecode_expect_ascii(s)
     s = ''.join(c for c in s if c.isalnum())
     s = s.lower()
-    return s  # noqa: RET504
+    return s
 
 
 def find_duplicate_examples(marker, examples):
