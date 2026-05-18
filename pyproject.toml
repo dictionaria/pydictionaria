@@ -3,13 +3,8 @@ name = "pydictionaria"
 version = "2.3.2.dev0"
 requires-python = ">= 3.8"
 dependencies = [
-    "simplepybtex",
-    "html5lib>=1.1",
-    "purl",
-    "python-dateutil",
     "csvw>=1.5.4",
     "BeautifulSoup4",
-    "attrs>=19.1",
     "clldutils>=3.5.1",
     # for MediaTable support
     "pycldf>=1.20",
