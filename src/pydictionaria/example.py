@@ -1,7 +1,7 @@
 from hashlib import md5
 
 from clldutils.sfm import Entry, SFM
-from clldutils.misc import slug, lazyproperty
+from clldutils.misc import slug
 
 
 MULTILINE_MARKERS = {'tx', 'mb', 'gl'}
@@ -125,16 +125,17 @@ def concat_multilines(example):
 
 
 class Examples(SFM):
+    def __init__(self, *args, **kwargs):
+        self._cached_ids = None
+        super().__init__(*args, **kwargs)
 
-    def read(self, filename, **kw):
-        return SFM.read(self, filename, entry_impl=Example, **kw)
-
-    @lazyproperty
-    def _map(self):
-        return {entry.get('ref'): entry for entry in self}
+    def read(self, filename, **kwargs):
+        return SFM.read(self, filename, entry_impl=Example, **kwargs)
 
     def get(self, item):
-        return self._map.get(item)
+        if self._cached_ids is None:
+            self._cached_ids = {entry.get('ref'): entry for entry in self}
+        return self._cached_ids.get(item)
 
 
 class Corpus:
