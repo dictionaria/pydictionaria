@@ -372,7 +372,7 @@ class ExampleExtractor:
                 try:
                     example = self.merge(example, from_corpus)
                 except ExampleError as err:
-                    self.log.write(err)
+                    self.log.write(str(err))
 
         orig = example.id
         count = 0
@@ -381,7 +381,7 @@ class ExampleExtractor:
                 example = self.merge(self.examples[example.id], example)
                 break
             except ExampleError as err:
-                self.log.write(err)
+                self.log.write(str(err))
                 count += 1
                 example.set('ref', f'{orig}---{count}')
 
