@@ -12,14 +12,14 @@ def _split_senses(entry):
     return senses
 
 
-def marker_fallback_entry(sense, target, source):
+def marker_fallback_entry(entry, target, source):
     """When entry marker `target` is empty or missing, try and fall back to `source`."""
-    has_target = bool(sense.get(target))
+    has_target = bool(entry.get(target))
     if has_target:
-        return sense
+        return entry
 
-    new = sense.__class__()
-    for marker, content in sense:
+    new = entry.__class__()
+    for marker, content in entry:
         if marker == target and not has_target:
             continue
         if marker == source and content and not has_target:
